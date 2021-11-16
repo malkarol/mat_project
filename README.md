@@ -1,1 +1,1 @@
-# mat_project
+# Model Aggregation Tool (MAT) 
