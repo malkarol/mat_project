@@ -1,18 +1,14 @@
 <template>
-<div>
-  <NavBar/>
-  <div class="container">
-    <div class="row">
-      <div class="col-md-12 pt-5">
-        <div>
-          <router-view/>
-        </div>
+  <div>
+    <NavBar />
+    <div class="container-fluid g-0">
+      <div class="row">
+        <router-view />
       </div>
     </div>
   </div>
-</div>
-
 </template>
+
 <script>
 import NavBar from './components/NavBar.vue'
 

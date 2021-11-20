@@ -1,5 +1,5 @@
 <template>
-  <div class="row">
+  <div class="row my-5">
     <div class="col-md-6 offset-md-3">
       <div>
         <div>
