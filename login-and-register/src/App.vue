@@ -3,7 +3,7 @@
     <NavBar />
     <div class="container-fluid g-0">
       <div class="row">
-        <router-view />
+        <router-view :sessions="sessions" />
       </div>
     </div>
   </div>
@@ -11,11 +11,17 @@
 
 <script>
 import NavBar from './components/NavBar.vue'
+import sessionsJson from './sessions.json'
 
 export default {
   name: 'App',
   components: {
     NavBar
+  },
+  data () {
+    return {
+      sessions: sessionsJson
+    }
   }
 }
 </script>
