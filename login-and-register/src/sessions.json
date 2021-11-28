@@ -2,7 +2,7 @@
     {
         "id": 1,
         "name": "Session_1",
-        "numberOfUsers": 3,
+        "numberOfUsers": 1,
         "maxNumberOfUsers": 5,
         "Private": false,
         "Finished": true
@@ -10,7 +10,7 @@
     {
         "id": 2,
         "name": "Session_2",
-        "numberOfUsers": 3,
+        "numberOfUsers": 2,
         "maxNumberOfUsers": 5,
         "Private": true,
         "Finished": true
