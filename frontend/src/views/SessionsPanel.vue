@@ -1,19 +1,32 @@
 <template>
 <div>
+  <div class="py-5">
     <div  class="list-group">
 
-      <div v-for="(session) in sessions.slice(0,10)" :key="session.id" >
-         <router-link to="/" class="list-group-item list-group-item-action">
+      <div v-for="(session, index) in sessions.slice(0,10)" class="border border-5" :key="session.name" data-bs-toggle="collapse" :data-bs-target="'#example_' + index" aria-expanded="false" :aria-controls="'example_' + index">
+         <div class="list-group-item list-group-item-action" :class="{'bg-primary text-white':index == selected}" @click="selected = index">
     <div class="d-flex w-100 justify-content-between">
       <h5 class="mb-1">{{session.name}} <span class="badge "
-      :class="badgeColor(session.Private)">{{badgeText(session.Private)}}</span></h5>
-      <small class="text-muted">3 days ago</small>
+      :class="badgeColor(session.private)">{{badgeText(session.private)}}</span></h5>
+      <small :class="textMutedColor(index)">3 days ago</small>
     </div>
     <p class="mb-1">Some placeholder content in a paragraph blank blan </p>
-    <small class="text-muted">{{session.numberOfUsers}}/{{session.maxNumberOfUsers}} Users</small>
-         </router-link>
+    <small :class="textMutedColor(index)">{{session.numberOfUsers}}/{{session.maxNumberOfUsers}} Users</small>
+        <div class="collapse" :id="'example_' + index">
+        <div class="card card-body border-0 text-black">
+          <br>
+    Some placeholder content in a paragraph <br>
+    Some placeholder content in a paragraph <br>
+      Some placeholder content in a paragraph <br>
+    Some placeholder content in a paragraph <br>
+      Some placeholder content in a paragraph <br>
+    Some placeholder content in a paragraph <br>
+  </div>
+      </div>
+        </div>
 
       </div>
+
     </div>
     <nav aria-label="...">
   <ul class="pagination">
@@ -31,10 +44,16 @@
   </ul>
 </nav>
 </div>
+</div>
 </template>
 <script>
 export default {
   props: ['sessions'],
+  data () {
+    return {
+      selected: undefined
+    }
+  },
   methods: {
     badgeColor (value) {
       return {
@@ -47,6 +66,12 @@ export default {
         return 'Private'
       }
       return 'Public'
+    },
+    textMutedColor (value) {
+      if (value === this.selected) {
+        return 'text-white'
+      }
+      return 'text-muted'
     }
   }
 }
