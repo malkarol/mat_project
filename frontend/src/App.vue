@@ -1,10 +1,8 @@
 <template>
   <div>
     <NavBar />
-    <div class="container-fluid g-0">
-      <div class="row">
+    <div class="row">
         <router-view :sessions="sessions" />
-      </div>
     </div>
   </div>
 </template>
