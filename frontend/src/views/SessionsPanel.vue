@@ -1,9 +1,13 @@
 <template>
 <div>
-  <div class="py-5">
+  <div class="container mt-3 py-5">
+    <h2>Sessions</h2>
+  <p>Type something in the input field to search the list for specific items:</p>
+  <input class="form-control" v-model="search" type="text" placeholder="Search..">
+  <br>
     <div  class="list-group">
 
-      <div v-for="(session, index) in sessions.slice(0,10)" class="border border-5" :key="session.name" data-bs-toggle="collapse" :data-bs-target="'#example_' + index" aria-expanded="false" :aria-controls="'example_' + index">
+      <div v-for="(session, index) in filteredList.slice(0,10)" class="border border-5" :key="session.name" data-bs-toggle="collapse" :data-bs-target="'#example_' + index" aria-expanded="false" :aria-controls="'example_' + index">
          <div class="list-group-item list-group-item-action" :class="{'bg-primary text-white':index == selected}" @click="selected = index">
     <div class="d-flex w-100 justify-content-between">
       <h5 class="mb-1">{{session.name}} <span class="badge "
@@ -14,7 +18,7 @@
     <small :class="textMutedColor(index)">{{session.numberOfUsers}}/{{session.maxNumberOfUsers}} Users</small>
         <div class="collapse" :id="'example_' + index">
         <div class="card card-body border-0 text-black">
-          <br>
+
     Some placeholder content in a paragraph <br>
     Some placeholder content in a paragraph <br>
       Some placeholder content in a paragraph <br>
@@ -47,11 +51,14 @@
 </div>
 </template>
 <script>
+import sessionsJson from '@/sessions.json'
+
 export default {
-  props: ['sessions'],
   data () {
     return {
-      selected: undefined
+      selected: undefined,
+      search: '',
+      sessions: sessionsJson
     }
   },
   methods: {
@@ -72,6 +79,13 @@ export default {
         return 'text-white'
       }
       return 'text-muted'
+    }
+  },
+  computed: {
+    filteredList () {
+      return this.sessions.filter(session => {
+        return session.name.toLowerCase().includes(this.search.toLowerCase())
+      })
     }
   }
 }
