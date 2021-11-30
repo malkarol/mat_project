@@ -7,7 +7,8 @@
   <br>
     <div  class="list-group">
 
-      <div v-for="(session, index) in filteredList.slice(0,10)" class="border border-5" :key="session.name" data-bs-toggle="collapse" :data-bs-target="'#example_' + index" aria-expanded="false" :aria-controls="'example_' + index">
+      <div v-for="(session, index) in sortedList" class="border border-5" :key="session.name" data-bs-toggle="collapse" :data-bs-target="'#example_' + index" aria-expanded="false" :aria-controls="'example_' + index"
+      v-bind:sortedList="sortedList">
          <div class="list-group-item list-group-item-action" :class="{'bg-primary text-white':index == selected}" @click="selected = index">
     <div class="d-flex w-100 justify-content-between">
       <h5 class="mb-1">{{session.name}} <span class="badge "
@@ -34,16 +35,11 @@
     </div>
     <nav aria-label="...">
   <ul class="pagination">
-    <li class="page-item disabled">
-      <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-    </li>
-    <li class="page-item"><a class="page-link" href="#">1</a></li>
-    <li class="page-item active" aria-current="page">
-      <a class="page-link" href="#">2</a>
-    </li>
-    <li class="page-item"><a class="page-link" href="#">3</a></li>
     <li class="page-item">
-      <a class="page-link" href="#">Next</a>
+      <a class="page-link" @click="prevPage" >Previous</a>
+    </li>
+    <li class="page-item">
+      <a class="page-link" @click="nextPage">Next</a>
     </li>
   </ul>
 </nav>
@@ -58,7 +54,9 @@ export default {
     return {
       selected: undefined,
       search: '',
-      sessions: sessionsJson
+      sessions: sessionsJson,
+      pageSize: 10,
+      currentPage: 1
     }
   },
   methods: {
@@ -79,12 +77,31 @@ export default {
         return 'text-white'
       }
       return 'text-muted'
+    },
+    nextPage () {
+      if ((this.currentPage * this.pageSize) < this.filteredList.length) this.currentPage++
+    },
+    prevPage () {
+      if (this.currentPage > 1) this.currentPage--
+    }
+  },
+  watch: {
+    search () {
+      console.log('reset to p1 due to filter')
+      this.currentPage = 1
     }
   },
   computed: {
     filteredList () {
       return this.sessions.filter(session => {
         return session.name.toLowerCase().includes(this.search.toLowerCase())
+      })
+    },
+    sortedList () {
+      return this.filteredList.filter((row, index) => {
+        const start = (this.currentPage - 1) * this.pageSize
+        const end = this.currentPage * this.pageSize
+        if (index >= start && index < end) return true
       })
     }
   }
