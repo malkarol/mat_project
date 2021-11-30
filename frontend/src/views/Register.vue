@@ -1,7 +1,7 @@
 <template>
-  <div class="row my-5">
-    <div class="col-md-6 offset-md-3">
-      <div>
+<div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+        <div class="card border-0 shadow rounded-3 my-5">
+          <div class="card-body p-4 p-sm-5 mb-5">
         <div>
           <h3>Registration</h3>
           <hr />
