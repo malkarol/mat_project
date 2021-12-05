@@ -1,0 +1,8 @@
+lr = 0.01
+comms_round = 100
+loss='categorical_crossentropy'
+metrics = ['accuracy']
+optimizer = SGD(lr=lr,
+                decay=lr / comms_round,
+                momentum=0.9
+               )

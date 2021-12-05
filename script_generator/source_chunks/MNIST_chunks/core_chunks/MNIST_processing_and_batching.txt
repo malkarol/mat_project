@@ -1,0 +1,7 @@
+#process and batch the training data for each client
+clients_batched = dict()
+for (client_name, data) in clients.items():
+    clients_batched[client_name] = batch_data(data)
+
+#process and batch the test set
+test_batched = tf.data.Dataset.from_tensor_slices((X_test, y_test)).batch(len(y_test))

@@ -1,0 +1,18 @@
+#declear path to your mnist data folder
+img_path = '/path/to/your/training/dataset'
+
+#get the path list using the path object
+image_paths = list(paths.list_images(img_path))
+
+#apply our function
+image_list, label_list = load(image_paths, verbose=10000)
+
+#binarize the labels
+lb = LabelBinarizer()
+label_list = lb.fit_transform(label_list)
+
+#split data into training and test set
+X_train, X_test, y_train, y_test = train_test_split(image_list,
+                                                    label_list,
+                                                    test_size=0.1,
+                                                    random_state=42)
