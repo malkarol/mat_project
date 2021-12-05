@@ -22,7 +22,7 @@
         "name": "Session_3",
         "numberOfUsers": 3,
         "maxNumberOfUsers": 5,
-        "private": false,
+        "private": true,
         "finished": true,
         "canJoin": true
     },
@@ -40,7 +40,7 @@
         "name": "Session_5",
         "numberOfUsers": 3,
         "maxNumberOfUsers": 5,
-        "private": false,
+        "private": true,
         "finished": true,
         "canJoin": true
     },
