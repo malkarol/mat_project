@@ -1,18 +1,12 @@
 <template>
-<div>
-  <NavBar/>
-  <div class="container">
+  <div>
+    <NavBar />
     <div class="row">
-      <div class="col-md-12 pt-5">
-        <div>
-          <router-view/>
-        </div>
-      </div>
+        <router-view />
     </div>
   </div>
-</div>
-
 </template>
+
 <script>
 import NavBar from './components/NavBar.vue'
 
@@ -21,5 +15,6 @@ export default {
   components: {
     NavBar
   }
+
 }
 </script>
