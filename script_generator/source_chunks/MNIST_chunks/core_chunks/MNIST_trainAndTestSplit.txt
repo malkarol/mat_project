@@ -1,9 +1,8 @@
 #declear path to your mnist data folder
-img_path = '/path/to/your/training/dataset'
+img_path = @{trainsetPath}
 
 #get the path list using the path object
 image_paths = list(paths.list_images(img_path))
-
 #apply our function
 image_list, label_list = load(image_paths, verbose=10000)
 
