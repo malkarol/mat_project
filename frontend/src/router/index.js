@@ -22,6 +22,12 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/SessionsPanel.vue')
   },
   {
+    path: '/singlesession',
+    name: 'SingleSession',
+
+    component: () => import(/* webpackChunkName: "about" */ '../views/SingleSession.vue')
+  },
+  {
     path: '/',
     name: 'Home',
     // route level code-splitting

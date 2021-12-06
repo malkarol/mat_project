@@ -14,7 +14,7 @@
           <router-link class="nav-link" to="/">Getting started</router-link>
         </li>
         <li class="nav-item">
-          <router-link class="nav-link" to="/">Tutorial</router-link>
+          <router-link class="nav-link" to="/singlesession">SingleSession[Preview]</router-link>
         </li>
         <li class="nav-item">
           <router-link class="nav-link" to="/sessions">Sessions</router-link>

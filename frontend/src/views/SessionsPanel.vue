@@ -27,12 +27,10 @@
       Some placeholder content in a paragraph <br>
      <div class="container">
   <div class="row">
-    <div class="col-12 col-md-6">
-        <button class="btn btn-primary btn-lg">1.klasse </button>
+    <div class="col-12 col-md-6 pt-5">
+        <button class="btn btn-primary btn-lg">Join session </button>
     </div>
-    <div class="col-12 col-md-6">
-        <button class="btn btn-primary btn-lg" >1.klasse </button>
-    </div>
+
   </div>
 </div>
   </div>
