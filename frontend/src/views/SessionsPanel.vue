@@ -3,7 +3,7 @@
   <div class="container mt-3 py-5">
     <h2>Sessions</h2>
   <p>Type something in the input field to search the list for specific items:</p>
-  <input class="form-control" v-model="search" type="text" placeholder="Search..">
+  <input class="form-control" v-model="search" type="text" placeholder="Search...">
   <br>
     <div  class="list-group">
 
@@ -17,22 +17,55 @@
     </div>
     <p class="mb-1">Some placeholder content in a paragraph blank blan </p>
     <small :class="textMutedColor(index)">{{session.numberOfUsers}}/{{session.maxNumberOfUsers}} Users</small>
-        <div class="collapse" :id="'example_' + index">
-        <div class="card card-body border-0 text-black">
+      <div class="collapse" :id="'example_' + index">
+      <div class="card card-body border-0 text-black">
+      <div class="container border rounded ">
+        <div class="d-flex flex-row pt-2 border-bottom">
+          <div class="p-2">
+            <h5 class="mb-1">Details</h5>
+          </div>
+          <div class="p-2">
+            <p v-if="Math.random() > 0.6"
+            class="mb-1 text-success">Joined</p>
+            <p v-else class="mb-1 text-primary">Eligible to join</p>
+          </div>
+        </div>
+        <div class="container py-2">
+          <div class="row justify-content-start pt-3">
+            <div class="col-3">
+              <div class="row">
+                <label><strong>Founder</strong></label>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="row">
+                <span class="">Karol</span>
+              </div>
+            </div>
+          </div>
+          <div class="row justify-content-start py-3">
+            <div class="col-3">
+              <div class="row">
+                <label><strong>Classification problem</strong></label>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="row">
+                <span class="">Image</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  <div>
+    <div class="row">
+      <div class="pt-3">
+          <button v-if="session.canJoin && session.maxNumberOfUsers > session.numberOfUsers"
+          @click="router.push({ name: 'session', params: { sessionName: 'test' } })" class="btn btn-primary">Join session</button>
 
-    Some placeholder content in a paragraph <br>
-    Some placeholder content in a paragraph <br>
-      Some placeholder content in a paragraph <br>
-    Some placeholder content in a paragraph <br>
-      Some placeholder content in a paragraph <br>
-     <div class="container">
-  <div class="row">
-    <div class="col-12 col-md-6 pt-5">
-        <button class="btn btn-primary btn-lg">Join session </button>
+      </div>
     </div>
-
   </div>
-</div>
   </div>
       </div>
         </div>
