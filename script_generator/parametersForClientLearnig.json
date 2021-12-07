@@ -1,0 +1,10 @@
+{
+    "dataPath": "your/path",
+    "trainSetSplit": 0.1,
+    "imageSize": 784,
+    "numberOfClasses": 10,
+    "learningRate": 0.01,
+    "lossFunction": "categorical_crossentropy",
+    "mlMetric": "accuracy",
+    "optimizer": "SGD"
+  }
