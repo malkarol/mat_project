@@ -22,7 +22,7 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/SessionsPanel.vue')
   },
   {
-    path: '/singlesession',
+    path: '/session',
     name: 'SingleSession',
 
     component: () => import(/* webpackChunkName: "about" */ '../views/SingleSession.vue')
