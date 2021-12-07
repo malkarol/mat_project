@@ -1,2 +1,0 @@
-The initial code was strongly influnced by the following article:
-https://towardsdatascience.com/federated-learning-a-step-by-step-implementation-in-tensorflow-aac568283399

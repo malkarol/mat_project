@@ -25,9 +25,9 @@
             <h5 class="mb-1">Details</h5>
           </div>
           <div class="p-2">
-            <p v-if="Math.random() > 0.6"
-            class="mb-1 text-success">Joined</p>
-            <p v-else class="mb-1 text-primary">Eligible to join</p>
+            <p v-if="session.canJoin && session.maxNumberOfUsers > session.numberOfUsers"
+            class="mb-1 text-success">Eligible to join</p>
+            <p v-else class="mb-1 text-danger">Cannot join to this session</p>
           </div>
         </div>
         <div class="container py-2">
@@ -61,8 +61,7 @@
     <div class="row">
       <div class="pt-3">
           <button v-if="session.canJoin && session.maxNumberOfUsers > session.numberOfUsers"
-          @click="router.push({ name: 'session', params: { sessionName: 'test' } })" class="btn btn-primary">Join session</button>
-
+          @click="router.push({ name: 'SingleSession', query: {session: session.name }})" class="btn btn-primary">Join session</button>
       </div>
     </div>
   </div>
@@ -88,6 +87,7 @@
 </template>
 <script>
 import sessionsJson from '@/sessions.json'
+import router from '../router/index.js'
 import axios from 'axios'
 axios.get('http://127.0.0.1:8000/users/')
   .then(response => console.log(response))
@@ -98,7 +98,8 @@ export default {
       search: '',
       sessions: sessionsJson,
       pageSize: 10,
-      currentPage: 1
+      currentPage: 1,
+      router: router
     }
   },
   methods: {
