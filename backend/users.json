@@ -1,0 +1,37 @@
+[
+    {
+        "pricingPlan": 0,
+        "name": "Bird Ramsey",
+        "mlBackground": "student",
+        "username": "NIMON",
+        "email": "birdramsey@nimon.com"
+    },
+    {
+        "pricingPlan": 0,
+        "name": "Lillian Burgess",
+        "mlBackground": "festudent",
+        "username": "LUXURIA",
+        "email": "lillianburgess@luxuria.com"
+    },
+    {
+        "pricingPlan": 1,
+        "name": "Kristie Cole",
+        "mlBackground": "festudent",
+        "username": "QUADEEBO",
+        "email": "kristiecole@quadeebo.com"
+    },
+    {
+        "pricingPlan": 1,
+        "name": "Leonor Cross",
+        "mlBackground": "festudent",
+        "username": "GRONK",
+        "email": "leonorcross@gronk.com"
+    },
+    {
+        "pricingPlan": 0,
+        "name": "Marsh Mccall",
+        "mlBackground": "student",
+        "username": "ULTRIMAX",
+        "email": "marshmccall@ultrimax.com"
+    }
+]
