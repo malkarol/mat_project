@@ -88,6 +88,9 @@
 <script>
 import sessionsJson from '@/sessions.json'
 import router from '../router/index.js'
+import axios from 'axios'
+axios.get('http://127.0.0.1:8000/users/')
+  .then(response => console.log(response))
 
 export default {
   data () {
