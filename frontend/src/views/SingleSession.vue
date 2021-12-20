@@ -26,13 +26,13 @@
         <div class="row">
         <nav>
           <div class="nav nav-tabs" id="nav-tab" role="tablist">
-            <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Session Details</button>
-            <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Learning Management Panel</button>
+            <button class="nav-link active" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-learning" type="button" role="tab" aria-controls="nav-contact" aria-selected="true">Learning Management Panel</button>
+            <button class="nav-link " id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="false">Session Details</button>
             <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Results</button>
           </div>
         </nav>
         <div class="tab-content" id="nav-tabContent">
-          <div class="tab-pane fade show active border border-top-0" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+          <div class="tab-pane fade show active border border-top-0" id="nav-learning" role="tabpanel" aria-labelledby="nav-home-tab">
             <div class="row">
               <h5 class="mt-3 px-5"><strong>Description</strong></h5>
               <p class= "mt-3 px-5">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nisl orci, tincidunt id nulla at, maximus aliquet massa. Sed id eros dignissim, laoreet ante et, facilisis neque. Sed sed quam vel odio sagittis tincidunt. Sed velit libero, elementum et felis efficitur, posuere bibendum nisl. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur id tincidunt ligula, sed sodales nisi. Nunc interdum tortor eu molestie finibus.</p>
@@ -118,7 +118,21 @@
 
 <script>
 export default {
-  props: ['session']
+  props: ['session'],
+  data () {
+    return {
+      text: 'This is an example file to download.'
+    }
+  },
+  methods: {
+    downloadText () {
+      var blob = new Blob([this.text], { type: 'text/plain' })
+      const link = document.createElement('a')
+      link.href = window.URL.createObjectURL(blob)
+      link.download = 'sampleFile.txt'
+      link.click()
+    }
+  }
 }
 </script>
 
