@@ -10,7 +10,7 @@ from session_handler.serializers import SessionResultSerializer, SessionSerializ
 @api_view(['GET', 'POST'])
 def sessions_list(request):
     """
-    List all sessions, or create a new snippet.
+    List all sessions, or create new one.
     """
     if request.method == 'GET':
         sessions_list = Session.objects.all()
@@ -19,6 +19,23 @@ def sessions_list(request):
 
     elif request.method == 'POST':
         serializer = SessionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET', 'POST'])
+def participants_list(request):
+    """
+    List all participants, or create new one.
+    """
+    if request.method == 'GET':
+        participant_list = Participant.objects.all()
+        serializer = ParticipantSerializer(participant_list, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = ParticipantSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
