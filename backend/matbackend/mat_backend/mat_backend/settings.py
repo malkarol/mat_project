@@ -43,7 +43,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'webapp.apps.WebappConfig',
-    'account.apps.AccountConfig'
+    'account.apps.AccountConfig',
+    'ml_handler.apps.MlHandlerConfig',
+    'session_handler.apps.SessionHandlerConfig'
 ]
 
 CORS_ORIGIN_ALLOW_ALL =True
