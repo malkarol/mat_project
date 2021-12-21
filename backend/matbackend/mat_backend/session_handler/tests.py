@@ -62,8 +62,7 @@ class ParticipantTestCase(TestCase):
         Participant.objects.create(user = user, model = model)
 
     def test_participant_model(self):
-        user = User.objects.get(username = "usertest")
-        participant = Participant.objects.get(user = user)
+        participant = Participant.objects.get(user__username = "usertest")
         # Then
         self.assertEqual(participant.user.username, "usertest")
 
@@ -87,9 +86,7 @@ class SessionTestCase(TestCase):
         )
 
     def test_session_model(self):
-        user = User.objects.get(username = "usertest")
-        participant = Participant.objects.get(user_id = user.id )
-        session = Session.objects.get(founder_id = participant.participant_id)
+        session = Session.objects.get(founder__user__username = "usertest")
         # Then
-        self.assertEqual(session.founder.user.username, participant.user.username )
+        self.assertEqual(session.founder.user.username, "usertest" )
 
