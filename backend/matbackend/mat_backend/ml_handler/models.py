@@ -8,8 +8,8 @@ class MLModel(models.Model):
     ml_model_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=150)
     owner = models.ForeignKey(User, on_delete = models.CASCADE)
-    creation_date = models.DateField()
-    model_parameters_json = models.CharField(max_length=1000)
+    creation_date = models.DateField(auto_now_add=True)
+    model_parameters_json = models.CharField(max_length=1000, null=True)
 
     class ModelTypesEnum(models.IntegerChoices):
         IMAGECLASS = 0, _('ImageClassification')
