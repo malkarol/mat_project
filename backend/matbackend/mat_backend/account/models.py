@@ -55,6 +55,7 @@ class UserManager(BaseUserManager):
 # Source for creating enum
 # 1. Django official documentation
 # 2. https://simpleisbetterthancomplex.com/tutorial/2016/07/22/how-to-extend-django-user-model.html
+# 3. https://www.youtube.com/watch?v=eCeRC7E8Z7Y
 class User(AbstractBaseUser):
     # email will be used for authentication
     email = models.EmailField(verbose_name="email", max_length=50, unique=True)
@@ -105,6 +106,9 @@ class User(AbstractBaseUser):
       choices=UserTypeEnum.choices,
       default=UserTypeEnum.NORMAL
     )
+
+    # def __iter__(self):
+    #         return iter(self.email)
 
     def __str__(self):
         return self.email
