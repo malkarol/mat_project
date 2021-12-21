@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.db import models
 from django.test import TestCase
-from session_handler.models import Session, Participant
+from session_handler.models import Session, Participant, SessionResult
 from datetime import datetime
 from ml_handler.models import MLModel
 from account.models import User
@@ -25,6 +25,10 @@ class SetUpHelper():
         user= SetUpHelper.setUpUser()
         model= SetUpHelper.setUpModel(user)
         return Participant.objects.create(user = user, model = model)
+
+    def setUpSessionResult():
+        return SessionResult.objects.create(local_models_accuracy_json="accuracy: 80%", finished=True)
+
 
 class AssertHelper():
     '''
@@ -68,7 +72,7 @@ class ParticipantTestCase(TestCase):
 
 class SessionTestCase(TestCase):
     def setUp(self):
-        # Given
+         # Given
         _name="Test Session"
         _min_num_of_participants = 2
         _max_num_of_participants = 10
@@ -85,8 +89,26 @@ class SessionTestCase(TestCase):
             founder = _founder
         )
 
+
     def test_session_model(self):
         session = Session.objects.get(founder__user__username = "usertest")
         # Then
         self.assertEqual(session.founder.user.username, "usertest" )
+
+class SessionResultTestCase(TestCase):
+    def setUp(self):
+        # Given
+        _local_models_accuracy_json="accuracy: 80%"
+        _finished=True
+        # When
+        SessionResult.objects.create(
+            local_models_accuracy_json=_local_models_accuracy_json,
+            finished=_finished,
+            global_model = SetUpHelper.setUpModel(SetUpHelper.setUpUser())
+        )
+
+    def test_session_result_model(self):
+        session_result = SessionResult.objects.get(global_model__owner__username = "usertest")
+        # Then
+        self.assertEqual(session_result.global_model.owner.username, "usertest" )
 
