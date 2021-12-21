@@ -93,13 +93,16 @@ DATABASES = {
         'USER': os.getenv('DB_USER'),
         'HOST': os.getenv('HOST'),
         'PASSWORD':os.getenv('PASSWORD'),
-        'PORT': '5432'
+        'PORT': '5432',
+        'TEST': {
+            'NAME': os.getenv('DB_NAME')
+        }
     }
 }
 
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',pip
+#         'ENGINE': 'django.db.backends.sqlite3',
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
