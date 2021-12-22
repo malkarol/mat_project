@@ -70,6 +70,10 @@ class ParticipantTestCase(TestCase):
         # Then
         self.assertEqual(participant.user.username, "usertest")
 
+    def test_participant_user_notnull(self):
+        participant = Participant.objects.get(user__username = "usertest")
+        self.failIf(participant.user is None)
+
 class SessionTestCase(TestCase):
     def setUp(self):
          # Given
