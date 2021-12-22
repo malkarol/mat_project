@@ -2,7 +2,7 @@ from datetime import datetime
 from django.db import models
 from django.test import TestCase
 from session_handler.models import Session, Participant
-from datetime import datetime
+from datetime import datetime,date
 from ml_handler.models import MLModel
 from account.models import User
 
@@ -61,7 +61,7 @@ class ParticipantTestCase(TestCase):
         # When
         Participant.objects.create(user = user, model = model)
 
-    def test_participant_model(self):
+    def test_participant_model_create(self):
         participant = Participant.objects.get(user__username = "usertest")
         # Then
         self.assertEqual(participant.user.username, "usertest")
@@ -74,6 +74,7 @@ class SessionTestCase(TestCase):
         _max_num_of_participants = 10
         _actual_num_of_participants = 0
         _start_date = datetime(2021,12,22)
+        _end_date = datetime(2021,12,30)
         _founder = SetUpHelper.setUpParticipant()
         # When
         Session.objects.create(
@@ -82,11 +83,23 @@ class SessionTestCase(TestCase):
             max_num_of_participants =_max_num_of_participants,
             actual_num_of_participants =_actual_num_of_participants,
             start_date = _start_date,
+            end_date = _end_date,
             founder = _founder
         )
 
-    def test_session_model(self):
+    def test_session_model_create(self):
         session = Session.objects.get(founder__user__username = "usertest")
         # Then
         self.assertEqual(session.founder.user.username, "usertest" )
+    
+    def test_session_enddate_smaller_than_startdate(self):
+        session = Session.objects.get(founder__user__username = "usertest")
+        proper_date = session.start_date <= session.end_date and session.end_date >= date.today()
+        self.assertEqual(proper_date, True)
+
+    def test_session_maxparticipants_GT_minparticipants(self):
+        session = Session.objects.get(founder__user__username = "usertest")
+        condition = session.min_num_of_participants < session.max_num_of_participants \
+            and session.min_num_of_participants >= 0 and session.actual_num_of_participants >=0
+        self.assertEqual(condition, True)
 
