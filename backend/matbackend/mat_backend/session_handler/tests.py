@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.db import models
 from django.test import TestCase
-from session_handler.models import Session, Participant
+from session_handler.models import Session, Participant, SessionResult
 from datetime import datetime,date
 from ml_handler.models import MLModel
 from account.models import User
