@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.test import TestCase
+from rest_framework.parsers import JSONParser
 from account.models import User
 
 def has_numbers(inputString):
@@ -51,8 +52,25 @@ class UserTestCase(TestCase):
         # Then
         self.failIf(has_numbers(user.last_name))
 
-# class UserEndpointsTestCase(TestCase):
-#     def setUp(self)
+class UserListViewTest(TestCase):
+    @classmethod
+    def setUp(cls):
+        number_of_users = 10
+        for user_id in range(number_of_users):
+            User.objects.create( email = f"user{user_id}test@gmail.com",
+        username = f"user{user_id}test", first_name= f"karol{user_id}", last_name="kowalski",
+        password = f"somePASS{user_id}")
+
+    def test_userview_url_exists_at_desired_location(self):
+        response = self.client.get('/users/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_lists_all_users(self):
+        response = self.client.get('/users/')
+        #user_data = JSONParser().parse(response.items)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()), 10)
+
 
 
     

@@ -1,9 +1,10 @@
 from django.shortcuts import render
 # to allow other domain to access our methods
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
 from django.http.response import JsonResponse
-
+from rest_framework.response import Response
 from account.models import User
 from account.serializers import UserSerializer
 from django.contrib.auth import get_user_model
@@ -14,7 +15,8 @@ from django.contrib.auth import get_user_model
 # If safe is True and a non-dict object is passed as the first argument,
 #  a TypeError will be raised.
 
-@csrf_exempt
+#@csrf_exempt
+@api_view(['GET', 'POST'])
 def users_list(request):
     """
     List all code snippets, or create a new snippet.
@@ -32,9 +34,9 @@ def users_list(request):
         return JsonResponse("Falied to create new User", safe=False)
 
 @csrf_exempt
-def user_details(request,email):
+def user_details(request,username):
     if request.method =='GET':
-        user = User.objects.filter(email=email).values()[0]
+        user = User.objects.get(username=username)
         user_serializer = UserSerializer(user)
         return JsonResponse(user_serializer.data,safe=False)
 
