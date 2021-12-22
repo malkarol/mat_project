@@ -127,6 +127,30 @@ class SessionResultTestCase(TestCase):
         session_result = SessionResult.objects.get(global_model__owner__username = "usertest")
         # Then
         self.assertEqual(session_result.global_model.owner.username, "usertest" )
+class MLModelListViewTest(TestCase):
+    @classmethod
+    def setUp(cls):
+        number_of_users = 10
+        for user_id in range(number_of_users):
+            # When
+            user = User.objects.create( email = f"user{user_id}test@gmail.com",
+            username = f"user{user_id}test", first_name= f"karol{user_id}", last_name="kowalski",
+            password = f"somePASS{user_id}")
+            model = MLModel.objects.create(name = f"test model{user_id}",
+            creation_date = "2021-12-11",
+            model_parameters_json = "one param",
+            owner = user)
+
+    def test_mlmodelview_url_exists_at_desired_location(self):
+        response = self.client.get('/mlmodels/')
+        # Then
+        self.assertEqual(response.status_code, 200)
+
+    def test_lists_all_mlmodels(self):
+        response = self.client.get('/mlmodels/')
+        # Then
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()), 10)
 
 class SessionListViewTest(TestCase):
     @classmethod
@@ -158,12 +182,12 @@ class SessionListViewTest(TestCase):
             founder = _founder
         )
 
-    def test_userview_url_exists_at_desired_location(self):
+    def test_sessionsview_url_exists_at_desired_location(self):
         response = self.client.get('/sessions/')
         # Then
         self.assertEqual(response.status_code, 200)
 
-    def test_lists_all_users(self):
+    def test_lists_all_sessions(self):
         response = self.client.get('/sessions/')
         # Then
         self.assertEqual(response.status_code, 200)
