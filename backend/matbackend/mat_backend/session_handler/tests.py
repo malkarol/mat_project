@@ -26,6 +26,10 @@ class SetUpHelper():
         model= SetUpHelper.setUpModel(user)
         return Participant.objects.create(user = user, model = model)
 
+    def setUpSessionResult():
+        return SessionResult.objects.create(local_models_accuracy_json="accuracy: 80%", finished=True)
+
+
 class AssertHelper():
     '''
     Helper class for creating and saving objects necessary for model test.
@@ -68,7 +72,7 @@ class ParticipantTestCase(TestCase):
 
 class SessionTestCase(TestCase):
     def setUp(self):
-        # Given
+         # Given
         _name="Test Session"
         _min_num_of_participants = 2
         _max_num_of_participants = 10
@@ -102,4 +106,21 @@ class SessionTestCase(TestCase):
         condition = session.min_num_of_participants < session.max_num_of_participants \
             and session.min_num_of_participants >= 0 and session.actual_num_of_participants >=0
         self.assertEqual(condition, True)
+
+class SessionResultTestCase(TestCase):
+    def setUp(self):
+        # Given
+        _local_models_accuracy_json="accuracy: 80%"
+        _finished=True
+        # When
+        SessionResult.objects.create(
+            local_models_accuracy_json=_local_models_accuracy_json,
+            finished=_finished,
+            global_model = SetUpHelper.setUpModel(SetUpHelper.setUpUser())
+        )
+
+    def test_session_result_model(self):
+        session_result = SessionResult.objects.get(global_model__owner__username = "usertest")
+        # Then
+        self.assertEqual(session_result.global_model.owner.username, "usertest" )
 
