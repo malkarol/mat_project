@@ -99,7 +99,7 @@ class SessionTestCase(TestCase):
         session = Session.objects.get(founder__user__username = "usertest")
         # Then
         self.assertEqual(session.founder.user.username, "usertest" )
-    
+
     def test_session_enddate_smaller_than_startdate(self):
         session = Session.objects.get(founder__user__username = "usertest")
         proper_date = session.start_date <= session.end_date and session.end_date >= date.today()
@@ -127,4 +127,45 @@ class SessionResultTestCase(TestCase):
         session_result = SessionResult.objects.get(global_model__owner__username = "usertest")
         # Then
         self.assertEqual(session_result.global_model.owner.username, "usertest" )
+
+class SessionListViewTest(TestCase):
+    @classmethod
+    def setUp(cls):
+        number_of_users = 10
+        for user_id in range(number_of_users):
+            # When
+            user = User.objects.create( email = f"user{user_id}test@gmail.com",
+            username = f"user{user_id}test", first_name= f"karol{user_id}", last_name="kowalski",
+            password = f"somePASS{user_id}")
+            model = MLModel.objects.create(name = f"test model{user_id}",
+            creation_date = "2021-12-11",
+            model_parameters_json = "one param",
+            owner = user)
+            _name=f"Test Session{user_id}"
+            _min_num_of_participants = 2
+            _max_num_of_participants = 10
+            _actual_num_of_participants = 0
+            _start_date = datetime(2021,12,22)
+            _end_date = datetime(2021,12,30)
+            _founder = Participant.objects.create(user = user, model = model)
+            Session.objects.create(
+            name=_name,
+            min_num_of_participants =_min_num_of_participants,
+            max_num_of_participants =_max_num_of_participants,
+            actual_num_of_participants =_actual_num_of_participants,
+            start_date = _start_date,
+            end_date = _end_date,
+            founder = _founder
+        )
+
+    def test_userview_url_exists_at_desired_location(self):
+        response = self.client.get('/sessions/')
+        # Then
+        self.assertEqual(response.status_code, 200)
+
+    def test_lists_all_users(self):
+        response = self.client.get('/sessions/')
+        # Then
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()), 10)
 
