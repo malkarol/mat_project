@@ -89,6 +89,7 @@ def gen_user():
         "last_name": ln,
         "email": faker.unique.email(fn),
         "password": faker.password(),
+        'username': fn+'_'+ln
     }
 
     return user
