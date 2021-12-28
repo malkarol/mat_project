@@ -21,14 +21,22 @@
         </li>
 
       </ul>
-      <div class="collapse navbar-collapse justify-content-end"  >
-      <ul class="navbar-nav">
-         <li class="nav-item">
+      <div v-if="isLogged() === false" class="collapse navbar-collapse justify-content-end"  >
+      <ul  class="navbar-nav">
+         <li  class="nav-item">
           <router-link class="nav-link " to="/login">Login</router-link>
         </li>
-        <li class="nav-item">
+        <li  class="nav-item">
           <router-link class="nav-link " to="/register">Register</router-link>
         </li>
+      </ul>
+      </div>
+       <div v-if="isLogged() === true" class="collapse navbar-collapse justify-content-end"  >
+      <ul  class="navbar-nav">
+         <li  class="nav-item">
+          <button type="button" class="btn btn-primary navbar-btn" @click=logout()> Log out</button>
+        </li>
+
       </ul>
       </div>
     </div>
@@ -36,6 +44,37 @@
 </nav>
 </template>
 <script>
+import axios from 'axios'
 export default {
+  data () {
+    return {
+
+    }
+  },
+
+  methods: {
+    async logout(){
+      await axios
+            .post('/api/v1/token/logout/')
+            .then( response => {
+              console.log('Logged out')
+            })
+            .catch(error => {
+              console.log(JSON.stringify(error))
+            })
+            axios.defaults.headers.common['Authorization'] = ''
+            localStorage.removeItem['token']
+            this.$store.commit('removeToken')
+            this.$router.push('/')
+    },
+    isLogged () {
+      if (!this.$store.state.isAuthenticated)
+      {
+        return false
+      }
+      return true
+
+    }
+  }
 }
 </script>
