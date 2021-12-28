@@ -19,13 +19,18 @@
         <li class="nav-item">
           <router-link class="nav-link" to="/sessions">Sessions</router-link>
         </li>
-        <li class="nav-item">
-          <router-link class="nav-link" to="/login">Login</router-link>
+
+      </ul>
+      <div class="collapse navbar-collapse justify-content-end"  >
+      <ul class="navbar-nav">
+         <li class="nav-item">
+          <router-link class="nav-link " to="/login">Login</router-link>
         </li>
         <li class="nav-item">
-          <router-link class="nav-link" to="/register">Register</router-link>
+          <router-link class="nav-link " to="/register">Register</router-link>
         </li>
       </ul>
+      </div>
     </div>
   </div>
 </nav>
