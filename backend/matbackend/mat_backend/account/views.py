@@ -19,7 +19,7 @@ from django.contrib.auth import get_user_model
 @api_view(['GET', 'POST'])
 def users_list(request):
     """
-    List all code snippets, or create a new snippet.
+    List all users, or create a new user.
     """
     if request.method =='GET':
         users = User.objects.all()
@@ -35,6 +35,9 @@ def users_list(request):
 
 @csrf_exempt
 def user_details(request,username):
+    """
+    Return, modify or delete one user.
+    """
     if request.method =='GET':
         user = User.objects.get(username=username)
         user_serializer = UserSerializer(user)

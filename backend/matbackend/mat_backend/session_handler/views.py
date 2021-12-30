@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from session_handler.models import Session, SessionResult, Participant
 from session_handler.serializers import SessionResultSerializer, SessionSerializer, ParticipantSerializer
 
+# 1. Session CRUD
 
 @api_view(['GET', 'POST'])
 def sessions_list(request):
@@ -24,6 +25,32 @@ def sessions_list(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET', 'PUT', 'DELETE'])
+def session_detail(request, pk):
+    """
+    Retrieve, update or delete a Session.
+    """
+    try:
+        session = Session.objects.get(pk=pk)
+    except Session.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = SessionSerializer(session)
+        return Response(serializer.data)
+
+    elif request.method == 'PUT':
+        serializer = SessionSerializer(session, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        session.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# 2. Participant CRUD
 @api_view(['GET', 'POST'])
 def participants_list(request):
     """
@@ -40,3 +67,29 @@ def participants_list(request):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def participant_detail(request, pk):
+    """
+    Retrieve, update or delete a Participant.
+    """
+    try:
+        participant = Participant.objects.get(pk=pk)
+    except Participant.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = ParticipantSerializer(participant)
+        return Response(serializer.data)
+
+    elif request.method == 'PUT':
+        serializer = ParticipantSerializer(participant, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        participant.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+

@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
+import store from '../store'
 const routes = [
   {
     path: '/login',
@@ -18,13 +18,17 @@ const routes = [
   {
     path: '/sessions',
     name: 'SessionsPanel',
-
+    meta: {
+      requireLogin: true
+    },
     component: () => import(/* webpackChunkName: "about" */ '../views/SessionsPanel.vue')
   },
   {
     path: '/session',
     name: 'SingleSession',
-
+    meta: {
+      requireLogin: true
+    },
     component: () => import(/* webpackChunkName: "about" */ '../views/SingleSession.vue')
   },
   {
@@ -40,6 +44,14 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requireLogin) && !store.state.isAuthenticated) {
+    next('/login')
+  } else {
+    next()
+  }
 })
 
 export default router
