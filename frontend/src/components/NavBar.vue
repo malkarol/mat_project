@@ -1,7 +1,11 @@
 <template>
+<div>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">MAT</a>
+    <a class="navbar-brand " style="
+    margin-right: 16px;
+    margin-left: 16px;" href="#">
+    <img src="@/assets/logo.png" width="30" height="30" alt="">
+  </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -19,8 +23,8 @@
         <li v-if="isLogged() === true"  class="nav-item">
           <router-link class="nav-link" to="/sessions">Sessions</router-link>
         </li>
-
       </ul>
+
       <div v-if="isLogged() === false" class="collapse navbar-collapse justify-content-end"  >
       <ul  class="navbar-nav">
          <li  class="nav-item">
@@ -40,8 +44,8 @@
       </ul>
       </div>
     </div>
-  </div>
 </nav>
+</div>
 </template>
 <script>
 import axios from 'axios'
