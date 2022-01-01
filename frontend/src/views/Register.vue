@@ -144,7 +144,6 @@
 
       </div>
     </div>
-<button @click="toggleModalAlert" type="button"> siema </button>
   </div>
 
 </template>
