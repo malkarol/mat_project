@@ -13,10 +13,10 @@
         <li class="nav-item">
           <router-link class="nav-link" to="/">Getting started</router-link>
         </li>
-        <li v-if="isLogged() === true" class="nav-item" >
-          <router-link class="nav-link" to="/session">Create new session</router-link>
+        <li v-if="isLogged() === true"  class="nav-item">
+          <router-link class="nav-link" to="/session">SingleSession[Preview]</router-link>
         </li>
-        <li v-if="isLogged() === true" class="nav-item">
+        <li v-if="isLogged() === true"  class="nav-item">
           <router-link class="nav-link" to="/sessions">Sessions</router-link>
         </li>
 
