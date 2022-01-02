@@ -156,7 +156,7 @@ export default {
       })
     },
     goToNewSessionView () {
-      this.$router.push('/session')
+      this.$router.push('/new-session')
     }
   }
 }
