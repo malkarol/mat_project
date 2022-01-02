@@ -3,7 +3,18 @@
   <div class="container mt-3 py-5">
     <h2>Sessions</h2>
   <p>Type something in the input field to search the list for specific items:</p>
-  <input class="form-control" v-model="search" type="text" placeholder="Search...">
+  <div class="d-flex justify-content-between">
+  <div class="col-sm-6"><input class="form-control" v-model="search" type="text" placeholder="Search..."></div>
+  <div> <button type="button" class="btn btn-success" @click='goToNewSessionView'>
+    <!-- <router-link
+    style="text-decoration: none; color: inherit;"
+    to="/session"
+    >Create session
+    </router-link> -->
+    Create new session
+    </button>
+    </div>
+  </div>
   <br>
     <div  class="list-group">
 
@@ -146,6 +157,9 @@ export default {
         const end = this.currentPage * this.pageSize
         if (index >= start && index < end) return true
       })
+    },
+    goToNewSessionView () {
+      this.$router.push('/new-session')
     }
   }
 }
