@@ -4,7 +4,7 @@
     <div class="row">
       <div class="d-flex justify-content-between">
         <div class="col">
-          <h2>Testowa sesja</h2>
+          <h2>Tymczasowa nazwa sesji</h2>
           <div class="d-flex flex-row pt-2 border-bottom">
             <div class="p-2">
               <p class="mb-1"><strong>Owner:</strong></p>
@@ -15,9 +15,7 @@
           </div>
         </div>
         <div class="border-bottom align-self-end">
-          <p class="text-primary my-0"><strong>IN PROGRESS</strong></p>
-          <p class="my-0">Start date: 08.12.2021</p>
-          <p>End date: 12.12.2021</p>
+          <p class="text-primary"><strong>IN PROGRESS</strong></p>
         </div>
       </div>
     </div>
@@ -26,22 +24,19 @@
         <div class="row">
         <nav>
           <div class="nav nav-tabs" id="nav-tab" role="tablist">
-            <button class="nav-link active" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-learning" type="button" role="tab" aria-controls="nav-contact" aria-selected="true">Learning Management Panel</button>
-            <button class="nav-link " id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="false">Session Details</button>
-            <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Results</button>
+            <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Session Details</button>
+            <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Learning Management Panel</button>
+            <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Test</button>
           </div>
         </nav>
         <div class="tab-content" id="nav-tabContent">
-          <div class="tab-pane fade show active border border-top-0" id="nav-learning" role="tabpanel" aria-labelledby="nav-home-tab">
-            <div class="row">
-              <h5 class="mt-3 px-5"><strong>Description</strong></h5>
-              <p class= "mt-3 px-5">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nisl orci, tincidunt id nulla at, maximus aliquet massa. Sed id eros dignissim, laoreet ante et, facilisis neque. Sed sed quam vel odio sagittis tincidunt. Sed velit libero, elementum et felis efficitur, posuere bibendum nisl. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur id tincidunt ligula, sed sodales nisi. Nunc interdum tortor eu molestie finibus.</p>
-            </div>
+          <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+          test2
           </div>
-          <div class="tab-pane fade border border-top-0" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
-            Here the user can download the final model and see some statistics
+          <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+           test test
           </div>
-          <div class="tab-pane fade border border-top-0" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
+          <div class="tab-pane fade border" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
              <div class="row px-4">
                 <div class="row mb-3 pt-3">
                   <label for="formFile" class="col-sm-3 col-form-label"><strong>Path to local dataset</strong></label>
@@ -118,21 +113,7 @@
 
 <script>
 export default {
-  props: ['session'],
-  data () {
-    return {
-      text: 'This is an example file to download.'
-    }
-  },
-  methods: {
-    downloadText () {
-      var blob = new Blob([this.text], { type: 'text/plain' })
-      const link = document.createElement('a')
-      link.href = window.URL.createObjectURL(blob)
-      link.download = 'sampleFile.txt'
-      link.click()
-    }
-  }
+  props: ['sessionName']
 }
 </script>
 

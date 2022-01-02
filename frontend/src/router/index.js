@@ -32,6 +32,14 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/SingleSession.vue')
   },
   {
+    path: '/new-session',
+    name: 'CreateNewSession',
+    meta: {
+      requireLogin: true
+    },
+    component: () => import(/* webpackChunkName: "about" */ '../views/CreateNewSession.vue')
+  },
+  {
     path: '/',
     name: 'Home',
     // route level code-splitting

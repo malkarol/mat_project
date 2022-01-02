@@ -3,7 +3,18 @@
   <div class="container mt-3 py-5">
     <h2>Sessions</h2>
   <p>Type something in the input field to search the list for specific items:</p>
-  <input class="form-control" v-model="search" type="text" placeholder="Search...">
+  <div class="d-flex justify-content-between">
+  <div class="col-sm-6"><input class="form-control" v-model="search" type="text" placeholder="Search..."></div>
+  <div> <button type="button" class="btn btn-success" @click='goToNewSessionView'>
+    <!-- <router-link
+    style="text-decoration: none; color: inherit;"
+    to="/session"
+    >Create session
+    </router-link> -->
+    Create new session
+    </button>
+    </div>
+  </div>
   <br>
     <div  class="list-group">
 
@@ -25,9 +36,9 @@
             <h5 class="mb-1">Details</h5>
           </div>
           <div class="p-2">
-            <p v-if="session.canJoin && session.maxNumberOfUsers > session.numberOfUsers"
-            class="mb-1 text-success">Eligible to join</p>
-            <p v-else class="mb-1 text-danger">Cannot join to this session</p>
+            <p v-if="Math.random() > 0.6"
+            class="mb-1 text-success">Joined</p>
+            <p v-else class="mb-1 text-primary">Eligible to join</p>
           </div>
         </div>
         <div class="container py-2">
@@ -61,7 +72,8 @@
     <div class="row">
       <div class="pt-3">
           <button v-if="session.canJoin && session.maxNumberOfUsers > session.numberOfUsers"
-          @click="router.push({ name: 'SingleSession', query: {session: session.name }})" class="btn btn-primary">Join session</button>
+          @click="router.push({ name: 'session', params: { sessionName: 'test' } })" class="btn btn-primary">Join session</button>
+
       </div>
     </div>
   </div>
@@ -87,10 +99,6 @@
 </template>
 <script>
 import sessionsJson from '@/sessions.json'
-import router from '../router/index.js'
-import axios from 'axios'
-axios.get('http://127.0.0.1:8000/users/')
-  .then(response => console.log(response))
 
 export default {
   data () {
@@ -99,8 +107,7 @@ export default {
       search: '',
       sessions: sessionsJson,
       pageSize: 10,
-      currentPage: 1,
-      router: router
+      currentPage: 1
     }
   },
   methods: {
@@ -147,6 +154,9 @@ export default {
         const end = this.currentPage * this.pageSize
         if (index >= start && index < end) return true
       })
+    },
+    goToNewSessionView () {
+      this.$router.push('/new-session')
     }
   }
 }
