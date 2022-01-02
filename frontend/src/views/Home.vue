@@ -1,6 +1,6 @@
 <template>
   <div>
-    <header class="py-5" style="background-color: #ffc34d;">
+    <header class="bg-dark py-5">
       <div class="container-fluid px-5">
         <div class="row gx-5 justify-content-center">
           <div class="col-lg-6">
