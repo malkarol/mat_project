@@ -1,11 +1,12 @@
 <template>
-  <div>
+  <div class="Site">
     <NavBar />
-    <div class="row">
+    <div class="row Site-content">
         <router-view />
     </div>
     <Footer />
   </div>
+
 </template>
 
 <script>
@@ -30,3 +31,14 @@ export default {
 
 }
 </script>
+<style>
+.Site {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.Site-content {
+  flex: 1;
+}
+</style>
