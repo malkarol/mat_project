@@ -1,7 +1,12 @@
 <template>
-<div>
-  <div class="container mt-3 py-5">
-    <h2>Sessions</h2>
+  <div class="col-lg-10 mx-auto">
+    <div class="card border-0 shadow rounded-3 my-5">
+          <div class="card-body p-4 p-sm-5 mb-5">
+        <div>
+          <h2>Sessions</h2>
+          <hr />
+        </div>
+
   <p>Type something in the input field to search the list for specific items:</p>
   <div class="d-flex justify-content-between">
   <div class="col-sm-6"><input class="form-control" v-model="search" type="text" placeholder="Search..."></div>
@@ -16,7 +21,7 @@
     </div>
   </div>
   <br>
-    <div  class="list-group">
+    <div  class="list-group" style="height: 1150px">
 
       <div v-for="(session, index) in sortedList" class="border border-5" :key="session.name" data-bs-toggle="collapse" :data-bs-target="'#example_' + index" aria-expanded="false" :aria-controls="'example_' + index"
       v-bind:sortedList="sortedList">
@@ -84,7 +89,7 @@
       </div>
 
     </div>
-    <nav aria-label="...">
+    <nav class="mt-2" aria-label="...">
   <ul class="pagination">
     <li class="page-item">
       <a class="page-link" @click="prevPage" >Previous</a>
@@ -96,7 +101,10 @@
 </nav>
 </div>
 </div>
+  </div>
+
 </template>
+
 <script>
 import sessionsJson from '@/sessions.json'
 

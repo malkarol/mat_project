@@ -1,10 +1,10 @@
 <template>
-  <div class="Site">
+  <div class="d-flex flex-column h-100">
     <NavBar />
-    <div class="row Site-content">
+    <div class="row flex-shrink-0">
         <router-view />
     </div>
-    <Footer />
+    <Footer class="footer mt-auto py-3 bg-light"/>
   </div>
 
 </template>
@@ -32,13 +32,6 @@ export default {
 }
 </script>
 <style>
-.Site {
-  display: flex;
-  min-height: 100vh;
-  flex-direction: column;
-}
 
-.Site-content {
-  flex: 1;
-}
+
 </style>

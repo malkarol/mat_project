@@ -1,7 +1,7 @@
 <template>
 
         <!-- Footer -->
-<footer class="footer">
+<footer class="footer mt-auto py-3 " >
 <div class="text-center text-lg-start bg-light text-muted">
   <!-- Copyright -->
   <div class="text-center p-4" style="background-color: #ffc34d;">
