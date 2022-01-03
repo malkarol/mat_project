@@ -93,3 +93,14 @@ def participant_detail(request, pk):
         participant.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+from django.core.files.base import ContentFile
+from django_dropbox_storage.storage import DropboxStorage
+
+storage = DropboxStorage()
+
+@api_view(['POST'])
+def upload_view(request):
+    file_object = request.FILES['files']
+    path = storage.save("/images/" + file_object.name, ContentFile(file_object.read()))
+    return Response(status=status.HTTP_200_OK)
+    

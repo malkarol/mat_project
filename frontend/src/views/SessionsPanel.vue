@@ -77,7 +77,7 @@
     <div class="row">
       <div class="pt-3">
           <button v-if="session.canJoin && session.maxNumberOfUsers > session.numberOfUsers"
-          @click="router.push({ name: 'session', params: { sessionName: 'test' } })" class="btn btn-primary">Join session</button>
+          @click="this.$router.push({ path:`/session/${session.name}`})" class="btn btn-primary">Join session</button>
 
       </div>
     </div>
