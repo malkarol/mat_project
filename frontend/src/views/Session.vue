@@ -3,7 +3,7 @@
         <div class="card border-0 shadow rounded-3 my-5">
             <div class="card-body p-4 p-sm-5 mb-5">
                 <div>
-                    <h2>Session_1</h2>
+                    <h2>{{sessionName()}}</h2>
                     <hr />
                 </div>
                 <nav>
@@ -184,6 +184,9 @@ export default {
         backToSessions () {
             this.$router.push('/sessions')
         },
+        sessionName(){
+        return this.$route.params.name == "" ? "Session preview screen" : this.$route.params.name 
+      }
     }
 }
 // <div class="form-group ">
