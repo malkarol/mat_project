@@ -125,7 +125,7 @@
     </div>
   </div>
 
-       <button class="btn btn-danger mx-2">Cancel</button>
+       <button class="btn btn-danger mx-2" @click="backToSessions()">Cancel</button>
        <button class="btn btn-success">Save</button>
       </form>
     </div>
@@ -179,6 +179,9 @@ export default {
       },
       printDate(){
         console.log(this.date)
+      },
+      backToSessions(){
+        this.$router.push('/sessions')
       }
     },
 

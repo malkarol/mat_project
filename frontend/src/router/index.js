@@ -25,12 +25,20 @@ const routes = [
   },
   {
     path: '/session',
-    name: 'SingleSession',
+    name: 'Session',
     meta: {
       requireLogin: true
     },
-    component: () => import(/* webpackChunkName: "about" */ '../views/SingleSession.vue')
+    component: () => import(/* webpackChunkName: "about" */ '../views/Session.vue')
   },
+  // {
+  //   path: '/session',
+  //   name: 'SingleSession',
+  //   meta: {
+  //     requireLogin: true
+  //   },
+  //   component: () => import(/* webpackChunkName: "about" */ '../views/SingleSession.vue')
+  // },
   {
     path: '/new-session',
     name: 'CreateNewSession',
