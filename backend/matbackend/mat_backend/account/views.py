@@ -34,12 +34,12 @@ def users_list(request):
         return JsonResponse("Falied to create new User", safe=False)
 
 @csrf_exempt
-def user_details(request,username):
+def user_details(request, id):
     """
     Return, modify or delete one user.
     """
     if request.method =='GET':
-        user = User.objects.get(username=username)
+        user = User.objects.get(pk=id)
         user_serializer = UserSerializer(user)
         return JsonResponse(user_serializer.data,safe=False)
 

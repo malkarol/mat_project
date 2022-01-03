@@ -3,7 +3,7 @@
         <div class="card border-0 shadow rounded-3 my-5">
             <div class="card-body p-4 p-sm-5 mb-5">
                 <div>
-                    <h2>{{sessionName()}}</h2>
+                    <h2>{{this.session.name}}</h2>
                     <hr />
                 </div>
                 <nav>
@@ -23,8 +23,8 @@
                     <div class="col shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                          <h4 for="lastName" class="d-flex justify-content-center"> <strong>Session deadline</strong></h4>
                          <div class="d-flex justify-content-around">
-                         <h5 class="d-flex justify-content-centery"> {{startDate}}</h5>
-                         <h5 class="d-flex justify-content-centery"> {{endDate}} </h5>
+                         <h5 class="d-flex justify-content-centery"> {{this.session.start_date}}</h5>
+                         <h5 class="d-flex justify-content-centery"> {{this.session.end_date == null ? "No end date" : this.session.end_date}} </h5>
                          </div>
                          </div>
                     </div>
@@ -53,10 +53,7 @@
                     <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                         <h4 for="lastName"> <strong>Description</strong></h4>
                         <p >
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                            <br> Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                            <br> Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+                            {{this.session.description}}
                         </p>
                     </div>
                 </div>
@@ -175,9 +172,15 @@ export default {
         return {
             participantList: participantJson,
             startDate: '2022-01-01',
-            endDate: '2022-02-01'
-
+            endDate: '2022-02-01',
+            session: {}
         }
+    },
+    mounted() {
+        console.log(this.$route.params)
+        axios.get('/session/' + this.$route.params.id).then(resp => {
+            this.session = resp.data
+        });
     },
     methods:
     {
