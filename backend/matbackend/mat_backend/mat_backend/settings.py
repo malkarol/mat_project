@@ -31,7 +31,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 DEFAULT_FILE_STORAGE = 'storages.backends.dropbox.DropBoxStorage'
-DROPBOX_ACCESS_TOKEN = '_W2rp8GyHFAAAAAAAAAAAXgjewEgT69LQvdC_RPxxDZcMWqSV7HjHoNsrjfGi5XM'
+DROPBOX_ACCESS_TOKEN = 'kTbeDtsVTngAAAAAAAAAAeWRNQ-u7GKcIDahW-5yFmyDeVuLxzKll0SiUG8qZkaG'
 # Application definition
 
 INSTALLED_APPS = [
