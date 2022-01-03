@@ -24,5 +24,4 @@ urlpatterns = [
     path('',include('ml_handler.urls')),
     path('api/v1/', include('djoser.urls')),
     path('api/v1/', include('djoser.urls.authtoken')),
-
 ]

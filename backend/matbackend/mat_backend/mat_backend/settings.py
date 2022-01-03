@@ -30,7 +30,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+DEFAULT_FILE_STORAGE = 'storages.backends.dropbox.DropBoxStorage'
+DROPBOX_ACCESS_TOKEN = 'kTbeDtsVTngAAAAAAAAAAeWRNQ-u7GKcIDahW-5yFmyDeVuLxzKll0SiUG8qZkaG'
 # Application definition
 
 INSTALLED_APPS = [
@@ -47,7 +48,9 @@ INSTALLED_APPS = [
     'webapp.apps.WebappConfig',
     'account.apps.AccountConfig',
     'ml_handler.apps.MlHandlerConfig',
-    'session_handler.apps.SessionHandlerConfig'
+    'session_handler.apps.SessionHandlerConfig',
+    'django_dropbox_storage',
+    
 ]
 
 CORS_ALLOWED_ORIGINS = [

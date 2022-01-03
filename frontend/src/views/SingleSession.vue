@@ -4,7 +4,7 @@
     <div class="row">
       <div class="d-flex justify-content-between">
         <div class="col">
-          <h2>Tymczasowa nazwa sesji</h2>
+          <h2>{{sessionName()}}</h2>
           <div class="d-flex flex-row pt-2 border-bottom">
             <div class="p-2">
               <p class="mb-1"><strong>Owner:</strong></p>
@@ -71,10 +71,17 @@
                 </div>
                 <div class="row mb-3 pt-3">
                   <div class="">
-                    <form method="post" action="#" id="#">
+                    <form>
                       <div class="form-group files color">
                         <label class="mb-3"><strong>Upload your trained model parameters</strong></label>
-                        <input type="file" class="form-control" multiple="">
+                        <input type="file" id="file" ref="file" class="form-control" multiple="" @change="handleFileUpload( $event )">
+                      </div>
+                      <div class="row">
+                        <div class="d-flex flex-row">
+                          <div class="mx-3 pt-3">
+                            <input type="button" @click="submitFile" class="btn btn-primary" value="Send file"/>
+                          </div>
+                        </div>
                       </div>
                     </form>
                   </div>
@@ -112,8 +119,40 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
-  props: ['sessionName']
+  data(){
+    return {
+      file: ''
+    }
+  },
+  methods: {
+      sessionName(){
+        return this.$route.params.name == "" ? "Session preview screen" : this.$route.params.name 
+      },
+      handleFileUpload(){
+        this.file = this.$refs.file
+      },
+      submitFile(e){
+        let formData = new FormData()
+        const imagefile = document.querySelector('#file');
+        formData.append('files', imagefile.files[0]);
+        axios.post( 'upload/', // testowy endpoint
+          formData,
+          {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+          }
+        }
+        ).then(function(){
+          console.log('SUCCESS!!');
+        })
+        .catch(function(){
+          console.log('FAILURE!!');
+        });
+        }
+        
+    }
 }
 </script>
 
