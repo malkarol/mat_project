@@ -94,13 +94,14 @@ def participant_detail(request, pk):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 from django.core.files.base import ContentFile
-from django_dropbox_storage.storage import DropboxStorage
-
-storage = DropboxStorage()
+from storages.backends.gcloud import GoogleCloudStorage
+storage = GoogleCloudStorage()
 
 @api_view(['POST'])
 def upload_view(request):
     file_object = request.FILES['files']
-    path = storage.save("/images/" + file_object.name, ContentFile(file_object.read()))
+    target_path = '/userfiles/' + file_object.name
+    path = storage.save(target_path, ContentFile(file_object.read()))
+    print(path)
     return Response(status=status.HTTP_200_OK)
     

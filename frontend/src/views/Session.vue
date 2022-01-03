@@ -134,7 +134,7 @@
                             <label for="formFileLg" class="form-label text-muted" >(Only .h5 files)</label>
                             <input class="form-control form-control-lg" id="formFileLg" accept=".h5" type="file">
                         </div>
-                         <button class="btn btn-primary btn-lg btn-success mt-3" @click="backToSessions()">Upload local model</button>
+                         <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="submitFile" value="Upload local model"/>
                          </div>
                     </div>
 
@@ -167,7 +167,7 @@
 </style>
 <script>
 import participantJson from '@/participants.json'
-
+import axios from 'axios'
 
 
 export default {
@@ -186,6 +186,24 @@ export default {
         },
         sessionName(){
         return this.$route.params.name == "" ? "Session preview screen" : this.$route.params.name 
+        },
+        submitFile(e){
+        let formData = new FormData()
+        const imagefile = document.querySelector('#formFileLg');
+        formData.append('files', imagefile.files[0]);
+        axios.post( 'upload/', // testowy endpoint
+          formData,
+          {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+          }
+        }
+        ).then(function(){
+          console.log('SUCCESS!!');
+        })
+        .catch(function(){
+          console.log('FAILURE!!');
+        });
       }
     }
 }

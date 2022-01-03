@@ -30,8 +30,20 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-DEFAULT_FILE_STORAGE = 'storages.backends.dropbox.DropBoxStorage'
-DROPBOX_ACCESS_TOKEN = 'kTbeDtsVTngAAAAAAAAAAeWRNQ-u7GKcIDahW-5yFmyDeVuLxzKll0SiUG8qZkaG'
+#DEFAULT_FILE_STORAGE = 'storages.backends.dropbox.DropBoxStorage'
+#DROPBOX_ACCESS_TOKEN = 'kTbeDtsVTngAAAAAAAAAAeWRNQ-u7GKcIDahW-5yFmyDeVuLxzKll0SiUG8qZkaG'
+#DROPBOX_ROOT_PATH = '/userfiles'
+
+from google.oauth2 import service_account
+# storage
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+    os.path.join(BASE_DIR, 'aerial-ceremony-337021-a6d88e217e34.json')
+)
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_BUCKET_NAME = 'mat_storage'
+
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -50,7 +62,6 @@ INSTALLED_APPS = [
     'ml_handler.apps.MlHandlerConfig',
     'session_handler.apps.SessionHandlerConfig',
     'django_dropbox_storage',
-    
 ]
 
 CORS_ALLOWED_ORIGINS = [
