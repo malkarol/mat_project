@@ -145,7 +145,7 @@
           <div class="tab-pane fade" id="nav-getGlobal" role="tabpanel" aria-labelledby="nav-getGlobal-tab">
                <div class="row mt-3">
                     <div class="col mb-3 shadow p-3 mb-5 d-flex justify-content-center rounded" style="background-color: #f1f1f1;">
-                <button class="btn btn-primary btn-lg btn-success mt-3 mb-3 mx-1" @click="backToSessions()">Download global model</button>
+                <button class="btn btn-primary btn-lg btn-success mt-3 mb-3 mx-1" @click="getFile()">Download global model</button>
                 <button class="btn btn-primary btn-lg btn-success mt-3 mb-3 mx-1" @click="backToSessions()">Aggregate models</button>
                 <button class="btn btn-primary btn-lg btn-success mt-3 mb-3 mx-1" @click="backToSessions()">Show results</button>
                     </div>
@@ -192,25 +192,45 @@ export default {
         return this.$route.params.name == "" ? "Session preview screen" : this.$route.params.name 
         },
         submitFile(e){
-        let formData = new FormData()
-        const imagefile = document.querySelector('#formFileLg');
-        formData.append('files', imagefile.files[0]);
-        formData.append('session_id', this.session.session_id)
-        console.log(formData)
-        axios.post( 'upload/', // testowy endpoint
-          formData,
-          {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-          }
+            let formData = new FormData()
+            const imagefile = document.querySelector('#formFileLg');
+            formData.append('files', imagefile.files[0]);
+            formData.append('session_id', this.session.session_id)
+            console.log(formData)
+            axios.post( 'upload/', // testowy endpoint
+              formData,
+              {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+              }
+            }
+            ).then(function(){
+              console.log('SUCCESS!!');
+            })
+            .catch(function(){
+              console.log('FAILURE!!');
+            })
+        },
+        getFile(){
+            console.log(this.session)
+            
+            axios({
+                  url: 'download/' + this.session.session_id,
+                  method: 'GET',
+                  responseType: 'blob',
+              }).then((response) => {
+                    var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                    var fileLink = document.createElement('a');
+                    
+                    fileLink.href = fileURL;
+                    fileLink.setAttribute('download', 'file.pdf'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                    document.body.appendChild(fileLink);
+        
+                    fileLink.click();
+    
+                    console.log(response)
+              })
         }
-        ).then(function(){
-          console.log('SUCCESS!!');
-        })
-        .catch(function(){
-          console.log('FAILURE!!');
-        });
-      }
     }
 }
 // <div class="form-group ">

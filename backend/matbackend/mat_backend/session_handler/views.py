@@ -1,5 +1,6 @@
 from django.shortcuts import render
 
+from django.http import FileResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -97,15 +98,25 @@ from django.core.files.base import ContentFile
 from storages.backends.gcloud import GoogleCloudStorage
 storage = GoogleCloudStorage()
 
-@api_view(['POST', 'GET'])
-def storage_file_view(request):
+@api_view(['POST'])
+def storage_files_view(request):
     if request.method == 'POST':
         file_object = request.FILES['files']
-        target_path = '/userfiles/' + file_object.name
+        session = Session.objects.get(pk=request.data['session_id'])
+        target_path = f'/session_ID{session.session_id}/' + file_object.name
         path = storage.save(target_path, ContentFile(file_object.read()))
         participant = Participant.objects.get(pk=2)
-        session = Session.objects.get(pk=request.data['session_id'])
         file = StorageFile.objects.create(name=file_object.name, path=path, participant_uploaded=participant, related_session=session)
         return Response(status=status.HTTP_200_OK)
-    elif request.method == 'GET':
-        pass
+
+@api_view(['GET'])
+def storage_file_detail(request, pk):
+    if request.method == 'GET':
+        session_id = pk
+        #participant_id = request.data['participant_id']
+
+        file = StorageFile.objects.filter(related_session = session_id).filter(participant_uploaded = 2)[0]
+        storage_file = storage.open(file.path, 'rb')
+
+        response = FileResponse(storage_file)
+        return response
