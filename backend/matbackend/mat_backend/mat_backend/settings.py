@@ -60,8 +60,7 @@ INSTALLED_APPS = [
     'webapp.apps.WebappConfig',
     'account.apps.AccountConfig',
     'ml_handler.apps.MlHandlerConfig',
-    'session_handler.apps.SessionHandlerConfig',
-    'django_dropbox_storage',
+    'session_handler.apps.SessionHandlerConfig'
 ]
 
 CORS_ALLOWED_ORIGINS = [
