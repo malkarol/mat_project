@@ -101,7 +101,6 @@ storage = GoogleCloudStorage()
 def storage_file_view(request):
     if request.method == 'POST':
         file_object = request.FILES['files']
-        #session_id = request.data['session_id']
         target_path = '/userfiles/' + file_object.name
         path = storage.save(target_path, ContentFile(file_object.read()))
         participant = Participant.objects.get(pk=2)
@@ -109,4 +108,4 @@ def storage_file_view(request):
         file = StorageFile.objects.create(name=file_object.name, path=path, participant_uploaded=participant, related_session=session)
         return Response(status=status.HTTP_200_OK)
     elif request.method == 'GET':
-        
+        pass
