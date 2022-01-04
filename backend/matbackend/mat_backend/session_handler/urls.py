@@ -7,6 +7,6 @@ urlpatterns=[
     path('session/<int:pk>',views.session_detail),
     path('participants/',views.participants_list),
     path('participant/<int:pk>',views.participant_detail),
-    path('upload/', views.upload_view)
+    path('upload/', views.storage_file_view)
     # path('user/<int:pk>',views.user_details)
 ]

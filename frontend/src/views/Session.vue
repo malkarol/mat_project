@@ -174,6 +174,7 @@ export default {
             startDate: '2022-01-01',
             endDate: '2022-02-01',
             session: {}
+
         }
     },
     mounted() {
@@ -194,6 +195,8 @@ export default {
         let formData = new FormData()
         const imagefile = document.querySelector('#formFileLg');
         formData.append('files', imagefile.files[0]);
+        formData.append('session_id', this.session.session_id)
+        console.log(formData)
         axios.post( 'upload/', // testowy endpoint
           formData,
           {

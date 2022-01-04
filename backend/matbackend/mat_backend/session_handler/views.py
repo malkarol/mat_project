@@ -3,7 +3,7 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from session_handler.models import Session, SessionResult, Participant
+from session_handler.models import Session, SessionResult, Participant, StorageFile
 from session_handler.serializers import SessionResultSerializer, SessionSerializer, ParticipantSerializer
 
 # 1. Session CRUD
@@ -97,11 +97,16 @@ from django.core.files.base import ContentFile
 from storages.backends.gcloud import GoogleCloudStorage
 storage = GoogleCloudStorage()
 
-@api_view(['POST'])
-def upload_view(request):
-    file_object = request.FILES['files']
-    target_path = '/userfiles/' + file_object.name
-    path = storage.save(target_path, ContentFile(file_object.read()))
-    print(path)
-    return Response(status=status.HTTP_200_OK)
-    
+@api_view(['POST', 'GET'])
+def storage_file_view(request):
+    if request.method == 'POST':
+        file_object = request.FILES['files']
+        #session_id = request.data['session_id']
+        target_path = '/userfiles/' + file_object.name
+        path = storage.save(target_path, ContentFile(file_object.read()))
+        participant = Participant.objects.get(pk=2)
+        session = Session.objects.get(pk=request.data['session_id'])
+        file = StorageFile.objects.create(name=file_object.name, path=path, participant_uploaded=participant, related_session=session)
+        return Response(status=status.HTTP_200_OK)
+    elif request.method == 'GET':
+        

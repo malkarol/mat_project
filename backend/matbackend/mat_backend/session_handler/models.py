@@ -50,3 +50,19 @@ class Session(models.Model):
       choices=PricingPlanEnum.choices,
       default=PricingPlanEnum.FREE
     )
+
+    # class LossFunctionEnum(models.IntegerChoices):
+    #     CATEGORICAL_CROSSENTROPY = 0, _('Categorical Crossentropy')
+    #     SVM_LOSS = 1, _('Support vector machines loss')
+
+    # loss_function = models.IntegerField(
+    #     choices = LossFunctionEnum.choices,
+    #     default = LossFunctionEnum.CATEGORICAL_CROSSENTROPY
+    # )
+
+class StorageFile(models.Model):
+    file_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=200, null=False)
+    path = models.CharField(max_length=200, null=False)
+    participant_uploaded = models.ForeignKey(Participant, on_delete = models.CASCADE)
+    related_session = models.ForeignKey(Session, on_delete = models.CASCADE)
