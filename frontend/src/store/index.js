@@ -36,7 +36,7 @@ export default createStore({
       state.token = ''
       state.isAuthenticated = false
     },
-    stateUser(state, user){
+    setUser(state, user){
       state.user = user
     }
   },

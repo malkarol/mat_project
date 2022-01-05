@@ -189,7 +189,7 @@ export default {
             this.$router.push('/sessions')
         },
         sessionName(){
-        return this.$route.params.name == "" ? "Session preview screen" : this.$route.params.name 
+        return this.$route.params.name == "" ? "Session preview screen" : this.$route.params.name
         },
         submitFile(e){
             let formData = new FormData()
@@ -197,7 +197,7 @@ export default {
             formData.append('files', imagefile.files[0]);
             formData.append('session_id', this.session.session_id)
             console.log(formData)
-            axios.post( 'upload/', // testowy endpoint
+            axios.post( 'upload/', // testowy endpoint - to zrob zeby nie byl testowy
               formData,
               {
                 headers: {
@@ -213,7 +213,7 @@ export default {
         },
         getFile(){
             console.log(this.session)
-            
+
             axios({
                   url: 'download/' + this.session.session_id,
                   method: 'GET',
@@ -221,13 +221,13 @@ export default {
               }).then((response) => {
                     var fileURL = window.URL.createObjectURL(new Blob([response.data]));
                     var fileLink = document.createElement('a');
-                    
+
                     fileLink.href = fileURL;
                     fileLink.setAttribute('download', 'file.pdf'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
                     document.body.appendChild(fileLink);
-        
+
                     fileLink.click();
-    
+
                     console.log(response)
               })
         }
