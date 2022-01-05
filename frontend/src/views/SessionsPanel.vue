@@ -74,7 +74,7 @@
                                     <div class="row">
                                         <div class="pt-3">
                                             <button v-if="session.max_num_of_participants > session.actual_num_of_participants"
-                                             @click="this.$router.push({ name:'Session', params: {id: session.session_id, name: session.name}})" 
+                                             @click="this.$router.push({ name:'Session', params: {id: session.session_id, name: session.name}})"
                                              class="btn btn-primary">Join session</button>
                                         </div>
                                     </div>
@@ -150,7 +150,7 @@ export default {
         getDays(creationDate){
           const today = new Date()
           let creation_date = new Date(creationDate)
-          let timeDiff = today.getTime() - creation_date.getTime() 
+          let timeDiff = today.getTime() - creation_date.getTime()
           return Math.round(timeDiff / (1000 * 3600 * 24))
         },
         getFounderName(session){

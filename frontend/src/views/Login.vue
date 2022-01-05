@@ -46,7 +46,7 @@ export default {
     }
   },
   methods: {
-    submitForm () {
+    async submitForm () {
       axios.defaults.headers.common['Authorization'] = ''
       localStorage.removeItem('token')
 
@@ -55,7 +55,7 @@ export default {
         password: this.password
       }
 
-      axios
+      await axios
           .post('/api/v1/token/login', formData)
           .then(response => {
             const token = response.data.auth_token
@@ -67,7 +67,7 @@ export default {
             localStorage.setItem('token', token)
 
 
-            this.$router.push('/sessions')
+
           })
           .catch( error => {
             if (error.response) {
@@ -78,6 +78,21 @@ export default {
               this.errors.push('Something went wrong. Please try again.')
             }
           })
+
+          await axios
+                .get('/api/v1/users/me')
+                .then( response => {
+                  this.$store.commit('setUser', { 'id': response.data.id, 'username': response.data.username})
+
+                  localStorage.setItem('username', response.data.username)
+                  localStorage.setItem('userid', response.data.id)
+
+                  this.$router.push('/sessions')
+                })
+                .catch( error =>
+                {
+                  console.log(error )
+                })
     }
   }
 }
