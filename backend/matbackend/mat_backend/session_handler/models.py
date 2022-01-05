@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 
 class Participant(models.Model):
     participant_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    user = models.ForeignKey(User, on_delete = models.CASCADE, default='user')
     related_session = models.IntegerField(default=0)
     model = models.ForeignKey(MLModel, on_delete = models.CASCADE)
     model_uploaded = models.BooleanField(default=False)
@@ -29,9 +29,9 @@ class Session(models.Model):
     session_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200, null=True)
     description = models.CharField(max_length=400, null=True)
-    founder = models.ForeignKey(Participant, on_delete = models.CASCADE)
+    founder = models.CharField(max_length=20, unique=True)
     result = models.ForeignKey(SessionResult, on_delete = models.SET_NULL, null=True)
-    participants = models.CharField(validators=[int_list_validator], max_length=100, null=True)
+    participants = models.ManyToManyField(Participant, related_name='participants')
     min_num_of_participants = models.IntegerField()
     max_num_of_participants = models.IntegerField()
     actual_num_of_participants = models.IntegerField()
