@@ -60,7 +60,7 @@ export default {
           .then(response => {
             const token = response.data.auth_token
 
-            this.$store.commit('setToken',token)
+            this.$store.commit('setToken', token)
 
             axios.defaults.headers.common['Authorization'] = 'Token ' + token
 
@@ -80,7 +80,7 @@ export default {
           })
 
           await axios
-                .get('/api/v1/users/me')
+                .get('/api/v1/users/me/')
                 .then( response => {
                   this.$store.commit('setUser', { 'id': response.data.id, 'username': response.data.username})
 

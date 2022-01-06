@@ -1,6 +1,7 @@
+from types import resolve_bases
 from django.shortcuts import render
 
-from django.http import FileResponse
+from django.http import FileResponse, response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -121,3 +122,16 @@ def storage_file_detail(request, pk):
 
         response = FileResponse(storage_file)
         return response
+
+
+# 4. File dynamically generated
+@api_view(['GET'])
+def local_model_detail(request):
+    response = FileResponse(content_tyoe = 'text/plain')
+    response['Content-Disposition'] = 'attachment; filename= local_model.txt'
+
+    lines =['print("Hello world")\n']
+
+    # Write to Python Script
+    response.writelines(lines)
+    return response
