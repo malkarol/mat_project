@@ -6,6 +6,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from session_handler.models import Session, SessionResult, Participant, StorageFile
 from session_handler.serializers import SessionResultSerializer, SessionSerializer, ParticipantSerializer
+from django.core.files.base import ContentFile
+from storages.backends.gcloud import GoogleCloudStorage
 
 # 1. Session CRUD
 
@@ -94,8 +96,7 @@ def participant_detail(request, pk):
         participant.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-from django.core.files.base import ContentFile
-from storages.backends.gcloud import GoogleCloudStorage
+# 3. File upload
 storage = GoogleCloudStorage()
 
 @api_view(['POST'])
@@ -103,7 +104,7 @@ def storage_files_view(request):
     if request.method == 'POST':
         file_object = request.FILES['files']
         session = Session.objects.get(pk=request.data['session_id'])
-        target_path = f'/session_ID{session.session_id}/' + file_object.name
+        target_path = f'/session_Id_{session.session_id}/' + file_object.name
         path = storage.save(target_path, ContentFile(file_object.read()))
         participant = Participant.objects.get(pk=2)
         file = StorageFile.objects.create(name=file_object.name, path=path, participant_uploaded=participant, related_session=session)
