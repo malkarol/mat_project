@@ -97,8 +97,6 @@ class SimpleMLP:
         return model
 
 def weight_scalling_factor(local_count, global_count):
-
-    print(f"\nlocal_count/global_count: {local_count/global_count}\n")
     return local_count/global_count
 
 
