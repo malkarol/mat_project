@@ -103,18 +103,18 @@
             >
             <select id="inputState" class="form-select" required v-model="mlBackground">
               <option value="" selected disabled hidden>Choose...</option>
-              <option value="1">Student</option>
-              <option value="2">Professor</option>
-              <option value="3">Professional</option>
-              <option value="4">Hobbyst</option>
+              <option value="0">Student</option>
+              <option value="1">Professor</option>
+              <option value="2">Professional</option>
+              <option value="3">Hobbyst</option>
             </select>
           </div>
           <div class="col-md-6">
             <label for="inputState" class="form-label">Pricing Plan</label>
             <select id="inputState" class="form-select" required v-model="pricingPlan">
               <option value="" selected disabled hidden>...</option>
-              <option value="1">Free</option>
-              <option value="2">Premium</option>
+              <option value="0">Free</option>
+              <option value="1">Premium</option>
             </select>
           </div>
           <div class="col-12">
@@ -177,7 +177,7 @@ export default {
       console.log("hej")
       this.isModalVisible = false
     },
-    submitForm () {
+    async submitForm () {
       this.errors = []
       console.log('Sign up')
       console.log(this.username)
@@ -196,8 +196,8 @@ export default {
         // pricingPlan: this.pricingPlan,
         // mlBackgroun: this.mlBackground
       }
-      if (this.errors)
-      axios
+      this.$store.commit('setIsLoading', true)
+      await axios
           .post('/api/v1/users/', formData)
           .then(response => {
             this.isModalVisible = true
@@ -221,6 +221,7 @@ export default {
               this.errors.push('Something went wrong. Please try again.')
             }
           })
+          this.$$store.commit('setIsLoading', false)
     },
     validateForm () {
       'use strict'

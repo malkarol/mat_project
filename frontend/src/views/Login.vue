@@ -47,6 +47,7 @@ export default {
   },
   methods: {
     async submitForm () {
+      this.$store.commit('setIsLoading', true)
       axios.defaults.headers.common['Authorization'] = ''
       localStorage.removeItem('token')
 
@@ -93,6 +94,9 @@ export default {
                 {
                   console.log(error )
                 })
+
+        this.$store.commit('setIsLoading', false)
+
     }
   }
 }
