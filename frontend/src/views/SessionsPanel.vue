@@ -234,9 +234,8 @@ export default {
     },
     computed: {
         filteredList() {
-            console.log(this.sessions)
             return this.sessions.filter(session => {
-                return session.name.toLowerCase().includes(this.search.toLowerCase())
+                return session.name == null ? "" : session.name.toLowerCase().includes(this.search.toLowerCase())
             })
         },
         sortedList() {
