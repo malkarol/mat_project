@@ -5,6 +5,9 @@ from django.http import FileResponse, response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.parsers import JSONParser
+
+from account.models import User
 from session_handler.models import Session, SessionResult, Participant, StorageFile
 from session_handler.serializers import SessionResultSerializer, SessionSerializer, ParticipantSerializer
 from django.core.files.base import ContentFile
@@ -66,7 +69,9 @@ def participants_list(request):
         return Response(serializer.data)
 
     elif request.method == 'POST':
+        print(request.data)
         serializer = ParticipantSerializer(data=request.data)
+        print(serializer)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -96,6 +101,50 @@ def participant_detail(request, pk):
     elif request.method == 'DELETE':
         participant.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['GET'])
+def get_joined_sessions(request,pk):
+    if request.method == 'GET':
+        participant = Participant.objects.filter(user__id = pk)
+        serializer = ParticipantSerializer(participant, many=True)
+        return Response([x['session'] for x in serializer.data])
+
+@api_view(['POST'])
+def add_one_participants(request):
+    pass
+@api_view(['POST'])
+def add_many_participants(request):
+    """
+    List all users, or create a new user.
+    """
+    if request.method =='POST':
+        users = User.objects.filter(username__in=request.data['usernames'])
+        participants = []
+        for user in users:
+            participant = {}
+            participant['user'] = user['id']
+            participant['session'] = request.data['session']
+            participants.append(participant)
+
+        serializer = ParticipantSerializer(data=participants,many=True)
+        if serializer.is_valid():
+            serializer.save()
+            try:
+                session = Session.objects.get(pk=request.data['session'])
+            except Session.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+
+            sessionTmp = {}
+            sessionTmp['id'] = session['id']
+            sessionTmp['actual_num_of_participants'] =  session['actual_num_of_participants'] + len(participants)
+
+            serializer = SessionSerializer(session, data=sessionTmp)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # 3. File upload
 storage = GoogleCloudStorage()

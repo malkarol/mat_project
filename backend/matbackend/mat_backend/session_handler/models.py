@@ -13,12 +13,13 @@ from django.utils.translation import gettext_lazy as _
 
 class Session(models.Model):
     session_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=200, null=True)
+    name = models.CharField(max_length=200)
     description = models.CharField(max_length=400, null=True)
-    founder = models.CharField(max_length=20, unique=True)
+    founder = models.CharField(max_length=20)
     min_num_of_participants = models.IntegerField()
     max_num_of_participants = models.IntegerField()
     actual_num_of_participants = models.IntegerField()
+    tags = ArrayField(models.CharField(max_length=30), null=True)
     start_date = models.DateField()
     end_date = models.DateField(null=True)
     creation_date = models.DateField(auto_now_add=True)
@@ -53,12 +54,12 @@ class StorageFile(models.Model):
 
 class Participant(models.Model):
     participant_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete = models.CASCADE, default='user')
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
     session = models.ForeignKey(Session, on_delete = models.SET_NULL, null=True)
     # model = models.ForeignKey(MLModel, on_delete = models.SET_NULL, null=True)
     local_data_count = models.IntegerField(null=True)
     weights_uploaded = models.ForeignKey(StorageFile, on_delete = models.SET_NULL, null=True)
-    accuracy = models,FloatField(null=True)
+    accuracy = models.FloatField(null=True)
     # are local weights uploaded
     is_model_uploaded = models.BooleanField(default=False)
     is_owner = models.BooleanField(default=False)

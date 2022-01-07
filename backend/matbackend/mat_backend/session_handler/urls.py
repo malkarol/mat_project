@@ -9,7 +9,8 @@ urlpatterns=[
     path('participant/<int:pk>',views.participant_detail),
     path('upload/', views.storage_files_view),
     path('download/<int:pk>', views.storage_file_detail),
-    path('generate-local-model/', views.local_model_detail)
-
+    path('generate-local-model/', views.local_model_detail),
+    path('add-participants/', views.add_many_participants),
+    path('participants/filter/<int:pk>', views.get_joined_sessions)
     # path('user/<int:pk>',views.user_details)
 ]

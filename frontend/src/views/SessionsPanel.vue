@@ -21,9 +21,9 @@
                 </div>
             </div>
             <br>
-            <div class="list-group" style="height: 1150px">
+            <div class="list-group" style="min-height: 1150px">
 
-                <div v-if="!isFetching" v-for="(session, index) in sortedList" class="border border-5" :key="session.name" data-bs-toggle="collapse" :data-bs-target="'#example_' + index" aria-expanded="false" :aria-controls="'example_' + index" v-bind:sortedList="sortedList">
+                <div  v-for="(session, index) in sortedList" class="border border-5" :key="session.name" data-bs-toggle="collapse" :data-bs-target="'#example_' + index" aria-expanded="false" :aria-controls="'example_' + index" v-bind:sortedList="sortedList">
                     <div class="list-group-item list-group-item-action" :class="{'bg-primary text-white':index == selected}" @click="selected = index">
                         <div class="d-flex w-100 justify-content-between">
                             <h5 class="mb-1">{{session.name}} <span class="badge " :class="badgeColor(session.pricing_plan)">{{badgeText(session.pricing_plan)}}</span></h5>
@@ -39,7 +39,7 @@
                                             <h5 class="mb-1">Details</h5>
                                         </div>
                                         <div class="p-2">
-                                            <p v-if="Math.random() > 0.6" class="mb-1 text-success">Joined</p>
+                                            <p v-if="isJoined(session.session_id) === true" class="mb-1 text-success">Joined</p>
                                             <p v-else class="mb-1 text-primary">Eligible to join</p>
                                         </div>
                                     </div>
@@ -52,7 +52,7 @@
                                             </div>
                                             <div class="col-6">
                                                 <div class="row">
-                                                    <span class="">Hello {{getFounderName(session)}}</span>
+                                                    <span class="">{{session.founder}}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -73,8 +73,11 @@
                                 <div>
                                     <div class="row">
                                         <div class="pt-3">
-                                            <button v-if="session.max_num_of_participants > session.actual_num_of_participants"
-                                             @click="this.$router.push({ name:'Session', params: {id: session.session_id, name: session.name}})"
+                                             <button v-if="isJoined(session.session_id)"
+                                             @click="this.$router.push({ name:'Session'})"
+                                             class="btn btn-primary">Go to session</button>
+                                            <button v-else-if="session.max_num_of_participants > session.actual_num_of_participants"
+                                             @click="joinSessionClicked(session.session_id)"
                                              class="btn btn-primary">Join session</button>
                                         </div>
                                     </div>
@@ -96,13 +99,14 @@
                     </li>
                 </ul>
             </nav>
+            <button><a href="#">Button Text</a></button>
         </div>
     </div>
 </div>
 </template>
 
 <script>
-import sessionsJson from '@/sessions.json'
+// import sessionsJson from '@/sessions.json'
 import axios from 'axios'
 
 export default {
@@ -110,17 +114,31 @@ export default {
         return {
             selected: undefined,
             search: '',
-            sessions: [],
+            sessions:[],
+            joinedSessions:[],
             pageSize: 10,
             currentPage: 1,
             isFetching: true
         }
     },
     mounted() {
-        axios.get('/sessions').then(resp => {
-            this.sessions = resp.data
-            this.isFetching = false
-        })
+        axios.get('/api/v1/sessions/').then(response => {
+            this.sessions = response.data
+
+        }),
+        axios
+          .get('/api/v1/participants/filter/' + this.$store.state.user.id)
+          .then(response => {
+            this.joinedSessions = response.data
+          }).catch( error => {
+            if (error.response) {
+              for (const property in error.response.data){
+                this.errors.push(`${property}: ${error.response.data[property]}`)
+              }
+            } else if (error.message){
+              this.errors.push('Something went wrong. Please try again.')
+            }
+          })
     },
     methods: {
         badgeColor(value) {
@@ -153,13 +171,59 @@ export default {
           let timeDiff = today.getTime() - creation_date.getTime()
           return Math.round(timeDiff / (1000 * 3600 * 24))
         },
+        getJoinedSessions(){
+          axios
+          .get('/api/v1/participants/filter/' + this.$store.state.user.id)
+          .then(response => {
+            this.joinedSessions = response.data
+          }).catch( error => {
+            if (error.response) {
+              for (const property in error.response.data){
+                this.errors.push(`${property}: ${error.response.data[property]}`)
+              }
+            } else if (error.message){
+              this.errors.push('Something went wrong. Please try again.')
+            }
+          })
+        },
         getFounderName(session){
-          axios.get('/participant/' + session.founder).then(resp => {
+          axios.get('/api/v1/participant/' + session.founder).then(resp => {
             console.log(resp.data)
             axios.get('/user/' + resp.data.user).then(response =>{
               return response.data.username
             })
-        });
+        })
+        },
+        isJoined(session_id){
+            return this.joinedSessions.includes(session_id)
+        },
+        async joinSessionClicked(session_id){
+
+            const formData = {
+                session_id: session_id,
+                new_participant: this.state.user.id
+            }
+            await axios
+          .post('/api/v1/session/add-participant/', formData)
+          .then(response => {
+
+            this.$router.push({ name:'Session'})
+
+
+          })
+          .catch( error => {
+            if (error.response) {
+              for (const property in error.response.data){
+                this.errors.push(`${property}: ${error.response.data[property]}`)
+              }
+            } else if (error.message){
+              this.errors.push('Something went wrong. Please try again.')
+            }
+          })
+
+        },
+        addNumberOfCurrentParticipants(session_id){
+
         }
     },
     watch: {
