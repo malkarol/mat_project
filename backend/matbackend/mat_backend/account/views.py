@@ -7,6 +7,7 @@ from django.http.response import JsonResponse
 from rest_framework.response import Response
 from account.models import User
 from account.serializers import UserSerializer
+from rest_framework import status
 from django.contrib.auth import get_user_model
 # piece of information about JsonResponse
 # The safe boolean parameter defaults to True.
@@ -62,5 +63,35 @@ def user_details(request, id):
         user = User.objects.get(pk=user_data['id'])
         user.delete()
         return JsonResponse("User deleted successfully", safe=False)
+
+@api_view(['POST'])
+def password_management(request):
+    user_id = request.data['user_id']
+    user = User.objects.get(pk=user_id)
+    user.set_password(request.data['password'])
+    user.save()
+    return Response(status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def email_management(request):
+    user_id = request.data['user_id']
+    user = User.objects.get(pk=user_id)
+    user.email = request.data['email']
+    user.save()
+    return Response(status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def profile_management(request):
+    user_id = request.data['user_id']
+    user = User.objects.get(pk=user_id)
+    user.username = request.data['username']
+    user.first_name = request.data['fullname'].split()[0]
+    user.last_name = request.data['fullname'].split()[1]
+    user.pricing_plan = request.data['pricingPlan']
+    user.ml_background = request.data['mlBackground']
+    user.save()
+    return Response(status=status.HTTP_200_OK)
+
 
 

@@ -23,6 +23,9 @@
         <li v-if="isLogged() === true"  class="nav-item">
           <router-link class="nav-link" to="/sessions" style="text-decoration: none; color: inherit;">Sessions</router-link>
         </li>
+        <li v-if="isLogged() === true"  class="nav-item">
+          <router-link class="nav-link" to="/profile" style="text-decoration: none; color: inherit;">Profile</router-link>
+        </li>
       </ul>
 
       <div v-if="isLogged() === false" class="collapse navbar-collapse justify-content-end"  >

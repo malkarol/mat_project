@@ -16,6 +16,12 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/Register.vue')
   },
   {
+    path: '/profile',
+    name: 'ProfileManagement',
+
+    component: () => import(/* webpackChunkName: "about" */ '../views/ProfileManagement.vue')
+  },
+  {
     path: '/sessions',
     name: 'SessionsPanel',
     meta: {
