@@ -32,9 +32,9 @@
 
                             <div class="col shadow p-3 mb-5 rounded" style="background-color: #f1f1f1;">
                             <h4 for="lastName" class="d-flex justify-content-center"> <strong>Participants</strong></h4>
-                             <ul v-for="(participant, index) in participantList" :key="participant.name" class="list-group px-5 rounded">
-                            <li class="list-group-item"> {{index}} <hr /><div> <h6>  {{participant.username}}</h6>
-                  <small class="text-muted">{{participant.status}}</small>
+                            <ul v-for="(participant, index) in participants" :key="participant.username" class="list-group px-5 rounded">
+                            <li class="list-group-item" :style="styleFounder(participant.username)"> {{index + 1}} <hr /><div> <h6>  {{participant.username}}</h6>
+                  <small class="text-muted">{{getUserType(participant.usertype)}}</small>
                   </div></li>
 
                              </ul>
@@ -59,12 +59,11 @@
                 </div>
                 <div class="row">
                     <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
-                    <div>
+                    <div v-for="(tag) in session.tags" :key="tag">
                 <h4> <strong> Tags </strong> </h4>
                 <hr />
-                 <span class="badge bg-dark mx-1"> medicine</span>
-                 <span class="badge bg-dark  mx-1"> science</span>
-                <span class="badge bg-dark  mx-1"> cancer </span>
+                 <span class="badge bg-dark mx-1"> {{tag}} </span>
+
                 </div>
                     </div>
                 </div>
@@ -72,7 +71,24 @@
                     <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                         <h4> <strong> Parameters </strong> </h4>
                         <hr />
-                <fieldset class="row mb-2">
+                        <table  class="table table-bordered table-hover">
+                          <thead>
+                            <tr>
+                              <th scope="col">#</th>
+                              <th scope="col">Parameter</th>
+                              <th scope="col">Value</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="(parameter, index) in session.parameters_keys" :key="parameter">
+                              <th scope="row">{{index}}</th>
+                              <td>{{parameter}}</td>
+                              <td>{{session.parameters_values[index]}}</td>
+                            </tr>
+
+                          </tbody>
+                        </table>
+                <!-- <fieldset class="row mb-2">
                     <legend class="col-form-label col-sm-2 pt-0"><strong>Classification type</strong></legend>
                     <div class="col-sm-4">
                         <label class="d-flex justify-content-center"> Image</label>
@@ -103,8 +119,8 @@
                         <label class="d-flex justify-content-center"> 4</label>
                     </div>
 
-            </fieldset>
-            <hr />
+            </fieldset> -->
+
                     </div>
                  </div>
             </form>
@@ -163,30 +179,75 @@
 
 </style>
 <script>
-import participantJson from '@/participants.json'
+// import participantJson from '@/participants.json'
 import axios from 'axios'
 
 
 export default {
     data() {
         return {
-            participantList: participantJson,
+            // participantList: participantJson,
             startDate: '2022-01-01',
             endDate: '2022-02-01',
-            session: {}
+            session: {},
+            participants:[],
+
+
 
         }
     },
     mounted() {
-        console.log(this.$route.params)
-        axios.get('/session/' + this.$route.params.id).then(resp => {
-            this.session = resp.data
-        });
+       axios.get('/api/v1/session/'+this.$route.params.id).then(response => {
+            this.session = response.data
+
+        }).catch( error => {
+            if (error.response) {
+              for (const property in error.response.data){
+                this.errors.push(`${property}: ${error.response.data[property]}`)
+              }
+            } else if (error.message){
+              this.errors.push('Something went wrong. Please try again.')
+            }
+          })
+
+          axios.get('/api/v1/participants/session/'+this.$route.params.id).then(response => {
+            this.participants =response.data
+
+
+        }).catch( error => {
+            if (error.response) {
+              for (const property in error.response.data){
+                this.errors.push(`${property}: ${error.response.data[property]}`)
+              }
+            } else if (error.message){
+              this.errors.push('Something went wrong. Please try again.')
+            }
+          })
     },
     methods:
     {
+        styleFounder (username){
+            if(username === this.session.founder)
+            {
+                return "background-color: #ffc34d;"
+            }
+        },
+        getUserType (usertype){
+           switch (usertype) {
+                case 0:
+                    return "Student"
+                case 1:
+                    return "Professor"
+                case 2:
+                    return "Professional"
+                case 3:
+                    return "Hobbyst"
+                default:
+                  return "none"
+            }
+        },
         backToSessions () {
-            this.$router.push('/sessions')
+            this.$router.push('/sessions/')
         },
         sessionName(){
         return this.$route.params.name == "" ? "Session preview screen" : this.$route.params.name

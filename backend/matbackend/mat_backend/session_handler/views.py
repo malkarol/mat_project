@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import JSONParser
 
 from account.models import User
+from account.serializers import UserSerializer
 from session_handler.models import Session, SessionResult, Participant, StorageFile
 from session_handler.serializers import SessionResultSerializer, SessionSerializer, ParticipantSerializer
 from django.core.files.base import ContentFile
@@ -112,6 +113,7 @@ def get_joined_sessions(request,pk):
 @api_view(['POST'])
 def add_one_participants(request):
     pass
+
 @api_view(['POST'])
 def add_many_participants(request):
     """
@@ -145,6 +147,19 @@ def add_many_participants(request):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_participants_for_session(request,pk):
+    if request.method == 'GET':
+        participant_list = Participant.objects.filter(session__session_id=pk)
+        serializer = ParticipantSerializer(participant_list, many=True)
+        users_ids = [x['user'] for x in serializer.data]
+        users_list = User.objects.filter(id__in=users_ids)
+        serializerUser = UserSerializer(users_list, many=True)
+        users_dic = [{'username':x['username'],'usertype': x['user_type'],'user_id': x['id']} for x in serializerUser.data]
+        print(users_dic)
+        return Response(users_dic)
+
 
 # 3. File upload
 storage = GoogleCloudStorage()

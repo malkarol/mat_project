@@ -30,7 +30,7 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/SessionsPanel.vue')
   },
   {
-    path: '/session/:name?',
+    path: '/session/:id',
     name: 'Session',
     meta: {
       requireLogin: true

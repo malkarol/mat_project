@@ -74,7 +74,7 @@
                                     <div class="row">
                                         <div class="pt-3">
                                              <button v-if="isJoined(session.session_id)"
-                                             @click="this.$router.push({ name:'Session'})"
+                                             @click="this.$router.push({ name: 'Session', params: { id: session.session_id } })"
                                              class="btn btn-primary">Go to session</button>
                                             <button v-else-if="session.max_num_of_participants > session.actual_num_of_participants"
                                              @click="joinSessionClicked(session.session_id)"
@@ -125,7 +125,15 @@ export default {
         axios.get('/api/v1/sessions/').then(response => {
             this.sessions = response.data
 
-        }),
+        }).catch( error => {
+            if (error.response) {
+              for (const property in error.response.data){
+                this.errors.push(`${property}: ${error.response.data[property]}`)
+              }
+            } else if (error.message){
+              this.errors.push('Something went wrong. Please try again.')
+            }
+          }),
         axios
           .get('/api/v1/participants/filter/' + this.$store.state.user.id)
           .then(response => {
@@ -207,7 +215,7 @@ export default {
           .post('/api/v1/session/add-participant/', formData)
           .then(response => {
 
-            this.$router.push({ name:'Session'})
+            this.$router.push({ name: 'Session', params: { id: session.session_id } })
 
 
           })
