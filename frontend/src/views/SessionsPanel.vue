@@ -23,14 +23,17 @@
             <br>
             <div class="list-group" style="min-height: 1150px">
 
-                <div  v-for="(session, index) in sortedList" class="border border-5" :key="session.name" data-bs-toggle="collapse" :data-bs-target="'#example_' + index" aria-expanded="false" :aria-controls="'example_' + index" v-bind:sortedList="sortedList">
+                <div v-for="(session, index) in sortedList" class="border border-5" :key="session.name" v-bind:sortedList="sortedList">
                     <div class="list-group-item list-group-item-action" :class="{'bg-primary text-white':index == selected}" @click="selected = index">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">{{session.name}} <span class="badge " :class="badgeColor(session.pricing_plan)">{{badgeText(session.pricing_plan)}}</span></h5>
-                            <small :class="textMutedColor(index)">{{getDays(session.creation_date)}} days ago</small>
+                        <div data-bs-toggle="collapse" :data-bs-target="'#example_' + index" aria-expanded="false" :aria-controls="'example_' + index">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{session.name}} <span class="badge " :class="badgeColor(session.pricing_plan)">{{badgeText(session.pricing_plan)}}</span></h5>
+                                <small :class="textMutedColor(index)">{{getDays(session.creation_date)}} days ago</small>
+                            </div>
+                            <p class="mb-1">{{session.description}}</p>
+                            <small :class="textMutedColor(index)">{{session.actual_num_of_participants}}/{{session.max_num_of_participants}} Users</small>
                         </div>
-                        <p class="mb-1">{{session.description}}</p>
-                        <small :class="textMutedColor(index)">{{session.actual_num_of_participants}}/{{session.max_num_of_participants}} Users</small>
+
                         <div class="collapse" :id="'example_' + index">
                             <div class="card card-body border-0 text-black">
                                 <div class="container border rounded ">
@@ -68,17 +71,26 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div v-if="session.pricing_plan==1 && !isJoined(session.session_id)" class="row justify-content-start py-3">
+                                            <div class="col-3">
+                                                <div class="row">
+                                                    <label><strong>Enter private key to join session:</strong></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="row">
+                                                    <input type="password" class="form-control" :id="'passSession_' + session.session_id" placeholder="Password" v-model="password">
+                                                    <label :id="'labelPass_' + session.session_id" class="text-danger d-none"><strong>This private key is invalid</strong></label>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div>
                                     <div class="row">
                                         <div class="pt-3">
-                                             <button v-if="isJoined(session.session_id)"
-                                             @click="this.$router.push({ name: 'Session', params: { id: session.session_id } })"
-                                             class="btn btn-primary">Go to session</button>
-                                            <button v-else-if="session.max_num_of_participants > session.actual_num_of_participants"
-                                             @click="joinSessionClicked(session.session_id)"
-                                             class="btn btn-primary">Join session</button>
+                                            <button v-if="isJoined(session.session_id)" @click="this.$router.push({ name: 'Session', params: { id: session.session_id } })" class="btn btn-primary">Go to session</button>
+                                            <button v-else-if="session.max_num_of_participants > session.actual_num_of_participants" @click="joinSessionClicked(session)" class="btn btn-primary">Join session</button>
                                         </div>
                                     </div>
                                 </div>
@@ -99,7 +111,7 @@
                     </li>
                 </ul>
             </nav>
-            <button><a href="#">Button Text</a></button>
+            <button @click="hello()"><a href="#">Button Text</a></button>
         </div>
     </div>
 </div>
@@ -114,8 +126,8 @@ export default {
         return {
             selected: undefined,
             search: '',
-            sessions:[],
-            joinedSessions:[],
+            sessions: [],
+            joinedSessions: [],
             pageSize: 10,
             currentPage: 1,
             isFetching: true,
@@ -124,32 +136,37 @@ export default {
     },
     mounted() {
         axios.get('/api/v1/sessions/').then(response => {
-            this.sessions = response.data
+                this.sessions = response.data
 
-        }).catch( error => {
-            if (error.response) {
-              for (const property in error.response.data){
-                this.errors.push(`${property}: ${error.response.data[property]}`)
-              }
-            } else if (error.message){
-              this.errors.push('Something went wrong. Please try again.')
-            }
-          }),
-        axios
-          .get('/api/v1/participants/filter/' + this.$store.state.user.id)
-          .then(response => {
-            this.joinedSessions = response.data
-          }).catch( error => {
-            if (error.response) {
-              for (const property in error.response.data){
-                this.errors.push(`${property}: ${error.response.data[property]}`)
-              }
-            } else if (error.message){
-              this.errors.push('Something went wrong. Please try again.')
-            }
-          })
+            }).catch(error => {
+                if (error.response) {
+                    for (const property in error.response.data) {
+                        this.errors.push(`${property}: ${error.response.data[property]}`)
+                    }
+                } else if (error.message) {
+                    this.errors.push('Something went wrong. Please try again.')
+                }
+            }),
+            axios
+            .get('/api/v1/participants/filter/' + this.$store.state.user.id)
+            .then(response => {
+                this.joinedSessions = response.data
+            }).catch(error => {
+                if (error.response) {
+                    for (const property in error.response.data) {
+                        this.errors.push(`${property}: ${error.response.data[property]}`)
+                    }
+                } else if (error.message) {
+                    this.errors.push('Something went wrong. Please try again.')
+                }
+            })
     },
     methods: {
+        hello() {
+            axios.get('api/v1/mailget/').then(response => {
+
+            })
+        },
         badgeColor(value) {
             return {
                 'bg-danger': value,
@@ -174,63 +191,70 @@ export default {
         prevPage() {
             if (this.currentPage > 1) this.currentPage--
         },
-        getDays(creationDate){
-          const today = new Date()
-          let creation_date = new Date(creationDate)
-          let timeDiff = today.getTime() - creation_date.getTime()
-          return Math.round(timeDiff / (1000 * 3600 * 24))
+        getDays(creationDate) {
+            const today = new Date()
+            let creation_date = new Date(creationDate)
+            let timeDiff = today.getTime() - creation_date.getTime()
+            return Math.round(timeDiff / (1000 * 3600 * 24))
         },
-        getJoinedSessions(){
-          axios
-          .get('/api/v1/participants/filter/' + this.$store.state.user.id)
-          .then(response => {
-            this.joinedSessions = response.data
-          }).catch( error => {
-            if (error.response) {
-              for (const property in error.response.data){
-                this.errors.push(`${property}: ${error.response.data[property]}`)
-              }
-            } else if (error.message){
-              this.errors.push('Something went wrong. Please try again.')
-            }
-          })
+        getJoinedSessions() {
+            axios
+                .get('/api/v1/participants/filter/' + this.$store.state.user.id)
+                .then(response => {
+                    this.joinedSessions = response.data
+                }).catch(error => {
+                    if (error.response) {
+                        for (const property in error.response.data) {
+                            this.errors.push(`${property}: ${error.response.data[property]}`)
+                        }
+                    } else if (error.message) {
+                        this.errors.push('Something went wrong. Please try again.')
+                    }
+                })
         },
-        getFounderName(session){
-          axios.get('/api/v1/participant/' + session.founder).then(resp => {
-            console.log(resp.data)
-            axios.get('/user/' + resp.data.user).then(response =>{
-              return response.data.username
+        getFounderName(session) {
+            axios.get('/api/v1/participant/' + session.founder).then(resp => {
+                console.log(resp.data)
+
             })
-        })
         },
-        isJoined(session_id){
+        isJoined(session_id) {
             return this.joinedSessions.includes(session_id)
         },
-        async joinSessionClicked(session_id){
-
+        async joinSessionClicked(session) {
+            const session_id = session.session_id
+            const warningLabel = document.getElementById('labelPass_' + session_id)
             const formData = {
                 session_id: session_id,
+                private_key: '0'
             }
+            if (session.pricing_plan == 1) {
+                formData.private_key = document.getElementById('passSession_' + session_id).value
+            }
+
             await axios
-          .post('/api/v1/join-session/', formData)
-          .then(response => {
+                .post('/api/v1/join-session/', formData)
+                .then(response => {
+                    warningLabel.classList.add('d-none')
+                    this.$router.push({ name: 'Session', params: { id: session.session_id } })
 
-            // this.$router.push({ name: 'Session', params: { id: session.session_id } })
-
-
-          })
-          .catch( error => {
-            if (error.response) {
-              for (const property in error.response.data){
-                this.errors.push(`${property}: ${error.response.data[property]}`)
-              }
-            } else if (error.message){
-              this.errors.push('Something went wrong. Please try again.')
-            }
-          })
+                })
+                .catch(error => {
+                    if (error.response) {
+                        for (const property in error.response.data) {
+                            this.errors.push(`${property}: ${error.response.data[property]}`)
+                        }
+                    } else if (error.message) {
+                        this.errors.push('Something went wrong. Please try again.')
+                    }
+                    if (error.response.status == 401){
+                        warningLabel.classList.remove('d-none')
+                        warningLabel.classList.add('d-flex')
+                    }
+                })
 
         },
-        addNumberOfCurrentParticipants(session_id){
+        addNumberOfCurrentParticipants(session_id) {
 
         }
     },

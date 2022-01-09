@@ -13,6 +13,8 @@ from session_handler.models import Session, SessionResult, Participant, StorageF
 from session_handler.serializers import SessionResultSerializer, SessionSerializer, ParticipantSerializer
 from django.core.files.base import ContentFile
 from storages.backends.gcloud import GoogleCloudStorage
+from django.core.mail import send_mail
+import hashlib
 
 # 1. Session CRUD
 
@@ -125,6 +127,9 @@ def join_session(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'POST':
+        if request.data['private_key'] != '0' and request.data['private_key'] != session.private_key:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        
         sessSerializer = SessionSerializer(session)
 
         sessionTmp = sessSerializer.data
@@ -202,6 +207,11 @@ def add_many_participants(request):
         serializer = SessionSerializer(data=request.data['session'])
         if serializer.is_valid():
             serializer.save()
+            if serializer.validated_data['pricing_plan'] == Session.PricingPlanEnum.PREMIUM:
+                session = Session.objects.get(pk=serializer.data['session_id'])
+                send_mail_with_privatekey(session)
+                session.save()
+                
             print(request.data['usernames'])
 
             participants = []
@@ -269,6 +279,15 @@ def storage_file_detail(request, pk):
         return response
 
 
+@api_view(['POST'])
+def validate_private_key(request):
+    if request.method == 'POST':
+        try:
+            session = Session.objects.get(private_key=request.data['private_key'])
+            return Response(status = status.HTTP_202_ACCEPTED)
+        except Session.DoesNotExist:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
 # 4. File dynamically generated
 @api_view(['GET'])
 def local_model_detail(request):
@@ -280,3 +299,34 @@ def local_model_detail(request):
     # Write to Python Script
     response.writelines(lines)
     return response
+
+def send_mail_with_privatekey(session):
+    user = User.objects.filter(username = session.founder)[0]
+    private_key = generate_private_key(session)
+    session.private_key = private_key
+
+
+    email_body = f"""
+NOTE: DO NOT REPLY TO THIS EMAIL, MESSAGE GENERATED AUTOMATICALLY
+
+Dear {user.first_name},
+You've just created a new private session: {session.name}
+Below you can find your private key. Other people can use it to join your session
+PRIVATE KEY: {private_key}
+
+                """
+    mail_subject = f"Private key to session: {session.name}"
+    send_mail(
+        mail_subject,
+        email_body,
+        'matmailservice@gmail.com',
+        recipient_list=[user.email],
+        fail_silently=False,
+    )
+
+
+def generate_private_key(session):
+    string = str(session.creation_date) + session.name
+    encoded = string.encode()
+    return hashlib.sha256(encoded).hexdigest()
+    

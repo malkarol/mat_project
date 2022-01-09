@@ -18,6 +18,7 @@ urlpatterns=[
     path('participants/filter/<int:pk>', views.get_joined_sessions),
     # return list of usernames for a single sessint
     path('participants/session/<int:pk>', views.get_participants_for_session),
+    path('validateprivatekey', views.validate_private_key)
     # add session and participants with filed usernames
     # path('sessions/add-filled/', views.add_filled_session),
     # path('user/<int:pk>',views.user_details)
