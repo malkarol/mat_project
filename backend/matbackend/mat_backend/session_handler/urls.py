@@ -10,9 +10,15 @@ urlpatterns=[
     path('upload/', views.storage_files_view),
     path('download/<int:pk>', views.storage_file_detail),
     path('generate-local-model/', views.local_model_detail),
-    path('add-participants/', views.add_many_participants),
-    path('participants/filter/<int:pk>', views.get_joined_sessions),
-    path('participants/session/<int:pk>', views.get_participants_for_session)
 
+    path('create-filled-session/', views.add_many_participants),
+    # join session
+    path('join-session/', views.join_session),
+    # check in which sessions user is
+    path('participants/filter/<int:pk>', views.get_joined_sessions),
+    # return list of usernames for a single sessint
+    path('participants/session/<int:pk>', views.get_participants_for_session),
+    # add session and participants with filed usernames
+    # path('sessions/add-filled/', views.add_filled_session),
     # path('user/<int:pk>',views.user_details)
 ]

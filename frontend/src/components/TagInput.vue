@@ -22,7 +22,7 @@
         disabled: false,
       }
     },
-    props:['tags', 'name','maxInput'],
+    props:['tags', 'name','maxInput','isUsers'],
     methods: {
       addTag (event) {
 
@@ -33,13 +33,26 @@
           event.preventDefault()
           var val = event.target.value.trim()
 
-          if (val.length > 0) {
+          if (val.length > 0 && !this.tags.includes(val) && this.isOwner(val,this.isUsers)===false) {
             this.tags.push(val)
             event.target.value = ''
           }
           console.log(this.tags)
         }
 
+        }
+      },
+      isOwner (name,isUser){
+        console.log(this.$store.state.user.username)
+        if(isUser){
+          if(name === this.$store.state.user.username)
+          {
+            return true
+          }
+          return false
+        }
+        else{
+          return false
         }
       },
       removeTag (index){

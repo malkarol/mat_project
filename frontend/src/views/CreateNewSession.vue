@@ -1,12 +1,26 @@
 <template>
 <div class="col-sm-9 col-md-7 col-lg-8 mx-auto">
+   <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+  </symbol>
+  <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+    <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+  </symbol>
+</svg>
+  <div v-if="errors.length" class="alert alert-danger d-flex align-items-center" role="alert" >
+  <svg  class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+  <div v-for="error in errors" v-bind:key="error" >
+    {{ error }}
+  </div>
+  </div>
   <div class="card border-0 shadow rounded-3 my-5">
     <div class="card-body p-4 p-sm-5 mb-5">
       <div>
         <h3>New session panel</h3>
-          <hr />
+          <hr>
       </div>
-     <form @submit.prevent="submitForm">>
+     <form @submit.prevent="submitForm">
   <div class="row mb-3">
     <label for="sessionName" class="col-sm-2 col-form-label" > <strong>Session name</strong></label>
     <div class="col-sm-10">
@@ -16,7 +30,7 @@
    <div class="row mb-3">
     <label for="tags" class="col-sm-2 col-form-label"> <strong>Tags</strong></label>
     <div class="col-sm-10">
-      <TagInput :tags="tags" :name="tagsComponentName" :maxInput="maxTags" />
+      <TagInput :tags="tags" :name="tagsComponentName" :maxInput="maxTags" :isUsers="false" />
     </div>
   </div>
 
@@ -41,7 +55,7 @@
   </div>
   <div class="form-group mb-3">
     <label >Add by username (optional)</label>
-      <TagInput :tags="participants" :name="usersComponentName" :maxInput ="maxParticipants" />
+      <TagInput :tags="participants" :name="usersComponentName" :maxInput ="maxParticipants" :isUsers="true" />
 
   </div>
     </div>
@@ -177,6 +191,8 @@ export default {
       maxTags: 5,
       maxParams: 100,
 
+
+      errors: []
     }
   },
   components:{
@@ -237,11 +253,12 @@ export default {
       this.parameters_values.push(this.lossFunction)
       this.parameters_values.push(this.num_of_epochs)
       const formData = {
+        session:{
         name: this.sessionName,
         description: this.description,
-        founder: this.$store.state.user.id,
-        min_num_of_participants: this.maxNumParticipants,
-        max_num_of_participants: this.minNumParticipants,
+        founder: this.$store.state.user.username,
+        min_num_of_participants: this.minNumParticipants,
+        max_num_of_participants: this.maxNumParticipants,
         actual_num_of_participants: 1,
         start_date: this.date[0].toISOString().split('T')[0],
         end_date: this.date[1] !=null ? this.date[1].toISOString().split('T')[0] : null,
@@ -250,35 +267,37 @@ export default {
         pricing_plan: 0,
         tags: this.tags,
         model_name: this.modelType
+        },
+        usernames:this.participants
 
       }
       this.$store.commit('setIsLoading', true)
       await axios
-          .post('/api/v1/sessions/', formData)
+          .post('/api/v1/create-filled-session/', formData)
           .then(response => {
 
 
             console.log(response.data)
-            // add owner
-             const participantData = {
-                user: this.$store.state.user.id,
-                session: response.data['session_id'],
-                is_owner: true
-             }
-          axios
-          .post('/api/v1/participants/', participantData)
-          .then(response => {
-               console.log(response)
-          })
-          .catch( error => {
-            if (error.response) {
-              for (const property in error.response.data){
-                this.errors.push(`${property}: ${error.response.data[property]}`)
-              }
-            } else if (error.message){
-              this.errors.push('Something went wrong. Please try again.')
-            }
-          })
+            // // add owner
+            //  const participantData = {
+            //     user: this.$store.state.user.id,
+            //     session: response.data['session_id'],
+            //     is_owner: true
+            //  }
+          // axios
+          // .post('/api/v1/participants/', participantData)
+          // .then(response => {
+          //      console.log(response)
+          // })
+          // .catch( error => {
+          //   if (error.response) {
+          //     for (const property in error.response.data){
+          //       this.errors.push(`${property}: ${error.response.data[property]}`)
+          //     }
+          //   } else if (error.message){
+          //     this.errors.push('Something went wrong. Please try again.')
+          //   }
+          // })
 
             // now add participants
 

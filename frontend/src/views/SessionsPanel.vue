@@ -118,7 +118,8 @@ export default {
             joinedSessions:[],
             pageSize: 10,
             currentPage: 1,
-            isFetching: true
+            isFetching: true,
+            errors: []
         }
     },
     mounted() {
@@ -209,13 +210,12 @@ export default {
 
             const formData = {
                 session_id: session_id,
-                new_participant: this.state.user.id
             }
             await axios
-          .post('/api/v1/session/add-participant/', formData)
+          .post('/api/v1/join-session/', formData)
           .then(response => {
 
-            this.$router.push({ name: 'Session', params: { id: session.session_id } })
+            // this.$router.push({ name: 'Session', params: { id: session.session_id } })
 
 
           })

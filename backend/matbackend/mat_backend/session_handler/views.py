@@ -22,7 +22,7 @@ def sessions_list(request):
     List all sessions, or create new one.
     """
     if request.method == 'GET':
-        sessions_list = Session.objects.all()
+        sessions_list = Session.objects.all().order_by('-session_id')
         serializer = SessionSerializer(sessions_list, many=True)
         return Response(serializer.data)
 
@@ -105,53 +105,134 @@ def participant_detail(request, pk):
 
 @api_view(['GET'])
 def get_joined_sessions(request,pk):
+    '''
+    Get list of sessions where logged user is a Participant
+    '''
     if request.method == 'GET':
         participant = Participant.objects.filter(user__id = pk)
         serializer = ParticipantSerializer(participant, many=True)
         return Response([x['session'] for x in serializer.data])
 
 @api_view(['POST'])
-def add_one_participants(request):
-    pass
+def join_session(request):
+    '''
+    Creates new participant associated with session
+    and rises actual_num_of_participants.
+    '''
+    try:
+        session = Session.objects.get(pk=request.data['session_id'])
+    except Session.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'POST':
+        sessSerializer = SessionSerializer(session)
+
+        sessionTmp = sessSerializer.data
+
+        sessionTmp['actual_num_of_participants'] =  sessionTmp['actual_num_of_participants'] + 1
+
+        sessSerializer = SessionSerializer(session, data=sessionTmp)
+        if sessSerializer.is_valid():
+            sessSerializer.save()
+            new_data = {}
+            new_data['user'] = request.user.id
+            new_data['session'] = request.data['session_id']
+            new_data['is_owner'] = False
+            serializer = ParticipantSerializer(data=new_data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(sessSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# @api_view('POST')
+# def add_filled_session(request):
+#     if request.method == 'POST':
+#         serializer = SessionSerializer(data=request.data['session'])
+#         if serializer.is_valid():
+#             serializer.save()
+#             usernames = request.data['usernames']
+#             users = []
+#             for username in usernames:
+#                 user = User.objects.get(username=username)
+#                 users.append(user)
+#             serializerUser = UserSerializer(data=users,many=True)
+#             participants = []
+#             session_id = serializer.data['session_id']
+        #     for user in serializerUser.data:
+        #         participant = {}
+        #         participant['user'] = user['id']
+        #         participant['session'] = session_id
+        #         participant['is_owner'] = False
+        #         participants.append(participant)
+
+        #     owner ={}
+        #     owner['user'] = request.user.id
+        #     owner['session'] = session_id
+        #     owner['is_owner'] = True
+        #     participants.append(owner)
+
+        #     serializerParticipant = ParticipantSerializer(data=participants, many=True)
+        #     if serializerParticipant.is_valid():
+        #         serializerParticipant.save()
+        #         return Response(serializerParticipant.data, status=status.HTTP_201_CREATED)
+        # return Response(serializerParticipant.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# def check_if_user_exists(request):
+#     usernames = request.data['usernames']
+#     users = []
+#     for username in usernames:
+#         try:
+#             user = User.objects.get(username=username)
+#         except User.DoesNotExist:
+#             return Response(status=status.HTTP_404_NOT_FOUND)
+#         users.append(user)
+#     serializerUser =UserSerializer(data=users,many=True)
+
 
 @api_view(['POST'])
 def add_many_participants(request):
     """
-    List all users, or create a new user.
+    Used when creating session.
     """
     if request.method =='POST':
-        users = User.objects.filter(username__in=request.data['usernames'])
-        participants = []
-        for user in users:
-            participant = {}
-            participant['user'] = user['id']
-            participant['session'] = request.data['session']
-            participants.append(participant)
-
-        serializer = ParticipantSerializer(data=participants,many=True)
+        users = User.objects.filter(username__in = request.data['usernames'])
+        serializerUser = UserSerializer(users,many=True)
+        request.data['session']['actual_num_of_participants'] =  request.data['session']['actual_num_of_participants'] + len(users)
+        serializer = SessionSerializer(data=request.data['session'])
         if serializer.is_valid():
             serializer.save()
-            try:
-                session = Session.objects.get(pk=request.data['session'])
-            except Session.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
+            print(request.data['usernames'])
 
-            sessionTmp = {}
-            sessionTmp['id'] = session['id']
-            sessionTmp['actual_num_of_participants'] =  session['actual_num_of_participants'] + len(participants)
+            participants = []
+            print("przed valied")
+            print(users)
 
-            serializer = SessionSerializer(session, data=sessionTmp)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            session_id = serializer.data['session_id']
+            for user in serializerUser.data:
+                participant = {}
+                participant['user'] = user['id']
+                participant['session'] = session_id
+                participant['is_owner'] = False
+                participants.append(participant)
+            owner ={}
+            owner['user'] = request.user.id
+            owner['session'] = session_id
+            owner['is_owner'] = True
+            participants.append(owner)
 
+            print("przed drugim valied")
+            serializerParticipant = ParticipantSerializer(data=participants, many=True)
+            if serializerParticipant.is_valid():
+                serializerParticipant.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET'])
 def get_participants_for_session(request,pk):
     if request.method == 'GET':
-        participant_list = Participant.objects.filter(session__session_id=pk)
+        participant_list = Participant.objects.filter(session__session_id=pk).order_by('-participant_id')
         serializer = ParticipantSerializer(participant_list, many=True)
         users_ids = [x['user'] for x in serializer.data]
         users_list = User.objects.filter(id__in=users_ids)

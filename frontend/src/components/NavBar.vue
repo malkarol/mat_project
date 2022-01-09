@@ -17,9 +17,9 @@
         <li class="nav-item">
           <router-link class="nav-link" to="/" style="text-decoration: none; color: inherit;">Getting started</router-link>
         </li>
-        <li v-if="isLogged() === true"  class="nav-item">
+        <!-- <li v-if="isLogged() === true"  class="nav-item">
           <router-link class="nav-link" to="/session" style="text-decoration: none; color: inherit;">SingleSession[Preview]</router-link>
-        </li>
+        </li> -->
         <li v-if="isLogged() === true"  class="nav-item">
           <router-link class="nav-link" to="/sessions" style="text-decoration: none; color: inherit;">Sessions</router-link>
         </li>

@@ -212,7 +212,9 @@ export default {
 
           axios.get('/api/v1/participants/session/'+this.$route.params.id).then(response => {
             this.participants =response.data
-
+            this.participants.sort(function(a, b) {
+              return parseFloat(a.user_id) - parseFloat(b.user_id);
+            })
 
         }).catch( error => {
             if (error.response) {
