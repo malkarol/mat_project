@@ -196,6 +196,7 @@ export default {
             this.validateForm()
 
             saveButton.classList.remove('d-flex')
+            saveButton.classList.add('d-none')
             editButton.value = "Edit your information"
             this.isEditing = false
 
@@ -206,11 +207,11 @@ export default {
                 pricingPlan: this.pricingPlan,
                 mlBackground: this.mlBackground
             }
-
+            this.isFetching = true
             axios
                 .post('profileManagement/', formData)
                 .then(response => {
-                    
+                    this.getUserData()
                 })
                 .catch(error => {
                     if (error.response) {
@@ -221,7 +222,6 @@ export default {
                         this.errors.push('Something went wrong. Please try again.')
                     }
                 })
-
         },
         changePassword() {
             this.validatePassword()
