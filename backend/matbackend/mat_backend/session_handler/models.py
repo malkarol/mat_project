@@ -57,7 +57,7 @@ class StorageFile(models.Model):
 class Participant(models.Model):
     participant_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete = models.CASCADE)
-    session = models.ForeignKey(Session, on_delete = models.SET_NULL, null=True)
+    session = models.ForeignKey(Session, on_delete = models.CASCADE, null=True)
     # model = models.ForeignKey(MLModel, on_delete = models.SET_NULL, null=True)
     local_data_count = models.IntegerField(null=True)
     weights_uploaded = models.ForeignKey(StorageFile, on_delete = models.SET_NULL, null=True)

@@ -21,7 +21,18 @@
                 </div>
             </div>
             <br>
-            <div class="list-group" style="min-height: 1150px">
+            <div class="d-flex flex-row justify-content-start">
+                <div>
+                    <input type="checkbox" class="btn-check" id="btn-check-outlined" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="btn-check-outlined">Created sessions</label><br>
+                </div>
+                <div class="mx-3">
+                    <input type="checkbox" class="btn-check" id="btn-check-outlined" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="btn-check-outlined">Created sessions</label><br>
+                </div>
+            </div>
+            <br>
+            <div class="list-group">
 
                 <div v-for="(session, index) in sortedList" class="border border-5" :key="session.name" v-bind:sortedList="sortedList">
                     <div class="list-group-item list-group-item-action" :class="{'bg-primary text-white':index == selected}" @click="selected = index">
@@ -236,7 +247,12 @@ export default {
                 .post('/api/v1/join-session/', formData)
                 .then(response => {
                     warningLabel.classList.add('d-none')
-                    this.$router.push({ name: 'Session', params: { id: session.session_id } })
+                    this.$router.push({
+                        name: 'Session',
+                        params: {
+                            id: session.session_id
+                        }
+                    })
 
                 })
                 .catch(error => {
@@ -247,7 +263,7 @@ export default {
                     } else if (error.message) {
                         this.errors.push('Something went wrong. Please try again.')
                     }
-                    if (error.response.status == 401){
+                    if (error.response.status == 401) {
                         warningLabel.classList.remove('d-none')
                         warningLabel.classList.add('d-flex')
                     }
@@ -267,7 +283,7 @@ export default {
     computed: {
         filteredList() {
             return this.sessions.filter(session => {
-                return session.name == null ? "" : session.name.toLowerCase().includes(this.search.toLowerCase())
+                return session.name.toLowerCase().includes(this.search.toLowerCase()) && session.pricing_plan <= this.$store.state.user.pricing_plan
             })
         },
         sortedList() {

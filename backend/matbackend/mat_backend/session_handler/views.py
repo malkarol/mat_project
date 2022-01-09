@@ -1,4 +1,5 @@
 from types import resolve_bases
+from django import http
 from django.shortcuts import render
 
 from django.http import FileResponse, response
@@ -114,6 +115,16 @@ def get_joined_sessions(request,pk):
         participant = Participant.objects.filter(user__id = pk)
         serializer = ParticipantSerializer(participant, many=True)
         return Response([x['session'] for x in serializer.data])
+
+@api_view(['GET'])
+def get_managed_sessions(request, name):
+    '''
+    Get list of sessions where logged user is the founder
+    '''
+    if request.method == 'GET':
+        sessionsObjects = Session.objects.filter(founder = name)
+        sessions = SessionSerializer(sessionsObjects, many=True)
+        return Response(x for x in sessions.data)
 
 @api_view(['POST'])
 def join_session(request):

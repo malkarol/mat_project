@@ -83,10 +83,12 @@ export default {
           await axios
                 .get('/api/v1/users/me/')
                 .then( response => {
-                  this.$store.commit('setUser', { 'id': response.data.id, 'username': response.data.username})
+                  console.log(response)
+                  this.$store.commit('setUser', { 'id': response.data.id, 'username': response.data.username, 'pricing_plan': response.data.pricing_plan})
 
                   localStorage.setItem('username', response.data.username)
                   localStorage.setItem('userid', response.data.id)
+                  localStorage.setItem('pricing_plan', response.data.pricing_plan)
 
                   this.$router.push('/sessions')
                 })
