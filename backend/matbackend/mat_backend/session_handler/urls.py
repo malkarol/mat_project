@@ -9,7 +9,13 @@ urlpatterns=[
     path('participant/<int:pk>',views.participant_detail),
     path('upload/', views.storage_files_view),
     path('download/<int:pk>', views.storage_file_detail),
-    path('generate-local-model/', views.local_model_detail),
+
+    # generate local model script for session
+    path('generate-local-model/', views.local_model_script),
+     # generate global model script for session
+    path('generate-global-model/', views.global_model_script),
+     # generate aggregate script for session
+    path('generate-local-model/', views.aggregate_script),
 
     path('create-filled-session/', views.add_many_participants),
     # join session

@@ -10,7 +10,6 @@ from django.core.validators import int_list_validator
 #  It’s convention to import this as a shorter alias, _, to save typing.
 from django.utils.translation import gettext_lazy as _
 
-
 class Session(models.Model):
     session_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200)
@@ -30,6 +29,7 @@ class Session(models.Model):
     parameters_values = ArrayField(models.CharField(max_length=30), null=True)
     model_name = models.CharField(max_length=200, null=True)
     # setting PricingPlanEnum value
+
     class PricingPlanEnum(models.IntegerChoices):
         FREE = 0, _('Free')
         PREMIUM = 1, _('Paid')
@@ -47,10 +47,25 @@ class Session(models.Model):
     #     choices = LossFunctionEnum.choices,
     #     default = LossFunctionEnum.CATEGORICAL_CROSSENTROPY
     # )
+
+class SessionFiles(models.Model):
+    file_id = models.AutoField(primary_key=True)
+
+    local_script_name = models.CharField(max_length=200, null=False)
+    local_script_path = models.CharField(max_length=200, null=False)
+
+    global_script_name = models.CharField(max_length=200, null=True)
+    global_script_path = models.CharField(max_length=200, null=True)
+
+    aggregate_script_name = models.CharField(max_length=200, null=True)
+    aggregate_script_path = models.CharField(max_length=200, null=True)
+
+
 class StorageFile(models.Model):
     file_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200, null=False)
     path = models.CharField(max_length=200, null=False)
+    related_session = models.ForeignKey(Session, on_delete = models.CASCADE)
 
 class Participant(models.Model):
     participant_id = models.AutoField(primary_key=True)

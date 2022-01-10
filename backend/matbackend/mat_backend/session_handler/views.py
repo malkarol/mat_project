@@ -13,7 +13,10 @@ from session_handler.models import Session, SessionResult, Participant, StorageF
 from session_handler.serializers import SessionResultSerializer, SessionSerializer, ParticipantSerializer
 from django.core.files.base import ContentFile
 from storages.backends.gcloud import GoogleCloudStorage
+import session_handler.file_finder as ff
 
+# 3. File upload
+storage = GoogleCloudStorage()
 # 1. Session CRUD
 
 @api_view(['GET', 'POST'])
@@ -204,11 +207,16 @@ def add_many_participants(request):
             serializer.save()
             print(request.data['usernames'])
 
+
+            session_id = serializer.data['session_id']
+            target_path = f'/sessions/session_Id_{session_id}/accuracy_and_loss/'
+            path = storage.save(target_path,ContentFile(bytes('', 'utf-8')))
+            target_path = f'/sessions/session_Id_{session_id}/local_weights/'
+            path = storage.save(target_path,ContentFile(bytes('', 'utf-8')))
             participants = []
             print("przed valied")
             print(users)
 
-            session_id = serializer.data['session_id']
             for user in serializerUser.data:
                 participant = {}
                 participant['user'] = user['id']
@@ -242,8 +250,7 @@ def get_participants_for_session(request,pk):
         return Response(users_dic)
 
 
-# 3. File upload
-storage = GoogleCloudStorage()
+
 
 @api_view(['POST'])
 def storage_files_view(request):
@@ -268,15 +275,35 @@ def storage_file_detail(request, pk):
         response = FileResponse(storage_file)
         return response
 
-
-# 4. File dynamically generated
 @api_view(['GET'])
-def local_model_detail(request):
-    response = FileResponse(content_tyoe = 'text/plain')
-    response['Content-Disposition'] = 'attachment; filename= local_model.txt'
+def local_model_script(request):
+    file_path = ff.find('CNN',"/common/models/")
+    print(file_path)
+    storage_file = storage.open(file_path, 'rb')
+    print()
+    response = FileResponse(storage_file)
+    return response
 
-    lines =['print("Hello world")\n']
+@api_view(['GET'])
+def global_model_script(request):
+    file_name = 'students.txt'
+    lines = []
+    data = User.objects.all()
+    for d in data:
+       lines.append('{0};{1};{2}'.format(d.username,d.email,d.id))
+    response_content = '\n'.join(lines)
+    response = FileResponse(response_content, content_type="text/plain,charset=utf-8")
+    response['Content-Disposition'] = 'attachment; filename={0}'.format(file_name)
+    return response
 
-    # Write to Python Script
-    response.writelines(lines)
+@api_view(['GET'])
+def aggregate_script(request):
+    file_name = 'students.txt'
+    lines = []
+    data = User.objects.all()
+    for d in data:
+       lines.append('{0};{1};{2}'.format(d.username,d.email,d.id))
+    response_content = '\n'.join(lines)
+    response = FileResponse(response_content, content_type="text/plain,charset=utf-8")
+    response['Content-Disposition'] = 'attachment; filename={0}'.format(file_name)
     return response
