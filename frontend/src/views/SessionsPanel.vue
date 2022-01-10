@@ -9,13 +9,9 @@
 
             <p>Type something in the input field to search the list for specific items:</p>
             <div class="d-flex justify-content-between">
-                <div class="col-sm-6"><input class="form-control" v-model="search" type="text" placeholder="Search..."></div>
-                <div> <button type="button" class="btn btn-success" @click='goToNewSessionView'>
-                        <!-- <router-link
-    style="text-decoration: none; color: inherit;"
-    to="/session"
-    >Create session
-    </router-link> -->
+                <div @change="updateSessionList()" class="col-sm-6"><input class="form-control" v-model="search" type="text" placeholder="Search..."></div>
+                <div>
+                    <button type="button" class="btn btn-success" @click='goToNewSessionView'>
                         Create new session
                     </button>
                 </div>
@@ -23,18 +19,22 @@
             <br>
             <div class="d-flex flex-row justify-content-start">
                 <div>
-                    <input type="checkbox" class="btn-check" id="createdSessionsCheck" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="createdSessionsCheck">Created sessions</label><br>
+                    <input @change="updateSessionList()" type="checkbox" class="form-check-input" id="createdSessionsCheck">
+                    <label class="form-check-label mx-2" for="createdSessionsCheck"><strong>Created sessions</strong></label><br>
                 </div>
-                <div class="mx-3">
-                    <input type="checkbox" class="btn-check" id="btn-check-outlined" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="btn-check-outlined">Created sessions</label><br>
+                <div v-if="this.$store.state.user.pricing_plan == 1" class="mx-3">
+                    <input @change="updateSessionList()" checked type="checkbox" class="form-check-input" id="privateCheck">
+                    <label class="form-check-label mx-2" for="privateCheck"><strong>Show Private</strong></label><br>
+                </div>
+                <div v-if="this.$store.state.user.pricing_plan == 1">
+                    <input @change="updateSessionList()" checked type="checkbox" class="form-check-input" id="publicCheck">
+                    <label class="form-check-label mx-2" for="publicCheck"><strong>Show Public</strong></label><br>
                 </div>
             </div>
             <br>
             <div class="list-group">
 
-                <div v-for="(session, index) in sortedList" class="border border-5" :key="session.name" v-bind:sortedList="sortedList">
+                <div v-for="(session, index) in pagedSessions" class="border border-5" :key="session.name" v-bind:pagedSessions="pagedSessions">
                     <div class="list-group-item list-group-item-action" :class="{'bg-primary text-white':index == selected}" @click="selected = index">
                         <div data-bs-toggle="collapse" :data-bs-target="'#example_' + index" aria-expanded="false" :aria-controls="'example_' + index">
                             <div class="d-flex w-100 justify-content-between">
@@ -115,10 +115,11 @@
             <nav class="mt-2" aria-label="...">
                 <ul class="pagination">
                     <li class="page-item">
-                        <a class="page-link" @click="prevPage">Previous</a>
+                        <a v-if="parseInt(filterSessions.length/pageSize)" class="page-link" @click="prevPage()">Previous</a>
                     </li>
+                    <li v-for="index in parseInt(filterSessions.length/pageSize)" :key="index" class="page-item" :id="'page_' + index"><a @click="changeCurrPage(index)" class="page-link" href="#">{{index}}</a></li>
                     <li class="page-item">
-                        <a class="page-link" @click="nextPage">Next</a>
+                        <a v-if="parseInt(filterSessions.length/pageSize) > 0" class="page-link" @click="nextPage()">Next</a>
                     </li>
                 </ul>
             </nav>
@@ -139,7 +140,9 @@ export default {
             search: '',
             sessions: [],
             joinedSessions: [],
-            pageSize: 10,
+            filterSessions: [],
+            pagedSessions: [],
+            pageSize: 2,
             currentPage: 1,
             isFetching: true,
             errors: []
@@ -148,7 +151,7 @@ export default {
     mounted() {
         axios.get('/api/v1/sessions/').then(response => {
                 this.sessions = response.data
-
+                this.updateSessionList()
             }).catch(error => {
                 if (error.response) {
                     for (const property in error.response.data) {
@@ -178,6 +181,9 @@ export default {
 
             })
         },
+        restartPage() {
+            document.getElementById('page_1').classList.add('active')
+        },
         badgeColor(value) {
             return {
                 'bg-danger': value,
@@ -197,10 +203,26 @@ export default {
             return 'text-muted'
         },
         nextPage() {
-            if ((this.currentPage * this.pageSize) < this.filteredList.length) this.currentPage++
+            if ((this.currentPage * this.pageSize) < this.filterSessions.length) {
+                document.getElementById('page_' + this.currentPage).classList.remove('active')
+                this.currentPage++
+                document.getElementById('page_' + this.currentPage).classList.add('active')
+            }
+            this.updateSessionList()
         },
         prevPage() {
-            if (this.currentPage > 1) this.currentPage--
+            if (this.currentPage > 1) {
+                document.getElementById('page_' + this.currentPage).classList.remove('active')
+                this.currentPage--
+                document.getElementById('page_' + this.currentPage).classList.add('active')
+            }
+            this.updateSessionList()
+        },
+        changeCurrPage(index) {
+            document.getElementById('page_' + this.currentPage).classList.remove('active')
+            this.currentPage = index
+            document.getElementById('page_' + this.currentPage).classList.add('active')
+            this.updateSessionList()
         },
         getDays(creationDate) {
             const today = new Date()
@@ -272,29 +294,52 @@ export default {
         },
         addNumberOfCurrentParticipants(session_id) {
 
+        },
+        updateSessionList() {
+            this.filterSessions = this.sessions
+
+            if (this.search != null && this.search.length > 0) {
+                this.filterSessions = this.filterSessions.filter(session => {
+                    return session.name.toLowerCase().includes(this.search.toLowerCase())
+                })
+            }
+
+            if (publicCheck.checked && privateCheck.checked) {
+                this.filterSessions = this.filterSessions.filter(session => {
+                    return session.pricing_plan == 0 || session.pricing_plan == 1
+                })
+            } else if (publicCheck.checked && !privateCheck.checked) {
+                this.filterSessions = this.filterSessions.filter(session => {
+                    return session.pricing_plan == 0
+                })
+            } else if (privateCheck.checked && !publicCheck.checked) {
+                this.filterSessions = this.filterSessions.filter(session => {
+                    return session.pricing_plan == 1
+                })
+            } else {
+                this.filterSessions = []
+            }
+
+            if (createdSessionsCheck.checked) {
+                this.filterSessions = this.filterSessions.filter(session => {
+                    return session.founder == this.$store.state.user.username
+                })
+            }
+
+            const start = (this.currentPage - 1) * this.pageSize
+            const end = this.currentPage * this.pageSize
+            this.pagedSessions = this.filterSessions.slice(start, end)
+
         }
     },
     watch: {
         search() {
+            this.updateSessionList()
             console.log('reset to p1 due to filter')
             this.currentPage = 1
         }
     },
     computed: {
-        filteredList() {
-            return this.sessions.filter(session => {
-                return session.name.toLowerCase().includes(this.search.toLowerCase()) && 
-                session.pricing_plan <= this.$store.state.user.pricing_plan
-            }) 
-            
-        },
-        sortedList() {
-            return this.filteredList.filter((row, index) => {
-                const start = (this.currentPage - 1) * this.pageSize
-                const end = this.currentPage * this.pageSize
-                if (index >= start && index < end) return true
-            })
-        },
         goToNewSessionView() {
             this.$router.push('/new-session')
         }
