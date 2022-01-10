@@ -262,6 +262,12 @@ def get_participants_for_session(request,pk):
         print(users_dic)
         return Response(users_dic)
 
+@api_view(['DELETE'])
+def participant_for_session(request,spk,ppk):
+    if (request.method == 'DELETE'):
+        participant = Participant.objects.filter(session_id=spk).filter(user_id=ppk)[0]
+        participant.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 # 3. File upload
 storage = GoogleCloudStorage()

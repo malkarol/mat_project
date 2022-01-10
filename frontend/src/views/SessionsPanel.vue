@@ -23,8 +23,8 @@
             <br>
             <div class="d-flex flex-row justify-content-start">
                 <div>
-                    <input type="checkbox" class="btn-check" id="btn-check-outlined" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="btn-check-outlined">Created sessions</label><br>
+                    <input type="checkbox" class="btn-check" id="createdSessionsCheck" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="createdSessionsCheck">Created sessions</label><br>
                 </div>
                 <div class="mx-3">
                     <input type="checkbox" class="btn-check" id="btn-check-outlined" autocomplete="off">
@@ -283,8 +283,10 @@ export default {
     computed: {
         filteredList() {
             return this.sessions.filter(session => {
-                return session.name.toLowerCase().includes(this.search.toLowerCase()) && session.pricing_plan <= this.$store.state.user.pricing_plan
-            })
+                return session.name.toLowerCase().includes(this.search.toLowerCase()) && 
+                session.pricing_plan <= this.$store.state.user.pricing_plan
+            }) 
+            
         },
         sortedList() {
             return this.filteredList.filter((row, index) => {
