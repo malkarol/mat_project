@@ -115,15 +115,14 @@
             <nav class="mt-2" aria-label="...">
                 <ul class="pagination">
                     <li class="page-item">
-                        <a v-if="parseInt(filterSessions.length/pageSize)" class="page-link" @click="prevPage()">Previous</a>
+                        <a class="page-link" @click="prevPage()">Previous</a>
                     </li>
-                    <li v-for="index in parseInt(filterSessions.length/pageSize)" :key="index" class="page-item" :id="'page_' + index"><a @click="changeCurrPage(index)" class="page-link" href="#">{{index}}</a></li>
+                    <li v-for="index in Math.ceil(filterSessions.length/pageSize)" :key="index" class="page-item" :id="'page_' + index"><a @click="changeCurrPage(index)" class="page-link" href="#">{{index}}</a></li>
                     <li class="page-item">
-                        <a v-if="parseInt(filterSessions.length/pageSize) > 0" class="page-link" @click="nextPage()">Next</a>
+                        <a class="page-link" @click="nextPage()">Next</a>
                     </li>
                 </ul>
             </nav>
-            <button @click="hello()"><a href="#">Button Text</a></button>
         </div>
     </div>
 </div>
@@ -142,7 +141,7 @@ export default {
             joinedSessions: [],
             filterSessions: [],
             pagedSessions: [],
-            pageSize: 2,
+            pageSize: 3,
             currentPage: 1,
             isFetching: true,
             errors: []
@@ -219,7 +218,10 @@ export default {
             this.updateSessionList()
         },
         changeCurrPage(index) {
-            document.getElementById('page_' + this.currentPage).classList.remove('active')
+            var elem = document.getElementById('page_' + this.currentPage)
+            if (elem != null){
+                elem.classList.remove('active')
+            }
             this.currentPage = index
             document.getElementById('page_' + this.currentPage).classList.add('active')
             this.updateSessionList()
@@ -305,9 +307,7 @@ export default {
             }
 
             if (publicCheck.checked && privateCheck.checked) {
-                this.filterSessions = this.filterSessions.filter(session => {
-                    return session.pricing_plan == 0 || session.pricing_plan == 1
-                })
+                this.filterSessions = this.filterSessions
             } else if (publicCheck.checked && !privateCheck.checked) {
                 this.filterSessions = this.filterSessions.filter(session => {
                     return session.pricing_plan == 0
@@ -325,6 +325,8 @@ export default {
                     return session.founder == this.$store.state.user.username
                 })
             }
+            if (parseInt(this.filterSessions.length/this.pageSize) < 1)
+                this.currentPage = 1
 
             const start = (this.currentPage - 1) * this.pageSize
             const end = this.currentPage * this.pageSize
