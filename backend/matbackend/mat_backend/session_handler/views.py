@@ -265,9 +265,18 @@ def get_participants_for_session(request,pk):
 @api_view(['DELETE'])
 def participant_for_session(request,spk,ppk):
     if (request.method == 'DELETE'):
-        participant = Participant.objects.filter(session_id=spk).filter(user_id=ppk)[0]
-        participant.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        try :
+            participant = Participant.objects.filter(session_id=spk).filter(user_id=ppk)[0]
+            session = Session.objects.get(pk=spk)
+            if request.user.id == participant.user_id:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+            if request.user.username != session.founder:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+            participant.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Session.DoesNotExist or Participant.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 # 3. File upload
 storage = GoogleCloudStorage()
