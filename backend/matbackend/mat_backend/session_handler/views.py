@@ -274,8 +274,24 @@ def participant_for_session(request,spk,ppk):
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
 
             participant.delete()
+            session.actual_num_of_participants -=  1
+            session.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Session.DoesNotExist or Participant.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+def leave_session(request, spk):
+    if (request.method == 'DELETE'):
+        try:
+            participant = Participant.objects.filter(session_id=spk).filter(user_id=request.user.id)[0]
+            session = Session.objects.get(pk = spk)
+            
+            participant.delete()
+            session.actual_num_of_participants -=  1
+            session.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Participant.DoesNotExist or Session.DoesNotExist or IndexError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 # 3. File upload

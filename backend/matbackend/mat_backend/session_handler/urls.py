@@ -20,7 +20,8 @@ urlpatterns=[
     # return list of usernames for a single sessint
     path('participants/session/<int:pk>', views.get_participants_for_session),
     path('validateprivatekey', views.validate_private_key),
-    path('mysessions/<str:name>', views.get_managed_sessions)
+    path('mysessions/<str:name>', views.get_managed_sessions),
+    path('leavesession/<int:spk>', views.leave_session)
     # add session and participants with filed usernames
     # path('sessions/add-filled/', views.add_filled_session),
     # path('user/<int:pk>',views.user_details)

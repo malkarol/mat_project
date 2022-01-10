@@ -12,36 +12,36 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav">
          <li class="nav-item">
-          <router-link class="nav-link" to="/" style="text-decoration: none; color: inherit;" >Home</router-link>
+          <router-link class="nav-link" to="/" style="text-decoration: none; color: white;" >Home</router-link>
         </li>
         <li class="nav-item">
-          <router-link class="nav-link" to="/" style="text-decoration: none; color: inherit;">Getting started</router-link>
+          <router-link class="nav-link" to="/" style="text-decoration: none; color: white;">Getting started</router-link>
         </li>
         <!-- <li v-if="isLogged() === true"  class="nav-item">
           <router-link class="nav-link" to="/session" style="text-decoration: none; color: inherit;">SingleSession[Preview]</router-link>
         </li> -->
         <li v-if="isLogged() === true"  class="nav-item">
-          <router-link class="nav-link" to="/sessions" style="text-decoration: none; color: inherit;">Sessions</router-link>
+          <router-link class="nav-link" to="/sessions" style="text-decoration: none; color: white;">Sessions</router-link>
         </li>
         <li v-if="isLogged() === true"  class="nav-item">
-          <router-link class="nav-link" to="/profile" style="text-decoration: none; color: inherit;">Profile</router-link>
+          <router-link class="nav-link" to="/profile" style="text-decoration: none; color: white;">Profile</router-link>
         </li>
       </ul>
 
       <div v-if="isLogged() === false" class="collapse navbar-collapse justify-content-end"  >
       <ul  class="navbar-nav">
          <li  class="nav-item">
-          <router-link class="nav-link " to="/login" style="text-decoration: none; color: inherit;">Login</router-link>
+          <router-link class="nav-link " to="/login" style="text-decoration: none; color: white;">Login</router-link>
         </li>
         <li  class="nav-item">
-          <router-link class="nav-link " to="/register" style="text-decoration: none; color: inherit;">Register</router-link>
+          <router-link class="nav-link " to="/register" style="text-decoration: none; color: white;">Register</router-link>
         </li>
       </ul>
       </div>
        <div v-if="isLogged() === true" class="collapse navbar-collapse justify-content-end"  >
       <ul  class="navbar-nav">
          <li  class="nav-item">
-          <button type="button" class="btn navbar-btn" style="text-decoration: none; color: inherit; background-color: #4d89ff;" @click=logout()> Log out</button>
+          <button type="button" class="btn navbar-btn" style="text-decoration: none; color: white; background-color: #4d89ff;" @click="logout()"> Log out</button>
         </li>
 
       </ul>

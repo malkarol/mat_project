@@ -278,7 +278,8 @@ export default {
             await axios
                 .post('/api/v1/join-session/', formData)
                 .then(response => {
-                    warningLabel.classList.add('d-none')
+                    if (warningLabel != null)
+                        warningLabel.classList.add('d-none')
                     this.$router.push({
                         name: 'Session',
                         params: {
@@ -295,7 +296,8 @@ export default {
                     } else if (error.message) {
                         this.errors.push('Something went wrong. Please try again.')
                     }
-                    if (error.response.status == 401) {
+                    console.log(error)
+                    if (error.response != undefined && error.response.status == 401) {
                         warningLabel.classList.remove('d-none')
                         warningLabel.classList.add('d-flex')
                     }

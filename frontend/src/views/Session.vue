@@ -64,7 +64,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
-                                        <div >
+                                        <div>
                                             <h4> <strong> Tags </strong> </h4>
                                             <hr />
                                             <span v-for="(tag) in session.tags" :key="tag" class="badge bg-dark mx-1"> {{tag}} </span>
@@ -146,7 +146,10 @@
 
                 </div>
             </div>
-            <button class="btn btn-primary btn-lg btn-block" @click="backToSessions()">Back to sessions</button>
+            <div class="d-flex justify-content-between">
+                <button class="btn btn-primary btn-lg btn-block" @click="backToSessions()">Back to sessions</button>
+                <button v-if="session.founder != this.$store.state.user.username" class="btn btn-danger btn-lg btn-block" @click="leaveSession()">Leave session</button>
+            </div>
         </div>
     </div>
 </div>
@@ -200,6 +203,7 @@ export default {
                 this.errors.push('Something went wrong. Please try again.')
             }
         })
+
     },
     methods: {
         styleFounder(username) {
@@ -221,14 +225,34 @@ export default {
                     return "none"
             }
         },
-        deleteSession() {
-            axios.delete('api/v1/session/' + this.session.session_id)
+        leaveSession() {
+            axios.delete('api/v1/leavesession/' + this.session.session_id)
                 .then(response => {
-                    console.log(response)
                     this.backToSessions()
                 })
                 .catch(error => {
-                    console.log(error)
+                    if (error.response) {
+                        for (const property in error.response.data) {
+                            this.errors.push(`${property}: ${error.response.data[property]}`)
+                        }
+                    } else if (error.message) {
+                        this.errors.push('Something went wrong. Please try again.')
+                    }
+                })
+        },
+        deleteSession() {
+            axios.delete('api/v1/session/' + this.session.session_id)
+                .then(response => {
+                    this.backToSessions()
+                })
+                .catch(error => {
+                    if (error.response) {
+                        for (const property in error.response.data) {
+                            this.errors.push(`${property}: ${error.response.data[property]}`)
+                        }
+                    } else if (error.message) {
+                        this.errors.push('Something went wrong. Please try again.')
+                    }
                 })
         },
         backToSessions() {
