@@ -22,6 +22,10 @@
                     <input @change="updateSessionList()" type="checkbox" class="form-check-input" id="createdSessionsCheck">
                     <label class="form-check-label mx-2" for="createdSessionsCheck"><strong>Created sessions</strong></label><br>
                 </div>
+                <div>
+                    <input @change="updateSessionList()" type="checkbox" class="form-check-input" id="joinedSessionsCheck">
+                    <label class="form-check-label mx-2" for="createdSessionsCheck"><strong>Joined sessions</strong></label><br>
+                </div>
                 <div v-if="this.$store.state.user.pricing_plan == 1" class="mx-3">
                     <input @change="updateSessionList()" checked type="checkbox" class="form-check-input" id="privateCheck">
                     <label class="form-check-label mx-2" for="privateCheck"><strong>Show Private</strong></label><br>
@@ -174,6 +178,10 @@ export default {
                 }
             })
     },
+    updated(){
+        if (this.currentPage == 1 && document.getElementById("page_1") != null)
+            document.getElementById("page_1").classList.add('active')
+    },
     methods: {
         hello() {
             axios.get('api/v1/mailget/').then(response => {
@@ -320,6 +328,12 @@ export default {
                 this.filterSessions = []
             }
 
+            if (joinedSessionsCheck.checked){
+                this.filterSessions = this.filterSessions.filter(session => {
+                    return this.joinedSessions.some(e => e == session.session_id) 
+                })
+            }
+
             if (createdSessionsCheck.checked) {
                 this.filterSessions = this.filterSessions.filter(session => {
                     return session.founder == this.$store.state.user.username
@@ -331,7 +345,7 @@ export default {
             const start = (this.currentPage - 1) * this.pageSize
             const end = this.currentPage * this.pageSize
             this.pagedSessions = this.filterSessions.slice(start, end)
-
+                
         }
     },
     watch: {
