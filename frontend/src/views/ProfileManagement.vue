@@ -39,8 +39,8 @@
                             <label for="planInput" class="form-label">Pricing Plan</label>
                             <select disabled id="planInput" class="form-select" required v-model="pricingPlan">
                                 <option value="" selected disabled hidden>...</option>
-                                <option value="1">Free</option>
-                                <option value="2">Premium</option>
+                                <option value="0">Free</option>
+                                <option value="1">Premium</option>
                             </select>
                         </div>
                         <div class="col-12 d-flex justify-content-between">
