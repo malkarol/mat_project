@@ -64,10 +64,10 @@
                                 </div>
                                 <div class="row">
                                     <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
-                                        <div v-for="(tag) in session.tags" :key="tag">
+                                        <div >
                                             <h4> <strong> Tags </strong> </h4>
                                             <hr />
-                                            <span class="badge bg-dark mx-1"> {{tag}} </span>
+                                            <span v-for="(tag) in session.tags" :key="tag" class="badge bg-dark mx-1"> {{tag}} </span>
 
                                         </div>
                                     </div>
@@ -93,39 +93,6 @@
 
                                             </tbody>
                                         </table>
-                                        <!-- <fieldset class="row mb-2">
-                    <legend class="col-form-label col-sm-2 pt-0"><strong>Classification type</strong></legend>
-                    <div class="col-sm-4">
-                        <label class="d-flex justify-content-center"> Image</label>
-                    </div>
-
-                    <legend class="col-form-label col-sm-2 pt-0"><strong>Model</strong></legend>
-                <div class="col-sm-4">
-                    <label class="d-flex justify-content-center"> Simple Multi-layer Perceptor</label>
-                </div>
-            </fieldset>
-            <hr />
-              <fieldset class="row mb-2">
-                    <legend class="col-form-label col-sm-2 pt-0"><strong>Optimizer</strong></legend>
-                    <div class="col-sm-4">
-                    <label class="d-flex justify-content-center"> Stochiastic Gradient Descent</label>
-                    </div>
-                    <legend class="col-form-label col-sm-2 pt-0"><strong>Loss function</strong></legend>
-
-                <div class="col-sm-4">
-                     <label class="d-flex justify-content-center"> categorical crossentropy</label>
-
-                </div>
-            </fieldset>
-            <hr />
-             <fieldset class="row mb-2 ">
-                    <legend class="col-form-label col-sm-2 pt-0"><strong>Number of local epochs</strong></legend>
-                    <div class="col-sm-4">
-                        <label class="d-flex justify-content-center"> 4</label>
-                    </div>
-
-            </fieldset> -->
-
                                     </div>
                                 </div>
                             </form>
@@ -170,7 +137,7 @@
                     </div>
 
                 </div>
-                <div class="tab-pane fade" id="nav-manageSession" role="tabpanel" aria-labelledby="nav-manageSession-tab">
+                <div v-if="this.session.founder == this.$store.state.user.username" class="tab-pane fade" id="nav-manageSession" role="tabpanel" aria-labelledby="nav-manageSession-tab">
                     <div class="row mt-3">
                         <div class="col mb-3 shadow p-3 mb-5 d-flex justify-content-center rounded" style="background-color: #f1f1f1;">
                             <button class="btn btn-primary btn-lg btn-success mt-3 mb-3 mx-1" @click="deleteSession()">Delete session</button>
