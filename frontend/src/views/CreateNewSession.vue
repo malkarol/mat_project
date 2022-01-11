@@ -98,6 +98,7 @@
               <option value="" selected disabled hidden>Choose...</option>
               <option value="SGD">SGD</option>
               <option value="RMSprop">rmsprop</option>
+              <option value="adam">rmsprop</option>
             </select>
     </div>
     <legend class="col-form-label col-sm-2 pt-0"><strong>Loss function</strong></legend>
@@ -111,12 +112,43 @@
             </select>
     </div>
   </fieldset>
+  <fieldset class="row mb-3">
+    <legend class="col-form-label col-sm-2 pt-0"><strong>Dataset origin</strong></legend>
+    <div class="col-sm-4">
+      <select id="optimizer" class="form-select mlparams" required  data-width="25%" v-model="load_origin">
+              <option value="local" selected >local</option>
+              <option value="MNIST_FROM_keras">MNIST from Tensorflow</option>
+              <option value="CIFAR10_from_keras">CIFAR10 from Tensorflow</option>
+              <option value="adam">rmsprop</option>
+            </select>
+    </div>
+    <legend class="col-form-label col-sm-2 pt-0"><strong>Picture size</strong></legend>
+
+     <div class="col-sm-2">
+      <input class = "mlparams" type="number" id="numOfEpochs"  min="1" max="100" v-model="picture_size">
+    </div>
+     <legend class="col-form-label col-sm-2 "><strong>Color</strong></legend>
+
+     <div class="col-sm-2">
+      <select id="optimizer" class="form-select mlparams" required  data-width="25%" v-model="color">
+              <option value="1" selected >Yes</option>
+              <option value="0">No</option>
+            </select>
+    </div>
+  </fieldset>
     <fieldset class="row mb-3">
+      <div class="col-xs-4">
+        <legend class="col-form-label col-sm-2 pt-0"><strong>Number of classes</strong></legend>
+    <div class="col-sm-4 mb-3">
+      <input class = "mlparams" type="number" id="numOfClasses"  min="2" max="100" v-model="num_of_classes">
+    </div>
+        </div>
+  <div class="col-xs-4">
     <legend class="col-form-label col-sm-2 pt-0"><strong>Number of epochs</strong></legend>
     <div class="col-sm-4">
       <input class = "mlparams" type="number" id="numOfEpochs"  min="1" max="100" v-model="num_of_epochs">
-    </div>
-
+   </div>
+   </div>
   </fieldset>
    <div class="row mb-3">
     <label class="col-sm-2 col-form-label" > <strong>Date range for learning session</strong></label>
@@ -129,7 +161,7 @@
        <button class="btn btn-success">Save</button>
 
       </form>
-      <button class="btn btn-success" @click="testFilterParticipants()">kurde bele </button>
+      <button class="btn btn-success" @click="get_many_files()">kurde bele </button>
     </div>
   </div>
 </div>
@@ -166,7 +198,8 @@ export default {
       min_num_of_participants: 2,
       max_num_of_participants: 3,
       actual_num_of_participants: 0,
-      parameters_keys: ['classification_type', 'optimizer','loss_function','num_of_epochs'],
+      parameters_keys: ['classification_type', 'optimizer','loss_function',
+      'num_of_epochs','picture_size', 'num_of_classes', 'load','learning','color'],
       pricing_plan : 0,
       minNumParticipants: 3,
       maxNumParticipants: 5,
@@ -175,8 +208,10 @@ export default {
       optimizer: '',
       lossFunction:'',
       num_of_epochs:1,
-
-
+      color:"1",
+      picture_size:28,
+      num_of_classes:2,
+      load_origin:'local',
 
       // for tag controls
       participants: [],
@@ -200,6 +235,41 @@ export default {
     Datepicker,
   },
   methods: {
+    get_many_files(){
+      axios({
+                  url: '/api/v1/get-tar/',
+                  method: 'GET',
+                  responseType: 'blob',
+              }).then((response) => {
+                    var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                    var fileLink = document.createElement('a');
+
+                    fileLink.href = fileURL;
+                    fileLink.setAttribute('download', 'somefiles.zip'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                    document.body.appendChild(fileLink);
+
+                    fileLink.click();
+
+                    console.log(response)
+              }).catch( error => {
+            if (error.response) {
+              for (const property in error.response.data){
+                this.errors.push(`${property}: ${error.response.data[property]}`)
+              }
+            } else if (error.message){
+              this.errors.push('Something went wrong. Please try again.')
+            }
+          })
+    },
+    testIf()
+    {
+      console.log(this.color)
+      if(this.color === "1")
+      {
+        console.log("SUCCESS")
+      }
+      console.log("kurde bele")
+    },
     testFilterParticipants (){
          axios
           .get('/api/v1/participants/filter/' + this.$store.state.user.id)
@@ -252,6 +322,32 @@ export default {
       this.parameters_values.push(this.optimizer)
       this.parameters_values.push(this.lossFunction)
       this.parameters_values.push(this.num_of_epochs)
+      this.parameters_values.push(this.picture_size)
+      this.parameters_values.push(this.num_of_classes)
+
+      if(this.color === "1" && this.load_origin === "local")
+      {
+        this.parameters_values.push('load_color_images')
+      }
+      else if (this.load_origin === "local")
+      {
+        this.parameters_values.push('load_images')
+      }
+      else
+      {
+        this.parameters_values.push(this.load_origin)
+      }
+      if(this.color === "1")
+      {
+        this.parameters_values.push('local_learning')
+        this.parameters_values.push(3)
+      }
+      else
+      {
+        this.parameters_values.push('local_learning_b_and_w')
+        this.parameters_values.push(1)
+      }
+
       const formData = {
         session:{
         name: this.sessionName,

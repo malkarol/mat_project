@@ -45,6 +45,7 @@ def weight_scalling_factor(self, local_count, global_count):
 # source:
 # https://keras.io/examples/vision/mnist_convnet/
 
+
 def SimpleCNN(num_of_classes,input_shape):
     model = Sequential()
     model.add(Input(shape=input_shape))

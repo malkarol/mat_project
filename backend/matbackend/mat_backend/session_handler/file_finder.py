@@ -13,15 +13,24 @@ def get_file_path(x):
         'load_color_images': '/common/loads/load_color_images.py',
 
         # others
-        'local learning':'/common/local_learning.py',
+        'local_learning':'/common/local_learning.py',
         'local_learning_b_and_w': '/common/local_learning_black_and_white.py',
-        'preparation':'/common/preparation.py',
 
-    }[x].get(x, 'File not found')    # message will be returned default if x is not found
+        'preparation':'/common/preparation.py',
+        'initialize_weights':'/common/initialize_weights.py'
+
+    }[x]   # message will be returned default if x is not found
 
 def get_class_name(x):
     return {
         # models
         'CNN': 'SimpleCNN',
         'VGG': 'VGGOneBlock'
-    }[x].get(x, 'Class not found')    # message will be returned default if x is not found
+    }[x]    # message will be returned default if x is not found
+
+def get_optimizer(x):
+    return {
+        # models
+        'SGD': 'SGD(learning_rate=0.01,decay= 0.01,momentum=0.9)',
+    }[x]
+

@@ -10,12 +10,17 @@ urlpatterns=[
     path('upload/', views.storage_files_view),
     path('download/<int:pk>', views.storage_file_detail),
 
+    # upload global weights
+    path('upload-global-weights/', views.upload_global_weights),
+    # generate script for global weights
+    path('generate-weights-script/<int:pk>', views.generate_global_weights),
+
     # generate local model script for session
-    path('generate-local-model/', views.local_model_script),
+    path('generate-local-model/<int:pk>', views.local_model_script),
      # generate global model script for session
     path('generate-global-model/', views.global_model_script),
      # generate aggregate script for session
-    path('generate-local-model/', views.aggregate_script),
+    path('generate-aggregate-script/', views.aggregate_script),
 
     path('create-filled-session/', views.add_many_participants),
     # join session
@@ -24,6 +29,7 @@ urlpatterns=[
     path('participants/filter/<int:pk>', views.get_joined_sessions),
     # return list of usernames for a single sessint
     path('participants/session/<int:pk>', views.get_participants_for_session),
+
     # add session and participants with filed usernames
     # path('sessions/add-filled/', views.add_filled_session),
     # path('user/<int:pk>',views.user_details)

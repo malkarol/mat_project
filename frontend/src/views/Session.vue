@@ -124,8 +124,16 @@
                     </div>
                  </div>
             </form>
-            <button class="btn btn-primary btn-lg btn-success mb-3" @click="backToSessions()">Download script for this parameters</button>
-        </div>
+            <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                <div>
+                  <label for="uploadWeights" class="form-label text-muted" >(Only .h5 files)</label>
+                    <input class="form-control form-control-lg" id="uploadWeights" accept=".h5" type="file">
+                </div>
+                  <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="initializeGlobalWeightsScript()" value="Get script to calculate global weights" />
+                  <input type="button" class="btn btn-primary btn-lg btn-success mt-3 mx-5" @click="uploadGlobalWeights()" value="Upload global weights" />
+            </div>
+            <button class="btn btn-primary btn-lg btn-success mb-3" @click="generateLocalModel()">Download script for this parameters</button>
+          </div>
               </div>
                 </div>
                  <div class="tab-pane fade" id="nav-upload" role="tabpanel" aria-labelledby="nav-upload-tab">
@@ -191,13 +199,14 @@ export default {
             endDate: '2022-02-01',
             session: {},
             participants:[],
-
+            errors:[]
 
 
         }
     },
     mounted() {
-       axios.get('/api/v1/session/'+this.$route.params.id).then(response => {
+       axios.get('/api/v1/session/'+this.$route.params.id)
+       .then(response => {
             this.session = response.data
 
         }).catch( error => {
@@ -212,9 +221,7 @@ export default {
 
           axios.get('/api/v1/participants/session/'+this.$route.params.id).then(response => {
             this.participants =response.data
-            this.participants.sort(function(a, b) {
-              return parseFloat(a.user_id) - parseFloat(b.user_id);
-            })
+
 
         }).catch( error => {
             if (error.response) {
@@ -258,7 +265,7 @@ export default {
             let formData = new FormData()
             const imagefile = document.querySelector('#formFileLg');
             formData.append('files', imagefile.files[0]);
-            formData.append('session_id', this.session.session_id)
+            formData.append('session', this.session.session_id)
             console.log(formData)
             axios.post( 'upload/', // testowy endpoint - to zrob zeby nie byl testowy
               formData,
@@ -293,6 +300,81 @@ export default {
 
                     console.log(response)
               })
+        },
+        generateLocalModel(){
+
+           axios({
+                  url: '/api/v1/generate-local-model/'+this.session.session_id,
+                  method: 'GET',
+                  responseType: 'blob',
+              }).then((response) => {
+                    var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                    var fileLink = document.createElement('a');
+
+                    fileLink.href = fileURL;
+                    fileLink.setAttribute('download', 'local_model.py'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                    document.body.appendChild(fileLink);
+
+                    fileLink.click();
+
+                    console.log(response)
+              }).catch( error => {
+            if (error.response) {
+              for (const property in error.response.data){
+                this.errors.push(`${property}: ${error.response.data[property]}`)
+              }
+            } else if (error.message){
+              this.errors.push('Something went wrong. Please try again.')
+            }
+          })
+        },
+        uploadGlobalWeights () {
+          const imagefile = document.querySelector('#uploadWeights');
+
+          let formData = new FormData()
+          formData.append('files', imagefile.files[0]);
+          formData.append('session', this.session.session_id)
+
+          axios.post( '/api/v1/upload-global-weights/', // testowy endpoint - to zrob zeby nie byl testowy
+              formData,
+              {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+              }
+            }
+            ).then(function(){
+              console.log('SUCCESS!!');
+            })
+            .catch(function(){
+              console.log('FAILURE!!');
+            })
+        },
+        initializeGlobalWeightsScript(){
+
+          axios({
+                  url: '/api/v1/generate-weights-script/'+this.session.session_id,
+                  method: 'GET',
+                  responseType: 'blob',
+              }).then((response) => {
+                    var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                    var fileLink = document.createElement('a');
+
+                    fileLink.href = fileURL;
+                    fileLink.setAttribute('download', 'initialize_weights.py'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                    document.body.appendChild(fileLink);
+
+                    fileLink.click();
+
+                    console.log(response)
+              }).catch( error => {
+            if (error.response) {
+              for (const property in error.response.data){
+                this.errors.push(`${property}: ${error.response.data[property]}`)
+              }
+            } else if (error.message){
+              this.errors.push('Something went wrong. Please try again.')
+            }
+          })
         }
     }
 }
