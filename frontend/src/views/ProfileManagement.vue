@@ -19,7 +19,7 @@
                         inputEmailConfirm.setCustomValidity(inputEmailConfirm.value != inputEmail.value ? "Passwords do not match." : "");' novalidate>
                         <div class="col-md-6 position-relative">
                             <label for="inputUserName" class="form-label">User name</label>
-                            <input readonly type="text" class="form-control" id="inputUserName" v-model="username" required />
+                            <input disabled type="text" class="form-control" id="inputUserName" v-model="username" required />
                         </div>
                         <div class="col-md-6 has-validation">
                             <label for="inputFullName" class="form-label">Full Name</label>
@@ -202,7 +202,6 @@ export default {
 
             const formData = {
                 user_id: this.$store.state.user.id,
-                username: this.username,
                 fullname: this.fullName,
                 pricingPlan: this.pricingPlan,
                 mlBackground: this.mlBackground
