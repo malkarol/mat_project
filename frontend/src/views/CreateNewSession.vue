@@ -8,7 +8,7 @@
             <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
         </symbol>
     </svg>
-    <div v-if="errors.length" class="alert alert-danger d-flex align-items-center" role="alert">
+    <div v-if="errors.length" class="alert alert-danger d-flex align-items-center mt-4" role="alert">
         <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:">
             <use xlink:href="#exclamation-triangle-fill" /></svg>
         <div v-for="error in errors" v-bind:key="error">
@@ -125,12 +125,11 @@
                         <Datepicker range style="width: 330px;" v-model="date" />
                     </div>
                 </div>
-
-                <button class="btn btn-danger mx-2" @click="backToSessions()">Cancel</button>
-                <button class="btn btn-success">Save</button>
-
+                <div class="d-flex justify-content-between mt-5">
+                    <button class="btn btn-success btn-lg px-5">Save</button>
+                    <button class="btn btn-danger btn-lg px-5" @click="backToSessions()">Cancel</button>
+                </div>
             </form>
-            <button class="btn btn-success" @click="testFilterParticipants()">kurde bele </button>
         </div>
     </div>
 </div>
@@ -247,6 +246,17 @@ export default {
         },
         async submitForm() {
             this.errors = []
+
+            if (this.maxNumParticipants <= this.minNumParticipants){
+                this.errors.push("Minimum number of participants cannot be greater than maximum number of participants")
+            }
+            if (this.num_of_epochs <= 0){
+                this.errors.push("Number of epochs must be a positive number")
+            }
+
+            if (this.errors.length > 0){
+                return
+            }
 
             this.parameters_values = []
             this.parameters_values.push(this.classificationType)
