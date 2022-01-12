@@ -163,6 +163,12 @@ export default {
       errors: []
     }
   },
+  mounted(){
+      if (this.$route.query != null && this.$route.query.plan != null){
+        this.pricingPlan = this.$route.query.plan == 'free' ? 0 : 1
+      }
+
+  },
   methods: {
     sleep (miliseconds) {
     var currentTime = new Date().getTime();
