@@ -53,6 +53,7 @@ class StorageFile(models.Model):
     file_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200, null=False)
     path = models.CharField(max_length=200, null=False)
+    related_session = models.ForeignKey(Session, on_delete = models.CASCADE)
 
 class Participant(models.Model):
     participant_id = models.AutoField(primary_key=True)

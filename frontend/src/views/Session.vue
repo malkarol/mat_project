@@ -305,18 +305,18 @@ export default {
                 })
         },
         getFile() {
-            console.log(this.session)
-
             axios({
-                url: 'download/' + this.session.session_id,
+                url: 'api/v1/getzip/' + this.session.session_id,
+                //url: 'api/v1/testmodel/',
                 method: 'GET',
                 responseType: 'blob',
             }).then((response) => {
-                var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                console.log(response)
+                var fileURL = window.URL.createObjectURL(new Blob([response.data],{type:'application/zip'}));
                 var fileLink = document.createElement('a');
 
                 fileLink.href = fileURL;
-                fileLink.setAttribute('download', 'file.pdf'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                fileLink.setAttribute('download', 'sessiongit.zip'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
                 document.body.appendChild(fileLink);
 
                 fileLink.click();

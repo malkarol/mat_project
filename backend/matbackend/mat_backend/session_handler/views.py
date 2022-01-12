@@ -1,3 +1,4 @@
+from os import stat
 from types import resolve_bases
 from django import http
 from django.shortcuts import render
@@ -16,6 +17,9 @@ from django.core.files.base import ContentFile
 from storages.backends.gcloud import GoogleCloudStorage
 from django.core.mail import send_mail
 import hashlib
+from io import BytesIO
+import zipfile
+from django.http import HttpResponse
 
 # 1. Session CRUD
 
@@ -319,6 +323,42 @@ def storage_file_detail(request, pk):
 
         response = FileResponse(storage_file)
         return response
+
+
+@api_view(['GET'])
+def get_zip(request, pk):
+    if request.method == 'GET':
+        files = StorageFile.objects.filter(related_session = pk)
+        session = Session.objects.get(pk = pk)
+        b = BytesIO()
+        
+        with zipfile.ZipFile(b, 'w') as zf:
+            for file in files:
+                try:
+                    fh = storage.open(file.path, 'rb')
+                    print(fh.name)
+                    zf.writestr(f"files/{file.name}", bytes(fh.read()))
+                except Exception as e:
+                    print(e)
+            response = HttpResponse(b.getvalue(), content_type="application/x-zip-compressed")
+            response['Content-Disposition'] = f'attachment; filename={session.name}_FILES.zip'
+            return response
+
+import tensorflow as tf
+@api_view(['GET'])
+def test_model(request):
+    fh = storage.open('/session_Id_72/hello.h5', 'rb')
+    with open("test.h5", 'wb') as f:
+        f.write(fh.read())
+    
+    model = tf.keras.Sequential()
+    model.add(tf.keras.Input(shape=(16,)))
+    model.add(tf.keras.layers.Dense(8))
+    
+    model.load_weights(fh)
+    print(model.get_weights())
+    return Response(status=status.HTTP_200_OK)
+    
 
 
 @api_view(['POST'])
