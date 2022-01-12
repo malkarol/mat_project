@@ -95,6 +95,13 @@ class LoadingScript(AbstractHandler):
             file_path = ff.get_file_path(parameters['load'])
             storage_file = storage.open(file_path , 'r')
             return storage_file.read().decode('ascii')
+        elif request == 'load_global':
+            if parameters['color'] == '1':
+                file_path = ff.get_file_path('load_default')
+            else:
+                file_path = ff.get_file_path('load_color_default')
+            storage_file = storage.open(file_path , 'r')
+            return storage_file.read().decode('ascii')
         else:
             return super().handle(request,parameters)
 
@@ -174,7 +181,7 @@ def generate_global_model(handler: Handler, session_params) -> None:
     """
     The template method defines the skeleton of an algorithm.
     """
-    commands = ['preparation','model','parameters','local_learning']
+    commands = ['preparation','model','parameters','load_global','local_learning']
     results = []
     for comm in  commands:
         print(f"\nClient: Who wants a {comm}?")

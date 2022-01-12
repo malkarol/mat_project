@@ -1,5 +1,6 @@
 import os
-
+import io
+from zipfile import *
 def get_file_path(x):
     return {
         # models
@@ -11,6 +12,8 @@ def get_file_path(x):
         'MNIST_FROM_keras': '/common/loads/load_MNIST_from_keras.py',
         'load_images': '/common/loads/load_images.py',
         'load_color_images': '/common/loads/load_color_images.py',
+        'load_default': '/common/loads/load_images.py',
+        'load_color_default': '/common/loads/load_color_images.py',
 
         # others
         'local_learning':'/common/local_learning.py',
@@ -34,3 +37,9 @@ def get_optimizer(x):
         'SGD': 'SGD(learning_rate=0.01,decay= 0.01,momentum=0.9)',
     }[x]
 
+def zipFiles(files):
+        outfile = io.StringIO()  # io.BytesIO() for python 3
+        with ZipFile(outfile, 'w') as zf:
+            for n, f in enumerate(files):
+                zf.writestr("{}.h5".format(n), f.getvalue())
+        return outfile.getvalue()

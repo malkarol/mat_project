@@ -124,15 +124,18 @@
                     </div>
                  </div>
             </form>
-            <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+            <div class="row">
+                    <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                 <div>
-                  <label for="uploadWeights" class="form-label text-muted" >(Only .h5 files)</label>
+                  <label for="uploadWeights" class="form-label text-muted" >Only .h5 files.</label>
                     <input class="form-control form-control-lg" id="uploadWeights" accept=".h5" type="file">
                 </div>
                   <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="initializeGlobalWeightsScript()" value="Get script to calculate global weights" />
                   <input type="button" class="btn btn-primary btn-lg btn-success mt-3 mx-5" @click="uploadGlobalWeights()" value="Upload global weights" />
             </div>
+            </div>
             <button class="btn btn-primary btn-lg btn-success mb-3" @click="generateLocalModel()">Download script for this parameters</button>
+
           </div>
               </div>
                 </div>
@@ -152,10 +155,10 @@
                     <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                          <h4 for="lastName"> <strong>Local model upload:</strong></h4>
                          <div>
-                            <label for="formFileLg" class="form-label text-muted" >(Only .h5 files)</label>
-                            <input class="form-control form-control-lg" id="formFileLg" accept=".h5" type="file">
+                            <label for="uploadLocal" class="form-label text-muted" >(Only .h5 files)</label>
+                            <input class="form-control form-control-lg" id="uploadLocal" accept=".h5" type="file">
                         </div>
-                         <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="submitFile" value="Upload local model"/>
+                         <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="uploadLocalModel()" value="Upload local model"/>
                          </div>
                     </div>
 
@@ -169,9 +172,14 @@
           <div class="tab-pane fade" id="nav-getGlobal" role="tabpanel" aria-labelledby="nav-getGlobal-tab">
                <div class="row mt-3">
                     <div class="col mb-3 shadow p-3 mb-5 d-flex justify-content-center rounded" style="background-color: #f1f1f1;">
-                <button class="btn btn-primary btn-lg btn-success mt-3 mb-3 mx-1" @click="getFile()">Download global model</button>
-                <button class="btn btn-primary btn-lg btn-success mt-3 mb-3 mx-1" @click="backToSessions()">Aggregate models</button>
-                <button class="btn btn-primary btn-lg btn-success mt-3 mb-3 mx-1" @click="backToSessions()">Show results</button>
+                      <div>
+                <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getFile()">Global model script for predictions</button>
+                <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getGlobalModel()">Global model script for idividual learning</button>
+                      </div>
+                      <div>
+                <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregateModelsScript()">Aggregate models locally</button>
+                <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="backToSessions()">Show results</button>
+                      </div>
                     </div>
                </div>
 
@@ -199,8 +207,8 @@ export default {
             endDate: '2022-02-01',
             session: {},
             participants:[],
-            errors:[]
-
+            errors:[],
+            data_path:''
 
         }
     },
@@ -282,24 +290,53 @@ export default {
             })
         },
         getFile(){
-            console.log(this.session)
+          let axiosArray = [1, 2];
+          for (var x = 0; x < 2; x++) {
 
-            axios({
-                  url: 'download/' + this.session.session_id,
+            let newPromise = axios({
+              url: '/api/v1/generate-global-model/'+this.session.session_id,
                   method: 'GET',
-                  responseType: 'blob',
-              }).then((response) => {
-                    var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                  responseType: 'blob'
+          })
+          axiosArray.push(newPromise)
+            }
+
+          axios
+        .all(axiosArray)
+          .then(axios.spread((...responses) => {
+            responses.forEach(res =>{
+                  var fileURL = window.URL.createObjectURL(new Blob([res.data]));
                     var fileLink = document.createElement('a');
 
                     fileLink.href = fileURL;
-                    fileLink.setAttribute('download', 'file.pdf'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                    fileLink.setAttribute('download', `global_model${index}.py`); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
                     document.body.appendChild(fileLink);
 
                     fileLink.click();
 
-                    console.log(response)
-              })
+
+             console.log('Success')})
+          console.log('submitted all axios calls');
+          }))
+          .catch(error => {})
+            // console.log(this.session)
+
+            // axios({
+            //       url: '/api/v1/download/' + this.session.session_id,
+            //       method: 'GET',
+            //       responseType: 'blob',
+            //   }).then((response) => {
+            //         var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+            //         var fileLink = document.createElement('a');
+
+            //         fileLink.href = fileURL;
+            //         fileLink.setAttribute('download', 'folder'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+            //         document.body.appendChild(fileLink);
+
+            //         fileLink.click();
+
+            //         console.log(response)
+            //   })
         },
         generateLocalModel(){
 
@@ -318,6 +355,22 @@ export default {
                     fileLink.click();
 
                     console.log(response)
+                    axios({
+                  url: '/api/v1/instructions/lm/',
+                  method: 'GET',
+                  responseType: 'blob',
+              }).then((response) => {
+                    var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                    var fileLink = document.createElement('a');
+
+                    fileLink.href = fileURL;
+                    fileLink.setAttribute('download', 'instructions.txt'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                    document.body.appendChild(fileLink);
+
+                    fileLink.click();
+
+                    console.log(response)
+              })
               }).catch( error => {
             if (error.response) {
               for (const property in error.response.data){
@@ -327,6 +380,143 @@ export default {
               this.errors.push('Something went wrong. Please try again.')
             }
           })
+
+        },
+        getLocalModelInstructions(){
+          console.log(heh)
+           axios({
+                  url: '/api/v1/instructions/lm/',
+                  method: 'GET',
+                  responseType: 'blob',
+              }).then((response) => {
+                    var fileURL2 = window.URL.createObjectURL(new Blob([response.data]));
+                    var fileLink2 = document.createElement('a');
+
+                    fileLink2.href = fileURL2;
+                    fileLink2.setAttribute('download', 'instructions.txt'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                    document.body.appendChild(fileLink2);
+
+                    fileLink2.click();
+
+                    console.log(response)
+              }).catch( error => {
+            if (error.response) {
+              for (const property in error.response.data){
+                this.errors.push(`${property}: ${error.response.data[property]}`)
+              }
+            } else if (error.message){
+              this.errors.push('Something went wrong. Please try again.')
+            }
+          })
+
+        },
+        getAggregateModelsScript(){
+             axios({
+                  url: '/api/v1/generate-aggregate-script/'+this.session.session_id,
+                  method: 'GET',
+                  responseType: 'blob',
+              }).then((response) => {
+                    var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                    var fileLink = document.createElement('a');
+
+                    fileLink.href = fileURL;
+                    fileLink.setAttribute('download', 'aggregate_script.py'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                    document.body.appendChild(fileLink);
+
+                    fileLink.click();
+
+                    console.log(response)
+                    axios({
+                  url: '/api/v1/instructions/lm/',
+                  method: 'GET',
+                  responseType: 'blob',
+              }).then((response) => {
+                    var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                    var fileLink = document.createElement('a');
+
+                    fileLink.href = fileURL;
+                    fileLink.setAttribute('download', 'instructions.txt'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                    document.body.appendChild(fileLink);
+
+                    fileLink.click();
+
+                    console.log(response)
+              })
+              }).catch( error => {
+            if (error.response) {
+              for (const property in error.response.data){
+                this.errors.push(`${property}: ${error.response.data[property]}`)
+              }
+            } else if (error.message){
+              this.errors.push('Something went wrong. Please try again.')
+            }
+          })
+        },
+        getGlobalModel(){
+             axios({
+                  url: '/api/v1/generate-global-model/'+this.session.session_id,
+                  method: 'GET',
+                  responseType: 'blob',
+              }).then((response) => {
+                    var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                    var fileLink = document.createElement('a');
+
+                    fileLink.href = fileURL;
+                    fileLink.setAttribute('download', 'global_model.py'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                    document.body.appendChild(fileLink);
+
+                    fileLink.click();
+
+                    console.log(response)
+                    axios({
+                  url: '/api/v1/instructions/lm/',
+                  method: 'GET',
+                  responseType: 'blob',
+              }).then((response) => {
+                    var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                    var fileLink = document.createElement('a');
+
+                    fileLink.href = fileURL;
+                    fileLink.setAttribute('download', 'instructions.txt'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                    document.body.appendChild(fileLink);
+
+                    fileLink.click();
+
+                    console.log(response)
+              })
+              }).catch( error => {
+            if (error.response) {
+              for (const property in error.response.data){
+                this.errors.push(`${property}: ${error.response.data[property]}`)
+              }
+            } else if (error.message){
+              this.errors.push('Something went wrong. Please try again.')
+            }
+          })
+        },
+        getGlobalModelForPredictions(){
+
+        },
+        uploadLocalModel(){
+          const imagefile = document.querySelector('#uploadLocal');
+
+          let formData = new FormData()
+          formData.append('files', imagefile.files[0]);
+          formData.append('session', this.session.session_id)
+
+          axios.post( '/api/v1/upload-local-model/', // testowy endpoint - to zrob zeby nie byl testowy
+              formData,
+              {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+              }
+            }
+            ).then(function(){
+              console.log('SUCCESS!!');
+            })
+            .catch(function(){
+              console.log('FAILURE!!');
+            })
         },
         uploadGlobalWeights () {
           const imagefile = document.querySelector('#uploadWeights');

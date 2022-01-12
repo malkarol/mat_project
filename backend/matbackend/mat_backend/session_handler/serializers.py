@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from session_handler.models import Participant, Session, SessionResult
+from session_handler.models import Participant, Session, SessionResult, StorageFile
 
 class ParticipantSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,4 +14,9 @@ class SessionResultSerializer(serializers.ModelSerializer):
 class SessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Session
+        fields = '__all__'
+
+class StorageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StorageFile
         fields = '__all__'

@@ -1,16 +1,18 @@
 from types import resolve_bases
 from django.shortcuts import render
-
+import io
+from django.http import HttpResponse
 from django.http import FileResponse, response
 from rest_framework import serializers, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.parsers import JSONParser
+from zipfile import *
 
 from account.models import User
 from account.serializers import UserSerializer
 from session_handler.models import Session, SessionResult, Participant, StorageFile
-from session_handler.serializers import SessionResultSerializer, SessionSerializer, ParticipantSerializer
+from session_handler.serializers import SessionResultSerializer, SessionSerializer, ParticipantSerializer, StorageSerializer
 from django.core.files.base import ContentFile
 
 from storages.backends.gcloud import GoogleCloudStorage
@@ -321,21 +323,145 @@ def storage_files_view(request):
         file = StorageFile.objects.create(name=file_object.name, path=path, participant_uploaded=participant, related_session=session)
         return Response(status=status.HTTP_200_OK)
 
+
 @api_view(['GET'])
 def storage_file_detail(request, pk):
     if request.method == 'GET':
-        session_id = pk
+
         #participant_id = request.data['participant_id']
+        participant = Participant.objects.filter(session__session_id=pk).get(user__id = request.user.id)
+        file = StorageFile.objects.get(file_id = participant.weights_uploaded_id)
+        fileMyname = storage.path(file.name)
+        filenames = [fileMyname]
 
-        file = StorageFile.objects.filter(related_session = session_id).filter(participant_uploaded = 2)[0]
-        storage_file = storage.open(file.path, 'rb')
+        # Folder name in ZIP archive which contains the above files
+        # E.g [thearchive.zip]/somefiles/file2.txt
+        # FIXME: Set this to something better
+        zip_subdir = "somefiles"
+        zip_filename = "%s.zip" % zip_subdir
 
-        response = FileResponse(storage_file)
+        response = HttpResponse(content_type='application/zip')
+        zip_file = ZipFile(response, 'w')
+
+        for filename in filenames:
+            zip_file.write(filename)
+        response['Content-Disposition'] = 'attachment; filename={}'.format(zip_filename)
         return response
+
+
+
+
+
 
 @api_view(['GET'])
 def local_model_script(request,pk):
     if request.method == 'GET':
+        try:
+           session = Session.objects.get(pk=pk)
+        except Session.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        try:
+            participant = Participant.objects.filter(session__session_id=pk).get(user__id = request.user.id)
+        except Participant.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = SessionSerializer(session)
+        class_name = serializer.data['model_name']
+        zip_iterator = zip(serializer.data['parameters_keys'],serializer.data['parameters_values'])
+        parameters= dict(zip_iterator)
+        parameters['username'] = request.user.username
+        parameters['model_name'] = class_name
+        parameters['optimizer'] = ff.get_optimizer(parameters['optimizer'])
+        lines = ScriptsExecutor().create_local_model(parameters)
+        print(parameters)
+        response_content = '\n'.join(lines)
+        response = FileResponse(response_content, content_type="text/plain,charset=utf-8")
+        response['Content-Disposition'] = 'attachment; filename=initialize_weights.py'
+        return response
+
+@api_view(['POST'])
+def upload_local_model(request):
+    try:
+       session = Session.objects.get(pk=request.data['session'])
+    except Session.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'POST':
+
+        # participant_list = Participant.objects.filter(session__session_id=request.data['session'])
+        # serializerPart = ParticipantSerializer(participant_list, many=True)
+        # users_ids = [x['user'] for x in serializerPart.data]
+        # if request.user.id in users_ids:
+        try:
+            participant = Participant.objects.filter(session__session_id=request.data['session']).get(user__id = request.user.id)
+        except Participant.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        file_object = request.FILES['files']
+        session = Session.objects.get(pk=request.data['session'])
+        target_path = f'/sessions/session_Id_{session.session_id}/' + file_object.name
+        path = storage.save(target_path, ContentFile(file_object.read()))
+        file = StorageFile.objects.create(name=file_object.name, path=path, related_session=session)
+        # file = StorageFile.objects.create(name=file_object.name, path=path, related_session=session)
+        print(file.file_id)
+        participant = Participant.objects.filter(session__session_id=request.data['session']).get(user__id = request.user.id)
+        serializerParticipant = ParticipantSerializer(participant)
+        print(serializerParticipant.data)
+        participant.is_model_uploaded = True
+        participant.weights_uploaded = file
+        participant.save()
+        # print(serializerParticipant.data)
+
+
+        return Response(status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def global_model_script(request,pk):
+      if request.method == 'GET':
+        try:
+           session = Session.objects.get(pk=pk)
+        except Session.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        try:
+            participant = Participant.objects.filter(session__session_id=pk).get(user__id = request.user.id)
+        except Participant.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = SessionSerializer(session)
+
+        class_name = serializer.data['model_name']
+        zip_iterator = zip(serializer.data['parameters_keys'],serializer.data['parameters_values'])
+        parameters= dict(zip_iterator)
+        parameters['username'] = request.user.username
+        parameters['model_name'] = class_name
+        parameters['optimizer'] = ff.get_optimizer(parameters['optimizer'])
+        lines = ScriptsExecutor().create_global_model(parameters)
+        print(parameters)
+        response_content = '\n'.join(lines)
+        response = FileResponse(response_content, content_type="text/plain,charset=utf-8")
+        response['Content-Disposition'] = 'attachment; filename=initialize_weights.py'
+        return response
+
+@api_view(['GET'])
+def get_instructions_local_model(request):
+    file_name = 'local_model_instructions.txt'
+    text = '''
+    ---------- INFORMATION ----------
+    1. This set of instructions allows you to run local_model.py file properly.
+    Put Python script local_model.py and initial_global_weights.h5 in the same directory as your data folder.
+    2. If there is ony one folder with files you can simply run the local_model.py script
+    in your favourite IDE, e.g. Visual Studio Code or PyCharm.
+    But to run Python script with  the terminal using the following command
+    [your python version path] local_model.py [your data set name] \n
+    [ EXAMPLE ] python local_model.py data/ \n
+    [ REMARK ] Remember to add \ or / at the end of your folder,
+    depending if you have Windows or Linux/macOS.
+    3. After that '''
+    response_content = text
+    response = FileResponse(response_content, content_type="text/plain,charset=utf-8")
+    response['Content-Disposition'] = f'attachment; filename={file_name}'
+    return response
+
+@api_view(['GET'])
+def aggregate_script(request, pk):
+      if request.method == 'GET':
         try:
            session = Session.objects.get(pk=pk)
         except Session.DoesNotExist:
@@ -346,9 +472,10 @@ def local_model_script(request,pk):
                 class_name = serializer.data['model_name']
                 zip_iterator = zip(serializer.data['parameters_keys'],serializer.data['parameters_values'])
                 parameters= dict(zip_iterator)
+                parameters['username'] = request.user.username
                 parameters['model_name'] = class_name
                 parameters['optimizer'] = ff.get_optimizer(parameters['optimizer'])
-                lines = ScriptsExecutor().create_local_model(parameters)
+                lines = ScriptsExecutor().generate_aggregation_script(parameters)
                 print(parameters)
                 response_content = '\n'.join(lines)
                 response = FileResponse(response_content, content_type="text/plain,charset=utf-8")
@@ -357,26 +484,3 @@ def local_model_script(request,pk):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET'])
-def global_model_script(request):
-    file_name = 'students.txt'
-    lines = []
-    data = User.objects.all()
-    for d in data:
-       lines.append('{0};{1};{2}'.format(d.username,d.email,d.id))
-    response_content = '\n'.join(lines)
-    response = FileResponse(response_content, content_type="text/plain,charset=utf-8")
-    response['Content-Disposition'] = 'attachment; filename={0}'.format(file_name)
-    return response
-
-@api_view(['GET'])
-def aggregate_script(request):
-    file_name = 'students.txt'
-    lines = []
-    data = User.objects.all()
-    for d in data:
-       lines.append('{0};{1};{2}'.format(d.username,d.email,d.id))
-    response_content = '\n'.join(lines)
-    response = FileResponse(response_content, content_type="text/plain,charset=utf-8")
-    response['Content-Disposition'] = 'attachment; filename={0}'.format(file_name)
-    return response

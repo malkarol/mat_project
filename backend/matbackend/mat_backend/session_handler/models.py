@@ -48,18 +48,6 @@ class Session(models.Model):
     #     default = LossFunctionEnum.CATEGORICAL_CROSSENTROPY
     # )
 
-class SessionFiles(models.Model):
-    file_id = models.AutoField(primary_key=True)
-
-    local_script_name = models.CharField(max_length=200, null=False)
-    local_script_path = models.CharField(max_length=200, null=False)
-
-    global_script_name = models.CharField(max_length=200, null=True)
-    global_script_path = models.CharField(max_length=200, null=True)
-
-    aggregate_script_name = models.CharField(max_length=200, null=True)
-    aggregate_script_path = models.CharField(max_length=200, null=True)
-
 
 class StorageFile(models.Model):
     file_id = models.AutoField(primary_key=True)
