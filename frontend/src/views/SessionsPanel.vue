@@ -36,7 +36,7 @@
                 </div>
             </div>
             <br>
-            <div class="list-group">
+            <div class="list-group"  style="min-height: 1000px">
 
                 <div v-for="(session, index) in pagedSessions" class="border border-5" :key="session.name" v-bind:pagedSessions="pagedSessions">
                     <div class="list-group-item list-group-item-action" :class="{'bg-primary text-white':index == selected}" @click="selected = index">
@@ -145,7 +145,7 @@ export default {
             joinedSessions: [],
             filterSessions: [],
             pagedSessions: [],
-            pageSize: 3,
+            pageSize: 10,
             currentPage: 1,
             isFetching: true,
             errors: []
