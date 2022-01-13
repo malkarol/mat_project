@@ -63,6 +63,16 @@ INSTALLED_APPS = [
     'session_handler.apps.SessionHandlerConfig'
 ]
 
+#GMAIL BACKEND MAIL
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'matmailservice@gmail.com'
+EMAIL_HOST_PASSWORD = os.getenv('GMAIL_KEY')
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'matmailservice@gmail.com'
+
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:8080'
 ]

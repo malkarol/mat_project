@@ -1,4 +1,6 @@
+from os import stat
 from types import resolve_bases
+from django import http
 from django.shortcuts import render
 import io
 from django.http import HttpResponse
@@ -17,6 +19,12 @@ from session_handler.serializers import SessionResultSerializer, SessionSerializ
 from django.core.files.base import ContentFile
 
 from storages.backends.gcloud import GoogleCloudStorage
+
+from django.core.mail import send_mail
+import hashlib
+from io import BytesIO
+import zipfile
+from django.http import HttpResponse
 import session_handler.file_finder as ff
 import ml_handler.aggregation as agreg
 from session_handler.ScriptGenerator import ScriptsExecutor
@@ -122,6 +130,16 @@ def get_joined_sessions(request,pk):
         serializer = ParticipantSerializer(participant, many=True)
         return Response([x['session'] for x in serializer.data])
 
+@api_view(['GET'])
+def get_managed_sessions(request, name):
+    '''
+    Get list of sessions where logged user is the founder
+    '''
+    if request.method == 'GET':
+        sessionsObjects = Session.objects.filter(founder = name)
+        sessions = SessionSerializer(sessionsObjects, many=True)
+        return Response(x for x in sessions.data)
+
 @api_view(['POST'])
 def join_session(request):
     '''
@@ -134,6 +152,9 @@ def join_session(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'POST':
+        if request.data['private_key'] != '0' and request.data['private_key'] != session.private_key:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        
         sessSerializer = SessionSerializer(session)
 
         sessionTmp = sessSerializer.data
@@ -211,6 +232,11 @@ def add_many_participants(request):
         serializer = SessionSerializer(data=request.data['session'])
         if serializer.is_valid():
             serializer.save()
+            if serializer.validated_data['pricing_plan'] == Session.PricingPlanEnum.PREMIUM:
+                session = Session.objects.get(pk=serializer.data['session_id'])
+                send_mail_with_privatekey(session)
+                session.save()
+                
             print(request.data['usernames'])
 
 
@@ -374,6 +400,41 @@ def get_participants_for_session(request,pk):
         print(users_dic)
         return Response(users_dic)
 
+@api_view(['DELETE'])
+def participant_for_session(request,spk,ppk):
+    if (request.method == 'DELETE'):
+        try :
+            participant = Participant.objects.filter(session_id=spk).filter(user_id=ppk)[0]
+            session = Session.objects.get(pk=spk)
+            if request.user.id == participant.user_id:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+            if request.user.username != session.founder:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+            participant.delete()
+            session.actual_num_of_participants -=  1
+            session.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Session.DoesNotExist or Participant.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+def leave_session(request, spk):
+    if (request.method == 'DELETE'):
+        try:
+            participant = Participant.objects.filter(session_id=spk).filter(user_id=request.user.id)[0]
+            session = Session.objects.get(pk = spk)
+            
+            participant.delete()
+            session.actual_num_of_participants -=  1
+            session.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Participant.DoesNotExist or Session.DoesNotExist or IndexError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+# 3. File upload
+storage = GoogleCloudStorage()
+
 @api_view(['POST'])
 def storage_files_view(request):
     if request.method == 'POST':
@@ -499,6 +560,52 @@ def upload_local_model(request):
         return Response(status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+def get_zip(request, pk):
+    if request.method == 'GET':
+        files = StorageFile.objects.filter(related_session = pk)
+        session = Session.objects.get(pk = pk)
+        b = BytesIO()
+        
+        with zipfile.ZipFile(b, 'w') as zf:
+            for file in files:
+                try:
+                    fh = storage.open(file.path, 'rb')
+                    print(fh.name)
+                    zf.writestr(f"files/{file.name}", bytes(fh.read()))
+                except Exception as e:
+                    print(e)
+            response = HttpResponse(b.getvalue(), content_type="application/x-zip-compressed")
+            response['Content-Disposition'] = f'attachment; filename={session.name}_FILES.zip'
+            return response
+
+import tensorflow as tf
+@api_view(['GET'])
+def test_model(request):
+    fh = storage.open('/session_Id_72/hello.h5', 'rb')
+    with open("test.h5", 'wb') as f:
+        f.write(fh.read())
+    
+    model = tf.keras.Sequential()
+    model.add(tf.keras.Input(shape=(16,)))
+    model.add(tf.keras.layers.Dense(8))
+    
+    model.load_weights(fh)
+    print(model.get_weights())
+    return Response(status=status.HTTP_200_OK)
+    
+
+
+@api_view(['POST'])
+def validate_private_key(request):
+    if request.method == 'POST':
+        try:
+            session = Session.objects.get(private_key=request.data['private_key'])
+            return Response(status = status.HTTP_202_ACCEPTED)
+        except Session.DoesNotExist:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+# 4. File dynamically generated
+@api_view(['GET'])
 def global_model_script(request,pk):
       if request.method == 'GET':
         try:
@@ -588,3 +695,34 @@ def aggregate_script(request, pk):
             return response
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
+
+def send_mail_with_privatekey(session):
+    user = User.objects.filter(username = session.founder)[0]
+    private_key = generate_private_key(session)
+    session.private_key = private_key
+
+
+    email_body = f"""
+NOTE: DO NOT REPLY TO THIS EMAIL, MESSAGE GENERATED AUTOMATICALLY
+
+Dear {user.first_name},
+You've just created a new private session: {session.name}
+Below you can find your private key. Other people can use it to join your session
+PRIVATE KEY: {private_key}
+
+                """
+    mail_subject = f"Private key to session: {session.name}"
+    send_mail(
+        mail_subject,
+        email_body,
+        'matmailservice@gmail.com',
+        recipient_list=[user.email],
+        fail_silently=False,
+    )
+
+
+def generate_private_key(session):
+    string = str(session.creation_date) + session.name
+    encoded = string.encode()
+    return hashlib.sha256(encoded).hexdigest()
+    
