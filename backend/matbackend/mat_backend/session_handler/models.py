@@ -10,7 +10,6 @@ from django.core.validators import int_list_validator
 #  It’s convention to import this as a shorter alias, _, to save typing.
 from django.utils.translation import gettext_lazy as _
 
-
 class Session(models.Model):
     session_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200)
@@ -32,6 +31,7 @@ class Session(models.Model):
     private_key = models.CharField(max_length=1000, null=True)
 
     # setting PricingPlanEnum value
+
     class PricingPlanEnum(models.IntegerChoices):
         FREE = 0, _('Free')
         PREMIUM = 1, _('Paid')
@@ -49,6 +49,8 @@ class Session(models.Model):
     #     choices = LossFunctionEnum.choices,
     #     default = LossFunctionEnum.CATEGORICAL_CROSSENTROPY
     # )
+
+
 class StorageFile(models.Model):
     file_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200, null=False)
@@ -63,6 +65,7 @@ class Participant(models.Model):
     local_data_count = models.IntegerField(null=True)
     weights_uploaded = models.ForeignKey(StorageFile, on_delete = models.SET_NULL, null=True)
     accuracy = models.FloatField(null=True)
+    loss = models.FloatField(null=True)
     # are local weights uploaded
     is_model_uploaded = models.BooleanField(default=False)
     is_owner = models.BooleanField(default=False)
@@ -70,8 +73,8 @@ class Participant(models.Model):
 
 class SessionResult(models.Model):
     session_result_id = models.AutoField(primary_key=True)
-    local_models_accuracy_json = models.CharField(max_length = 1000, null=True)
     session = models.ForeignKey(Session, on_delete = models.SET_NULL, null=True)
     finished = models.BooleanField(default=False)
-    global_model_accuracy = ArrayField(models.FloatField(), null=True)
+    global_model_accuracy = models.FloatField(null=True)
+    global_model_loss = models.FloatField(null=True)
     # global_model = models.ForeignKey(MLModel, on_delete=models.CASCADE)
