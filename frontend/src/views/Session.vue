@@ -132,9 +132,11 @@
                 </div>
                   <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="initializeGlobalWeightsScript()" value="Get script to calculate global weights" />
                   <input type="button" class="btn btn-primary btn-lg btn-success mt-3 mx-5" @click="uploadGlobalWeights()" value="Upload global weights" />
+
             </div>
             </div>
             <button class="btn btn-primary btn-lg btn-success mb-3" @click="generateLocalModel()">Download script for this parameters</button>
+            <button class="btn btn-primary btn-lg btn-success mb-3" @click="getInitialWeights()">Get initial weights</button>
 
           </div>
               </div>
@@ -153,12 +155,27 @@
             <form >
                 <div class="row mt-3">
                     <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
-                         <h4 for="lastName"> <strong>Local model upload:</strong></h4>
+                         <h4 for="lastName"> <strong>Upload weights from local model:</strong></h4>
                          <div>
                             <label for="uploadLocal" class="form-label text-muted" >(Only .h5 files)</label>
                             <input class="form-control form-control-lg" id="uploadLocal" accept=".h5" type="file">
                         </div>
-                         <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="uploadLocalModel()" value="Upload local model"/>
+                         <input type="button" class="btn btn-primary btn-lg btn-success mt-3 mb-3" @click="uploadLocalWeights()" value="Upload local weights"/>
+                         <div>
+                            <label for="uploadLocalJson" class="form-label text-muted" >(Only .json files)</label>
+                            <input class="form-control form-control-lg" id="uploadLocalJson" accept=".json" type="file">
+                        </div>
+                          <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="uploadLocalWeightsJson()" value="Upload local weights" />
+                         </div>
+                    </div>
+                    <div class="row mt-3">
+                    <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                         <h4 for="lastName"> <strong>Upload results file:</strong></h4>
+                         <div>
+                            <label for="uploadLocalResults" class="form-label text-muted" >(Only .json files)</label>
+                            <input class="form-control form-control-lg" id="uploadLocalResults" accept=".json" type="file">
+                        </div>
+                          <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="LocalLearningResults()" value="Upload results" />
                          </div>
                     </div>
 
@@ -178,8 +195,15 @@
                       </div>
                       <div>
                 <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregateModelsScript()">Aggregate models locally</button>
-                <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="backToSessions()">Show results</button>
+                 <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregation()">Aggregate models on server</button>
+
+
                       </div>
+                       <div>
+                          <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getManyWeights()">Get local weights</button>
+                      <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="backToSessions()">Show results</button>
+                       </div>
+
                     </div>
                </div>
 
@@ -289,36 +313,147 @@ export default {
               console.log('FAILURE!!');
             })
         },
-        getFile(){
-          let axiosArray = [1, 2];
-          for (var x = 0; x < 2; x++) {
+        getAggregation() {
+           axios.get('/api/v1/aggregate-on-server/'+this.$route.params.id)
+       .then(response => {
+            this.session = response.data
 
-            let newPromise = axios({
-              url: '/api/v1/generate-global-model/'+this.session.session_id,
-                  method: 'GET',
-                  responseType: 'blob'
-          })
-          axiosArray.push(newPromise)
+        }).catch( error => {
+            if (error.response) {
+              for (const property in error.response.data){
+                this.errors.push(`${property}: ${error.response.data[property]}`)
+              }
+            } else if (error.message){
+              this.errors.push('Something went wrong. Please try again.')
             }
+          })
+        },
+        LocalLearningResults(){
+          const imagefile = document.querySelector('#uploadLocalResults');
 
-          axios
-        .all(axiosArray)
-          .then(axios.spread((...responses) => {
-            responses.forEach(res =>{
-                  var fileURL = window.URL.createObjectURL(new Blob([res.data]));
+          let formData = new FormData()
+          formData.append('files', imagefile.files[0]);
+          formData.append('session', this.session.session_id)
+
+          axios.post( '/api/v1/upload-local-results-json/', // testowy endpoint - to zrob zeby nie byl testowy
+              formData,
+              {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+              }
+            }
+            ).then(function(){
+              console.log('SUCCESS!!');
+            })
+            .catch(function(){
+              console.log('FAILURE!!');
+            })
+        },
+        getManyWeights(){
+          console.log(this.participants[0].username)
+          const array = this.participants; // changed the input array a bit so that the `array[i].id` would actually work - obviously the asker's true array is more than some contrived strings
+          let users = [];
+          let promises = [];
+          for (let i = 0; i < array.length; i++) {
+          promises.push(
+            axios.get('/api/v1/get-global-weights/'+this.session.session_id).then(response => {
+            // do something with response
+            const fileURL = window.URL.createObjectURL(new Blob([response.data]));
+            const fileLink = document.createElement('a');
+
+            fileLink.href = fileURL;
+            fileLink.setAttribute('download', `local_weights_${this.participants[i].username}.h5`); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+            document.body.appendChild(fileLink);
+
+            fileLink.click();
+              })
+            )
+          }
+
+          Promise.all(promises).then(() => console.log(users));
+        },
+        uploadLocalWeightsJson(){
+            const imagefile = document.querySelector('#uploadLocalJson');
+
+          let formData = new FormData()
+          formData.append('files', imagefile.files[0]);
+          formData.append('session', this.session.session_id)
+
+          axios.post( '/api/v1/upload-local-weights-json/', // testowy endpoint - to zrob zeby nie byl testowy
+              formData,
+              {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+              }
+            }
+            ).then(function(){
+              console.log('SUCCESS!!');
+            })
+            .catch(function(){
+              console.log('FAILURE!!');
+            })
+        },
+        getInitialWeights(){
+          axios({
+                  url: '/api/v1/get-global-weights/'+this.session.session_id,
+                  method: 'GET',
+                  responseType: 'blob',
+              }).then((response) => {
+                    var fileURL = window.URL.createObjectURL(new Blob([response.data]));
                     var fileLink = document.createElement('a');
 
                     fileLink.href = fileURL;
-                    fileLink.setAttribute('download', `global_model${index}.py`); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                    fileLink.setAttribute('download', 'initial_weights.h5'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
                     document.body.appendChild(fileLink);
 
                     fileLink.click();
 
+                    console.log(response)
+                    axios({
+                  url: '/api/v1/instructions/lm/',
+                  method: 'GET',
+                  responseType: 'blob',
+              }).then((response) => {
+                    var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                    var fileLink = document.createElement('a');
 
-             console.log('Success')})
-          console.log('submitted all axios calls');
-          }))
-          .catch(error => {})
+                    fileLink.href = fileURL;
+                    fileLink.setAttribute('download', 'instructions.txt'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                    document.body.appendChild(fileLink);
+
+                    fileLink.click();
+
+                    console.log(response)
+              })
+              }).catch( error => {
+            if (error.response) {
+              for (const property in error.response.data){
+                this.errors.push(`${property}: ${error.response.data[property]}`)
+              }
+            } else if (error.message){
+              this.errors.push('Something went wrong. Please try again.')
+            }
+          })
+        },
+        getFile(){
+
+           axios({
+            url: '/api/v1/generate-zip/'+this.session.session_id,
+                  method: 'GET',
+                  responseType: 'arraybuffer',
+                })
+            .then(function (response) {
+                console.log(response)
+                const url =window.URL.createObjectURL( new Blob([response.data], {  type: 'application/zip'}));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'somezip.zip');
+                document.body.appendChild(link);
+                link.click();
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
             // console.log(this.session)
 
             // axios({
@@ -420,7 +555,7 @@ export default {
                     var fileLink = document.createElement('a');
 
                     fileLink.href = fileURL;
-                    fileLink.setAttribute('download', 'aggregate_script.py'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                    fileLink.setAttribute('download', 'aggregation_script.py'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
                     document.body.appendChild(fileLink);
 
                     fileLink.click();
@@ -497,7 +632,7 @@ export default {
         getGlobalModelForPredictions(){
 
         },
-        uploadLocalModel(){
+        uploadLocalWeights(){
           const imagefile = document.querySelector('#uploadLocal');
 
           let formData = new FormData()

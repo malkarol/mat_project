@@ -20,7 +20,10 @@ def get_file_path(x):
         'local_learning_b_and_w': '/common/local_learning_black_and_white.py',
 
         'preparation':'/common/preparation.py',
-        'initialize_weights':'/common/initialize_weights.py'
+        'initialize_weights':'/common/initialize_weights.py',
+
+        # aggregate
+        'aggregate_locally':'/common/aggregate_locally.py'
 
     }[x]   # message will be returned default if x is not found
 

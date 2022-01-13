@@ -3,13 +3,18 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+import os
 from  ml_handler.models import MLModel
 from ml_handler.serializers import MLModelSerializer
-from session_handler.models import Session
-from session_handler.serializers import SessionSerializer
+from account.models import User
+from account.serializers import UserSerializer
+from session_handler.models import Session, Participant
+from session_handler.serializers import SessionSerializer,ParticipantSerializer
 import session_handler.file_finder as ff
 import ml_handler.aggregation as agreg
-
+from django.core.files.base import ContentFile
+from storages.backends.gcloud import GoogleCloudStorage
+storage = GoogleCloudStorage()
 
 @api_view(['GET', 'POST'])
 def ml_models_list(request):
@@ -62,20 +67,45 @@ def aggregate_on_server(request, pk):
     if request.method == 'GET':
         serializer = SessionSerializer(session)
         if request.user.username == serializer.data['founder']:
-            class_name = ff.get_class_name(serializer.data['model_name'])
+
             zip_iterator = zip(serializer.data['parameters_keys'],serializer.data['parameters_values'])
             parameters= dict(zip_iterator)
-            input_size = (32, 32, 3)
-            num_of_classes = 10
-            # TO DO
-            # copy getting files from storage for each list
-            client_names = []
-            client_counts = []
-            global_weights = []
-            aggregator = agreg.Aggregator(class_name,input_size,num_of_classes)
-            aggregator.get_file_names_and_counts(client_names, client_counts)
-            aggregator.aggregate(parameters,client_names,global_weights)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            parameters['optimizer'] = ff.get_optimizer(parameters['optimizer'])
+            parameters['model_name'] = ff.get_class_name(serializer.data['model_name'])
+            list_of_participants = Participant.objects.filter(session__session_id = pk)
+            serializerPar = ParticipantSerializer(list_of_participants , many=True)
+            clients_counts = []
+            users_ids = [x['user'] for x in serializerPar.data]
+            users_list = User.objects.filter(id__in=users_ids)
+            serializerUser = UserSerializer(users_list, many=True)
+            users_final_list = [[x['username'],x['id']]for x in serializerUser.data]
+            participant_final_list = [[x['local_data_count'],x['user']]for x in serializerPar.data]
+            users_final_list = sorted(users_final_list, key=lambda x: x[1])
+            participant_final_list = sorted(participant_final_list, key=lambda x: x[1])
+            print("\n\n")
+            print(users_final_list )
+            print("\n\n")
+            print(participant_final_list)
+            print("\n\n")
+            parameters['model_name']= ff.get_class_name(serializer.data['model_name'])
+            parameters['client_names'] =[ x[0] for x in users_final_list ]
+            parameters['clients_counts'] = [ x[0] for x in participant_final_list ]
+            print(clients_counts)
+            color = int(parameters['color'])
+            width = height = int(parameters['picture_size'])
+            num_of_classes =parameters['num_of_classes']
+            input_shape = (height,width,color)
+            print("\n\n")
+            print(input_shape)
+            print("\n\n")
+            aggregator = agreg.Aggregator(input_shape,num_of_classes,parameters,pk)
+            text_path = aggregator.aggregate(parameters)
+            file = open(text_path,'rb')
+            target_path = f'/sessions/session_Id_{session.session_id}/aggregated_weights.h5'
+            path = storage.save(target_path, ContentFile(file.read()))
+            file.close()
+            os.remove(text_path)
+            return Response(status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_404_NOT_FOUND)
 
 

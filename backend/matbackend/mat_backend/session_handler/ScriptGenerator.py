@@ -59,7 +59,7 @@ class ParametersScript(AbstractHandler):
             input_list =[parameters['picture_size'],parameters['color']]
             lines =['']
             for key, value in tmp_params.items():
-                if '('not in value and value.isdigit() == False:
+                if '('not in value and  not isinstance(value, list) and value.isdigit() == False:
                     new_line = f'{key} = "{value}"'
                 else:
                     new_line = f'{key} = {value}'
@@ -123,6 +123,15 @@ class ModelScript(AbstractHandler):
         else:
             return super().handle(request,parameters)
 
+class AggregateLocallyScript(AbstractHandler):
+    def handle(self, request: Any, parameters) -> str:
+        if request == 'aggregate_locally':
+            file_path = ff.get_file_path(parameters['aggregate_locally'])
+            storage_file = storage.open(file_path , 'r')
+            return storage_file.read().decode('ascii')
+        else:
+            return super().handle(request,parameters)
+
 
 def generate_local_model(handler: Handler, session_params) -> None:
     """
@@ -165,7 +174,7 @@ def generate_aggregation_script(handler: Handler, session_params) -> None:
     The client code is usually suited to work with a single handler. In most
     cases, it is not even aware that the handler is part of a chain.
     """
-    commands = ['preparation','model','parameters','client_names_and_counts','get_aggregate']
+    commands = ['preparation','model','parameters','aggregate_locally']
     results = []
     for comm in  commands:
         print(f"\nClient: Who wants a {comm}?")
@@ -245,9 +254,10 @@ class ScriptsExecutor():
         load_script = LoadingScript()
         learning_script = LocalLearningScript()
         model_script = ModelScript()
+        aggregate_script = AggregateLocallyScript()
 
         params_script.set_next(prep_script).set_next(initial_script).set_next(
-            load_script).set_next(learning_script).set_next(model_script)
+            load_script).set_next(learning_script).set_next(model_script).set_next(aggregate_script)
 
         return generate_aggregation_script(params_script, parameters)
 

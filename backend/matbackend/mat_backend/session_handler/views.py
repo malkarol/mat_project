@@ -8,6 +8,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.parsers import JSONParser
 from zipfile import *
+from django.core.files.storage import default_storage
 
 from account.models import User
 from account.serializers import UserSerializer
@@ -274,6 +275,67 @@ def upload_global_weights(request):
             return Response(status=status.HTTP_200_OK)
     return Response(status=status.HTTP_404_NOT_FOUND)
 
+@api_view(['POST'])
+def upload_local_results_json(request):
+    try:
+       session = Session.objects.get(pk=request.data['session'])
+    except Session.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'POST':
+
+        # participant_list = Participant.objects.filter(session__session_id=request.data['session'])
+        # serializerPart = ParticipantSerializer(participant_list, many=True)
+        # users_ids = [x['user'] for x in serializerPart.data]
+        # if request.user.id in users_ids:
+        try:
+            participant = Participant.objects.filter(session__session_id=request.data['session']).get(user__id = request.user.id)
+        except Participant.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        file_object = request.FILES['files']
+
+
+        content = file_object.read()
+        tmpDict = eval(content.decode("utf-8"))
+        print(tmpDict)
+        participant.accuracy = tmpDict['accuracy']
+        participant.loss = tmpDict['loss']
+        serializerParticipant = ParticipantSerializer(participant)
+        print(serializerParticipant.data)
+        participant.save()
+        return Response(status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def upload_local_weights_json(request):
+    try:
+       session = Session.objects.get(pk=request.data['session'])
+    except Session.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'POST':
+
+        # participant_list = Participant.objects.filter(session__session_id=request.data['session'])
+        # serializerPart = ParticipantSerializer(participant_list, many=True)
+        # users_ids = [x['user'] for x in serializerPart.data]
+        # if request.user.id in users_ids:
+        try:
+            participant = Participant.objects.filter(session__session_id=request.data['session']).get(user__id = request.user.id)
+        except Participant.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        file_object = request.FILES['files']
+        session = Session.objects.get(pk=request.data['session'])
+        print(file_object.name)
+        target_path = f'/sessions/session_Id_{session.session_id}/local_weights/' + file_object.name
+        path = storage.save(target_path, ContentFile(file_object.read()))
+        file = StorageFile.objects.create(name=file_object.name, path=path, related_session=session)
+        # file = StorageFile.objects.create(name=file_object.name, path=path, related_session=session)
+        print(file.file_id)
+        participant = Participant.objects.filter(session__session_id=request.data['session']).get(user__id = request.user.id)
+        serializerParticipant = ParticipantSerializer(participant)
+        print(serializerParticipant.data)
+        participant.is_model_uploaded = True
+        participant.weights_uploaded = file
+        participant.local_data_count = int(file.name.split('_')[-1].split('.')[0])
+        participant.save()
+        return Response(status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def generate_global_weights(request,pk):
@@ -348,7 +410,29 @@ def storage_file_detail(request, pk):
         response['Content-Disposition'] = 'attachment; filename={}'.format(zip_filename)
         return response
 
-
+@api_view(['GET'])
+def generate_zip(request,pk):
+    list_of_files = StorageFile.objects.all()
+    files =[]
+    for elem in list_of_files:
+        files.append(elem.path)
+    zfname = 'somezip.zip'
+    # print(list_of_files)
+    b =  io.BytesIO()
+    with ZipFile(b, 'w') as zf:
+            for current_file in list_of_files:
+                try:
+                    fh = storage.open(current_file.path, "rb")
+                    # print(fh.read())
+                    zf.writestr(fh.name, fh.read())
+                except Exception as e:
+                    print(e)
+            b.seek(0)
+            response = HttpResponse(content_type="application/x-zip-compressed")
+            response['Content-Disposition'] = 'attachment; filename={}'.format(zfname)
+            # print(b.read())
+            response.write(b.read())
+            return response
 
 
 
@@ -395,8 +479,9 @@ def upload_local_model(request):
         except Participant.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         file_object = request.FILES['files']
+        print(type(file_object))
         session = Session.objects.get(pk=request.data['session'])
-        target_path = f'/sessions/session_Id_{session.session_id}/' + file_object.name
+        target_path = f'/sessions/session_Id_{session.session_id}/local_weigths/' + file_object.name
         path = storage.save(target_path, ContentFile(file_object.read()))
         file = StorageFile.objects.create(name=file_object.name, path=path, related_session=session)
         # file = StorageFile.objects.create(name=file_object.name, path=path, related_session=session)
@@ -406,6 +491,7 @@ def upload_local_model(request):
         print(serializerParticipant.data)
         participant.is_model_uploaded = True
         participant.weights_uploaded = file
+        participant.local_data_count = int(file.name.split('_')[-1].split('.')[0])
         participant.save()
         # print(serializerParticipant.data)
 
@@ -440,6 +526,13 @@ def global_model_script(request,pk):
         return response
 
 @api_view(['GET'])
+def get_global_weights(request,pk):
+    path = f'/sessions/session_Id_'+str(pk)+'/' + 'initial_global_weights.h5'
+    storage_file = storage.open(path, 'rb')
+    response = FileResponse(storage_file)
+    return response
+
+@api_view(['GET'])
 def get_instructions_local_model(request):
     file_name = 'local_model_instructions.txt'
     text = '''
@@ -461,26 +554,37 @@ def get_instructions_local_model(request):
 
 @api_view(['GET'])
 def aggregate_script(request, pk):
-      if request.method == 'GET':
-        try:
-           session = Session.objects.get(pk=pk)
-        except Session.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        if request.method == 'GET':
-            serializer = SessionSerializer(session)
-            if request.user.username == serializer.data['founder']:
-                class_name = serializer.data['model_name']
-                zip_iterator = zip(serializer.data['parameters_keys'],serializer.data['parameters_values'])
-                parameters= dict(zip_iterator)
-                parameters['username'] = request.user.username
-                parameters['model_name'] = class_name
-                parameters['optimizer'] = ff.get_optimizer(parameters['optimizer'])
-                lines = ScriptsExecutor().generate_aggregation_script(parameters)
-                print(parameters)
-                response_content = '\n'.join(lines)
-                response = FileResponse(response_content, content_type="text/plain,charset=utf-8")
-                response['Content-Disposition'] = 'attachment; filename=initialize_weights.py'
-                return response
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    try:
+       session = Session.objects.get(pk=pk)
+    except Session.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        serializer = SessionSerializer(session)
+        print("\n\n")
+        print(request.user.username)
+        print(serializer.data['founder'])
+        print("\n\n")
+        if request.user.username == serializer.data['founder']:
+            class_name = serializer.data['model_name']
+            zip_iterator = zip(serializer.data['parameters_keys'],serializer.data['parameters_values'])
+            parameters= dict(zip_iterator)
+            parameters['username'] = request.user.username
+            parameters['model_name'] = class_name
+            parameters['optimizer'] = ff.get_optimizer(parameters['optimizer'])
+            list_of_participants = Participant.objects.filter(session__session_id = pk)
+            username_list = []
+            clients_counts = []
+            for participant in list_of_participants:
+                username_list.append(participant.user.username)
+                clients_counts.append(participant.local_data_count)
+            parameters['client_names'] = username_list
+            parameters['clients_counts'] = clients_counts
+            parameters['aggregate_locally'] =  'aggregate_locally'
+            lines = ScriptsExecutor().generate_aggregation_script(parameters)
+            print(parameters)
+            response_content = '\n'.join(lines)
+            response = FileResponse(response_content, content_type="text/plain,charset=utf-8")
+            response['Content-Disposition'] = 'attachment; filename=initialize_weights.py'
+            return response
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 

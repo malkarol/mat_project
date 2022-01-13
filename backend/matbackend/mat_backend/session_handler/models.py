@@ -63,6 +63,7 @@ class Participant(models.Model):
     local_data_count = models.IntegerField(null=True)
     weights_uploaded = models.ForeignKey(StorageFile, on_delete = models.SET_NULL, null=True)
     accuracy = models.FloatField(null=True)
+    loss = models.FloatField(null=True)
     # are local weights uploaded
     is_model_uploaded = models.BooleanField(default=False)
     is_owner = models.BooleanField(default=False)
@@ -70,8 +71,8 @@ class Participant(models.Model):
 
 class SessionResult(models.Model):
     session_result_id = models.AutoField(primary_key=True)
-    local_models_accuracy_json = models.CharField(max_length = 1000, null=True)
     session = models.ForeignKey(Session, on_delete = models.SET_NULL, null=True)
     finished = models.BooleanField(default=False)
-    global_model_accuracy = ArrayField(models.FloatField(), null=True)
+    global_model_accuracy = models.FloatField(null=True)
+    global_model_loss = models.FloatField(null=True)
     # global_model = models.ForeignKey(MLModel, on_delete=models.CASCADE)

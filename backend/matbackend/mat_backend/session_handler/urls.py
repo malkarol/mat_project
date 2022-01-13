@@ -10,11 +10,16 @@ urlpatterns=[
     path('upload/', views.storage_files_view),
     path('download/<int:pk>', views.storage_file_detail),
 
+    path('generate-zip/<int:pk>',views.generate_zip),
     # upload global weights
     path('upload-global-weights/', views.upload_global_weights),
+    path('upload-local-weights-json/', views.upload_local_weights_json),
+
+    path('upload-local-results-json/', views.upload_local_results_json),
     # generate script for global weights
     path('generate-weights-script/<int:pk>', views.generate_global_weights),
 
+    path('get-global-weights/<int:pk>', views.get_global_weights),
     # generate local model script for session
     path('upload-local-model/', views.upload_local_model),
     # generate local model script for session
