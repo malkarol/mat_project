@@ -296,6 +296,8 @@ export default {
             }
         },
         leaveSession() {
+            if (!confirm("Are you sure you wish to leave this session?"))
+                return
             axios.delete('api/v1/leavesession/' + this.session.session_id)
                 .then(response => {
                     this.backToSessions()
@@ -311,7 +313,8 @@ export default {
                 })
         },
         deleteSession() {
-            axios.delete('api/v1/session/' + this.session.session_id)
+            if (confirm("Are you sure you would like to delete this session? This action cannot be undone.")){
+                axios.delete('api/v1/session/' + this.session.session_id)
                 .then(response => {
                     this.backToSessions()
                 })
@@ -324,6 +327,7 @@ export default {
                         this.errors.push('Something went wrong. Please try again.')
                     }
                 })
+            }
         },
         removeParticipant(participant) {
             axios.delete('api/v1/session/' + this.session.session_id + '/participant/' + participant.user_id)
