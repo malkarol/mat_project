@@ -85,7 +85,6 @@ def email_management(request):
 def profile_management(request):
     user_id = request.data['user_id']
     user = User.objects.get(pk=user_id)
-    user.username = request.data['username']
     user.first_name = request.data['fullname'].split()[0]
     user.last_name = request.data['fullname'].split()[1]
     user.pricing_plan = request.data['pricingPlan']

@@ -19,7 +19,7 @@
                         inputEmailConfirm.setCustomValidity(inputEmailConfirm.value != inputEmail.value ? "Passwords do not match." : "");' novalidate>
                         <div class="col-md-6 position-relative">
                             <label for="inputUserName" class="form-label">User name</label>
-                            <input readonly type="text" class="form-control" id="inputUserName" v-model="username" required />
+                            <input disabled type="text" class="form-control" id="inputUserName" v-model="username" required />
                         </div>
                         <div class="col-md-6 has-validation">
                             <label for="inputFullName" class="form-label">Full Name</label>
@@ -39,8 +39,8 @@
                             <label for="planInput" class="form-label">Pricing Plan</label>
                             <select disabled id="planInput" class="form-select" required v-model="pricingPlan">
                                 <option value="" selected disabled hidden>...</option>
-                                <option value="1">Free</option>
-                                <option value="2">Premium</option>
+                                <option value="0">Free</option>
+                                <option value="1">Premium</option>
                             </select>
                         </div>
                         <div class="col-12 d-flex justify-content-between">
@@ -196,21 +196,21 @@ export default {
             this.validateForm()
 
             saveButton.classList.remove('d-flex')
+            saveButton.classList.add('d-none')
             editButton.value = "Edit your information"
             this.isEditing = false
 
             const formData = {
                 user_id: this.$store.state.user.id,
-                username: this.username,
                 fullname: this.fullName,
                 pricingPlan: this.pricingPlan,
                 mlBackground: this.mlBackground
             }
-
+            this.isFetching = true
             axios
                 .post('profileManagement/', formData)
                 .then(response => {
-                    
+                    this.getUserData()
                 })
                 .catch(error => {
                     if (error.response) {
@@ -221,7 +221,6 @@ export default {
                         this.errors.push('Something went wrong. Please try again.')
                     }
                 })
-
         },
         changePassword() {
             this.validatePassword()

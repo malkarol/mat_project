@@ -1,6 +1,6 @@
 <template>
   <div>
-    <header class="py-5" style="background-color: #ffc34d;">
+    <header class="py-5" style="background-color: #011f4b;">
       <div class="container-fluid px-5">
         <div class="row gx-5 justify-content-center">
           <div class="col-lg-6">
@@ -9,7 +9,7 @@
                 MAT - Model Aggregation Tool
               </h1>
               <p class="lead text-white-50 mb-4">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda numquam neque ex dicta mollitia recusandae autem! Quibusdam labore illo eaque.
+                A web platform for collaborative machine learning without centralized training data 
               </p>
               <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
                 <a class="btn btn-primary btn-lg px-4 me-sm-3" href="#features"
@@ -35,8 +35,8 @@
                         <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-collection"></i></div>
                         <h2 class="h4 fw-bolder">Federated learning</h2>
                         <p>Paragraph of text beneath the heading to explain the heading. We'll add onto it with another sentence and probably just keep going until we run out of words.</p>
-                        <a class="text-decoration-none" href="#!">
-                            Call to action
+                        <a class="text-decoration-none" href="https://venturebeat.com/2021/08/13/what-is-federated-learning/">
+                            More about Federated Learning
                             <i class="bi bi-arrow-right"></i>
                         </a>
                     </div>
@@ -85,34 +85,26 @@
                                     </li>
                                     <li class="mb-2">
                                         <i class="bi bi-check text-primary"></i>
-                                        5GB storage
+                                        Access to only public sessions
                                     </li>
                                     <li class="mb-2">
                                         <i class="bi bi-check text-primary"></i>
-                                        Unlimited public projects
+                                        Client-side aggregation
                                     </li>
                                     <li class="mb-2">
                                         <i class="bi bi-check text-primary"></i>
-                                        Community access
+                                        More user interaction required
                                     </li>
                                     <li class="mb-2 text-muted">
                                         <i class="bi bi-x"></i>
-                                        Unlimited private projects
+                                        Less automated learning
                                     </li>
                                     <li class="mb-2 text-muted">
                                         <i class="bi bi-x"></i>
-                                        Dedicated support
-                                    </li>
-                                    <li class="mb-2 text-muted">
-                                        <i class="bi bi-x"></i>
-                                        Free linked domain
-                                    </li>
-                                    <li class="text-muted">
-                                        <i class="bi bi-x"></i>
-                                        Monthly status reports
+                                        Sessions access restriction
                                     </li>
                                 </ul>
-                                <div class="d-grid"><a class="btn btn-primary" href="#!">Choose plan</a></div>
+                                <div class="d-grid"><a class="btn btn-primary" @click="this.$router.push({ path: 'register', query: { plan: 'free' } })">Choose plan</a></div>
                             </div>
                         </div>
                     </div>
@@ -125,7 +117,7 @@
                                     Premium
                                 </div>
                                 <div class="mb-3">
-                                    <span class="display-4 fw-bold">$9</span>
+                                    <span class="display-4 fw-bold">$3</span>
                                     <span class="text-muted">/ mo.</span>
                                 </div>
                                 <ul class="list-unstyled mb-4">
@@ -135,34 +127,26 @@
                                     </li>
                                     <li class="mb-2">
                                         <i class="bi bi-check text-primary"></i>
-                                        5GB storage
+                                        Access to public sessions
                                     </li>
                                     <li class="mb-2">
                                         <i class="bi bi-check text-primary"></i>
-                                        Unlimited public projects
+                                        Access to private sessions
                                     </li>
                                     <li class="mb-2">
                                         <i class="bi bi-check text-primary"></i>
-                                        Community access
+                                        Server-side aggregation
                                     </li>
                                     <li class="mb-2">
                                         <i class="bi bi-check text-primary"></i>
-                                        Unlimited private projects
+                                        More automated learning
                                     </li>
                                     <li class="mb-2">
                                         <i class="bi bi-check text-primary"></i>
                                         Dedicated support
                                     </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Free linked domain
-                                    </li>
-                                    <li class="text-muted">
-                                        <i class="bi bi-x"></i>
-                                        Monthly status reports
-                                    </li>
                                 </ul>
-                                <div class="d-grid"><a class="btn btn-primary" href="#!">Choose plan</a></div>
+                                <div class="d-grid"><a @click="this.$router.push({ path: 'register', query: { plan: 'premium' } })" class="btn btn-primary">Choose plan</a></div>
                             </div>
                         </div>
                     </div>

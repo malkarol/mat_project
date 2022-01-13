@@ -28,6 +28,8 @@ class Session(models.Model):
     parameters_keys = ArrayField(models.CharField(max_length=30), null=True)
     parameters_values = ArrayField(models.CharField(max_length=30), null=True)
     model_name = models.CharField(max_length=200, null=True)
+    private_key = models.CharField(max_length=1000, null=True)
+
     # setting PricingPlanEnum value
 
     class PricingPlanEnum(models.IntegerChoices):
@@ -58,7 +60,7 @@ class StorageFile(models.Model):
 class Participant(models.Model):
     participant_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete = models.CASCADE)
-    session = models.ForeignKey(Session, on_delete = models.SET_NULL, null=True)
+    session = models.ForeignKey(Session, on_delete = models.CASCADE, null=True)
     # model = models.ForeignKey(MLModel, on_delete = models.SET_NULL, null=True)
     local_data_count = models.IntegerField(null=True)
     weights_uploaded = models.ForeignKey(StorageFile, on_delete = models.SET_NULL, null=True)

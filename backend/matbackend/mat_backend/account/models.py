@@ -72,7 +72,7 @@ class User(AbstractBaseUser):
 
 
     USERNAME_FIELD= 'email'
-    REQUIRED_FIELDS = [ 'username','first_name', 'last_name']
+    REQUIRED_FIELDS = [ 'username','first_name', 'last_name', 'pricing_plan']
 
     objects = UserManager()
     # setting PricingPlanEnum value

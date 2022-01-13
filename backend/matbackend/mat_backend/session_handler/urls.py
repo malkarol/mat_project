@@ -34,8 +34,15 @@ urlpatterns=[
     path('join-session/', views.join_session),
     # check in which sessions user is
     path('participants/filter/<int:pk>', views.get_joined_sessions),
+    path('session/<int:spk>/participant/<int:ppk>', views.participant_for_session),
     # return list of usernames for a single sessint
     path('participants/session/<int:pk>', views.get_participants_for_session),
+
+    path('validateprivatekey', views.validate_private_key),
+    path('mysessions/<str:name>', views.get_managed_sessions),
+    path('leavesession/<int:spk>', views.leave_session),
+    path('getzip/<int:pk>', views.get_zip),
+    path('testmodel/', views.test_model),
 
 
     # instuctions
