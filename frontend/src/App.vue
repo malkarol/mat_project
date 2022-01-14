@@ -7,7 +7,7 @@
     <div class="flex-shrink-0 Site-content">
         <router-view />
     </div>
-    <Footer class="footer mt-auto py-3 bg-light"/>
+    <Footer/>
   </div>
 
 </template>

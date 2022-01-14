@@ -154,6 +154,12 @@ export default {
     mounted() {
         axios.get('/api/v1/sessions/').then(response => {
                 this.sessions = response.data
+
+                if (this.$store.state.user.pricing_plan == 0)
+                {this.sessions = this.sessions.filter(session => {
+                    return session.pricing_plan == 0
+                })}
+                console.log(this.sessions)
                 this.updateSessionList()
             }).catch(error => {
                 if (error.response) {
@@ -315,7 +321,8 @@ export default {
                     return session.name.toLowerCase().includes(this.search.toLowerCase())
                 })
             }
-
+            console.log(this.$store.state.user.pricing_plan != 0)
+            if (this.$store.state.user.pricing_plan != 0){
             if (publicCheck.checked && privateCheck.checked) {
                 this.filterSessions = this.filterSessions
             } else if (publicCheck.checked && !privateCheck.checked) {
@@ -329,10 +336,11 @@ export default {
             } else {
                 this.filterSessions = []
             }
+            }
 
             if (joinedSessionsCheck.checked){
                 this.filterSessions = this.filterSessions.filter(session => {
-                    return this.joinedSessions.some(e => e == session.session_id) 
+                    return this.joinedSessions.some(e => e == session.session_id)
                 })
             }
 
@@ -347,7 +355,7 @@ export default {
             const start = (this.currentPage - 1) * this.pageSize
             const end = this.currentPage * this.pageSize
             this.pagedSessions = this.filterSessions.slice(start, end)
-                
+            console.log(this.sessions)
         }
     },
     watch: {
