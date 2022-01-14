@@ -18,7 +18,7 @@ class Session(models.Model):
     min_num_of_participants = models.IntegerField()
     max_num_of_participants = models.IntegerField()
     actual_num_of_participants = models.IntegerField()
-    tags = ArrayField(models.CharField(max_length=30), null=True)
+    tags = ArrayField(models.CharField(max_length=30), blank=True)
     start_date = models.DateField()
     end_date = models.DateField(null=True)
     creation_date = models.DateField(auto_now_add=True)

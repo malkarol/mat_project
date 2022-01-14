@@ -187,7 +187,7 @@ export default {
       this.errors = []
       console.log('Sign up')
       console.log(this.username)
-      console.log(this.password)
+      // console.log(this.password)
       console.log(this.email)
       console.log(this.fullName)
       console.log(this.pricingPlan)
@@ -198,10 +198,11 @@ export default {
         password: this.password,
         email: this.email,
         first_name: this.fullName.split(' ').slice(0, -1).join(' '),
-        last_name: this.fullName.split(' ').slice(-1).join(' ')
-        // pricingPlan: this.pricingPlan,
-        // mlBackgroun: this.mlBackground
+        last_name: this.fullName.split(' ').slice(-1).join(' '),
+        pricing_plan: this.pricingPlan,
+        ml_background: this.mlBackground
       }
+      console.log(formData)
       this.$store.commit('setIsLoading', true)
       await axios
           .post('/api/v1/users/', formData)

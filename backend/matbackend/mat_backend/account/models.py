@@ -7,7 +7,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, first_name, last_name, username, password=None):
+    def create_user(self, email, first_name, last_name, username, ml_background, pricing_plan, password=None):
         """
         Creates and saves a User with the given email, date of
         birth and password.
@@ -26,14 +26,16 @@ class UserManager(BaseUserManager):
             email=self.normalize_email(email),
             first_name = first_name,
             last_name = last_name,
-            username = username
+            username = username,
+            pricing_plan = pricing_plan,
+            ml_background = ml_background,
         )
 
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password, first_name, last_name, username):
+    def create_superuser(self, email, password, first_name, last_name, username,  pricing_plan, ml_background):
 
 
         user = self.create_user(
@@ -41,7 +43,9 @@ class UserManager(BaseUserManager):
             first_name = first_name,
             last_name = last_name,
             username = username,
-            password = password
+            password = password,
+            pricing_plan = pricing_plan,
+            ml_background = ml_background
         )
         user.is_admin = True
         user.is_staff = True
@@ -72,7 +76,7 @@ class User(AbstractBaseUser):
 
 
     USERNAME_FIELD= 'email'
-    REQUIRED_FIELDS = [ 'username','first_name', 'last_name', 'pricing_plan']
+    REQUIRED_FIELDS = [ 'username','first_name', 'last_name', 'pricing_plan','ml_background']
 
     objects = UserManager()
     # setting PricingPlanEnum value
