@@ -15,7 +15,7 @@
           <router-link class="nav-link" to="/" style="text-decoration: none; color: inherit;" >Home</router-link>
         </li>
         <li class="nav-item">
-          <router-link class="nav-link" to="/" style="text-decoration: none; color: inherit;">Getting started</router-link>
+          <router-link class="nav-link" to="/getting-started" style="text-decoration: none; color: inherit;">Getting started</router-link>
         </li>
         <!-- <li v-if="isLogged() === true"  class="nav-item">
           <router-link class="nav-link" to="/session" style="text-decoration: none; color: inherit;">SingleSession[Preview]</router-link>

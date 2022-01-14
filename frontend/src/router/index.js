@@ -30,6 +30,11 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/SessionsPanel.vue')
   },
   {
+    path: '/getting-started',
+    name: 'GettingStarted',
+    component: () => import(/* webpackChunkName: "about" */ '../views/GettingStarted.vue')
+  },
+  {
     path: '/session/:id',
     name: 'Session',
     meta: {
