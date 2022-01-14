@@ -26,17 +26,17 @@
                     <input @change="updateSessionList()" type="checkbox" class="form-check-input" id="joinedSessionsCheck">
                     <label class="form-check-label mx-2" for="createdSessionsCheck"><strong>Joined sessions</strong></label><br>
                 </div>
-                <div v-if="this.$store.state.user.pricing_plan == 1" class="mx-3">
-                    <input @change="updateSessionList()" checked type="checkbox" class="form-check-input" id="privateCheck">
+                <div class="mx-3">
+                    <input @change="updateSessionList()" type="checkbox" class="form-check-input" id="privateCheck">
                     <label class="form-check-label mx-2" for="privateCheck"><strong>Show Private</strong></label><br>
                 </div>
-                <div v-if="this.$store.state.user.pricing_plan == 1">
+                <div>
                     <input @change="updateSessionList()" checked type="checkbox" class="form-check-input" id="publicCheck">
                     <label class="form-check-label mx-2" for="publicCheck"><strong>Show Public</strong></label><br>
                 </div>
             </div>
             <br>
-            <div class="list-group"  style="min-height: 1000px">
+            <div class="list-group" style="min-height: 1000px">
 
                 <div v-for="(session, index) in pagedSessions" class="border border-5" :key="session.name" v-bind:pagedSessions="pagedSessions">
                     <div class="list-group-item list-group-item-action" :class="{'bg-primary text-white':index == selected}" @click="selected = index">
@@ -178,7 +178,12 @@ export default {
                 }
             })
     },
-    updated(){
+    updated() {
+        if (this.$store.state.user.pricing_plan == 0){
+            publicCheck.disabled = true
+            privateCheck.disabled = true
+        }
+        
         if (this.currentPage == 1 && document.getElementById("page_1") != null)
             document.getElementById("page_1").classList.add('active')
     },
@@ -227,7 +232,7 @@ export default {
         },
         changeCurrPage(index) {
             var elem = document.getElementById('page_' + this.currentPage)
-            if (elem != null){
+            if (elem != null) {
                 elem.classList.remove('active')
             }
             this.currentPage = index
@@ -315,7 +320,6 @@ export default {
                     return session.name.toLowerCase().includes(this.search.toLowerCase())
                 })
             }
-
             if (publicCheck.checked && privateCheck.checked) {
                 this.filterSessions = this.filterSessions
             } else if (publicCheck.checked && !privateCheck.checked) {
@@ -330,9 +334,9 @@ export default {
                 this.filterSessions = []
             }
 
-            if (joinedSessionsCheck.checked){
+            if (joinedSessionsCheck.checked) {
                 this.filterSessions = this.filterSessions.filter(session => {
-                    return this.joinedSessions.some(e => e == session.session_id) 
+                    return this.joinedSessions.some(e => e == session.session_id)
                 })
             }
 
@@ -341,13 +345,13 @@ export default {
                     return session.founder == this.$store.state.user.username
                 })
             }
-            if (parseInt(this.filterSessions.length/this.pageSize) < 1)
+            if (parseInt(this.filterSessions.length / this.pageSize) < 1)
                 this.currentPage = 1
 
             const start = (this.currentPage - 1) * this.pageSize
             const end = this.currentPage * this.pageSize
             this.pagedSessions = this.filterSessions.slice(start, end)
-                
+
         }
     },
     watch: {
