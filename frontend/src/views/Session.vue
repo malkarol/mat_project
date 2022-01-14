@@ -11,7 +11,7 @@
                     <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">General information</button>
                     <button class="nav-link" id="nav-upload-tab" data-bs-toggle="tab" data-bs-target="#nav-upload" type="button" role="tab" aria-controls="nav-upload" aria-selected="false">Upload your local model</button>
                     <button class="nav-link" id="nav-getGlobal-tab" data-bs-toggle="tab" data-bs-target="#nav-getGlobal" type="button" role="tab" aria-controls="nav-getGlobal" aria-selected="false">Get global model</button>
-                    <button v-if="this.session.founder == this.$store.state.user.username" class="nav-link" id="nav-manageSession-tab" data-bs-toggle="tab" data-bs-target="#nav-manageSession" type="button" role="tab" aria-controls="nav-manageSession" aria-selected="false">Manage session</button>
+                    <button class="nav-link" id="nav-manageSession-tab" data-bs-toggle="tab" data-bs-target="#nav-manageSession" type="button" role="tab" aria-controls="nav-manageSession" aria-selected="false">Manage session</button>
                 </div>
             </nav>
 
@@ -209,23 +209,25 @@
                     </div>
 
                 </div>
-                <div v-if="this.session.founder == this.$store.state.user.username" class="tab-pane fade" id="nav-manageSession" role="tabpanel" aria-labelledby="nav-manageSession-tab">
-                     <div class="row mt-3">
-                        <div class="col mb-3 shadow p-3 mb-5 d-flex justify-content-center rounded" style="background-color: #f1f1f1;
-                                    height=500">
+                <div class="tab-pane fade" id="nav-manageSession" role="tabpanel" aria-labelledby="nav-manageSession-tab">
+                    <div class="row mt-3">
+                        <div class="col mb-3 shadow p-3 mb-5 rounded" style="background-color: #f1f1f1;
+                                   ">
+                                   <div class=" d-flex justify-content-center">
                             <h4 for="lastName" class='mb-3'> <strong>Results:</strong></h4>
-                            <div id="chart" style="height=500; width=500;">
-                                <Chart />
+                            <ChartResult :key="componentKey" v-bind:chartData="chartDataAccuracy" :chartOptions="chartOptions" />
+                            <ChartResult :key="componentKeyLoss" v-bind:chartData="chartDataLoss" :chartOptions="chartOptions" />
+
                             </div>
+                            <button @click="fillData">Show results</button>
                         </div>
-                        </div>
+                    </div>
                     <div class="row mt-3">
                         <div class="col mb-3 shadow p-3 mb-5 d-flex justify-content-center rounded" style="background-color: #f1f1f1;">
                             <button class="btn btn-primary btn-lg btn-success mt-3 mb-3 mx-1" @click="deleteSession()">Delete session</button>
                         </div>
                     </div>
                 </div>
-
 
             </div>
             <div class="d-flex justify-content-between">
@@ -244,22 +246,61 @@
 <script>
 // import participantJson from '@/participants.json'
 import axios from 'axios'
-import Chart from '@/components/Chart.vue'
+//import Chart from '@/components/Chart.vue'
+import ChartResult from '@/components/ChartResult'
 
 export default {
+    components: {
+        ChartResult
+    },
+    beforeCreate() {
+        //this.$options.components.ChartResult = require('@/components/ChartResult.vue').default;
+    },
     data() {
         return {
             // participantList: participantJson,
+            data_for_chart: {},
             startDate: '2022-01-01',
             endDate: '2022-02-01',
             session: {},
             participants: [],
             errors: [],
             data_path: '',
-            usernames: []
-
-
+            renderChart: false,
+            usernames: [],
+            componentKey: 0,
+            componentKeyLoss: 0,
+            chartDataAccuracy: {
+                labels: ["Hello"], //response.data.names,
+                datasets: [{
+                    label: 'Data One',
+                    backgroundColor: '#f87979',
+                    data: [1] //response.data.accuracy
+                }]
+            },
+            chartDataLoss: {
+                labels: ["Hello"], //response.data.names,
+                datasets: [{
+                    label: 'Data One',
+                    backgroundColor: '#f87979',
+                    data: [1] //response.data.accuracy
+                }]
+            },
+            chartOptions: {
+                responsive: true,
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            min: 0,
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
         }
+    },
+    beforeMount() {
+        //this.fillData()
     },
     mounted() {
         axios.get('/api/v1/session/' + this.$route.params.id)
@@ -293,13 +334,57 @@ export default {
             this.usernames.push(user['username'])
     },
     components: {
-        Chart,
+        ChartResult,
     },
     methods: {
         styleFounder(username) {
             if (username === this.session.founder) {
                 return "background-color: #ffc34d;"
             }
+        },
+        forceRerender() {
+            this.componentKey += 1
+            this.componentKeyLoss +=1
+        },
+        fillData() {
+            this.$store.state.isLoading = true
+            axios.get('/api/v1/results-for-chart/' + this.$route.params.id)
+                .then(response => {
+                    console.log("w środku")
+
+                    this.chartDataAccuracy = {
+                        labels: response.data.names.concat(response.data.names).concat(response.data.names).concat(response.data.names).concat(response.data.names),
+                        datasets: [{
+                                label: 'Accuracy',
+                                backgroundColor: 'rgb(77, 137, 255)',
+                                data: response.data.accuracy.concat(response.data.accuracy).concat(response.data.accuracy).concat(response.data.accuracy).concat(response.data.accuracy)
+                            }]
+                    }
+                    this.chartDataLoss = {
+                        labels: response.data.names.concat(response.data.names).concat(response.data.names).concat(response.data.names).concat(response.data.names),
+                        datasets: [{
+                                label: 'Loss',
+                            backgroundColor: '#f87979',
+                            data: response.data.losses.concat(response.data.losses).concat(response.data.losses).concat(response.data.losses).concat(response.data.losses)
+                            }]
+                    }
+                    console.log(this.chartData)
+                    this.renderChart = true;
+                    this.forceRerender()
+                    this.$store.state.isLoading = false
+                }).catch(error => {
+                    if (error.response) {
+                        for (const property in error.response.data) {
+                            this.errors.push(`${property}: ${error.response.data[property]}`)
+                        }
+                    } else if (error.message) {
+                        this.errors.push('Something went wrong. Please try again.')
+                    }
+                })
+
+        },
+        getRandomInt() {
+            return Math.floor(Math.random() * (10 - 5 + 1)) + 10
         },
         getUserType(usertype) {
             switch (usertype) {
@@ -526,7 +611,9 @@ export default {
                 responseType: 'blob',
             }).then((response) => {
                 console.log(response)
-                var fileURL = window.URL.createObjectURL(new Blob([response.data],{type:'application/zip'}));
+                var fileURL = window.URL.createObjectURL(new Blob([response.data], {
+                    type: 'application/zip'
+                }));
                 var fileLink = document.createElement('a');
 
                 fileLink.href = fileURL;
