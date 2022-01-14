@@ -210,6 +210,11 @@ export default {
             axios
                 .post('api/v1/profileManagement/', formData)
                 .then(response => {
+                    this.$store.commit('setUser', {
+                        'id': this.$store.state.user.id,
+                        'username': this.$store.state.user.username,
+                        'pricing_plan': this.pricingPlan
+                    })
                     this.getUserData()
                 })
                 .catch(error => {
