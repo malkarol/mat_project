@@ -158,6 +158,7 @@ export default {
             document.getElementById("page_1").classList.add('active')
     },
     mounted() {
+        this.$store.state.isLoading = true
         axios.get('/api/v1/sessions/').then(response => {
                 this.sessions = response.data
 
@@ -168,6 +169,7 @@ export default {
                 }
                 console.log(this.sessions)
                 this.updateSessionList()
+                this.$store.state.isLoading = false
             }).catch(error => {
                 if (error.response) {
                     for (const property in error.response.data) {

@@ -163,12 +163,14 @@ export default {
                 user_id: this.$store.state.user.id,
                 email: this.email
             }
-            console.log(formData)
+            this.$store.state.isLoading = true
             axios
                 .post('api/v1/profileEmail/', formData)
                 .then(response => {
                     console.log(response)
                     emailChangeInput.classList.remove('d-none')
+                    this.$store.state.isLoading = false
+
                 })
                 .catch(error => {
                     if (error.response) {
@@ -181,6 +183,8 @@ export default {
                 })
         },
         getUserData() {
+            this.$store.state.isLoading = true
+            
             axios.get('api/v1/user/' + this.$store.state.user.id)
                 .then((resp) => {
                     console.log(resp.data)
@@ -190,7 +194,9 @@ export default {
                     this.pricingPlan = resp.data.pricing_plan == 1 ? 1 : 0
                     this.mlBackground = resp.data.ml_background
                     this.isFetching = false
+                    this.$store.state.isLoading = false
                 })
+            
         },
         changeInformation() {
             this.validateForm()
@@ -207,6 +213,7 @@ export default {
                 mlBackground: this.mlBackground
             }
             this.isFetching = true
+            this.$store.state.isLoading = true
             axios
                 .post('api/v1/profileManagement/', formData)
                 .then(response => {
@@ -237,7 +244,7 @@ export default {
                 user_id: this.$store.state.user.id,
                 password: this.changedPassword
             }
-
+            this.$store.state.isLoading = true
             axios
                 .post('api/v1/profilePassword/', formData)
                 .then(response => {
