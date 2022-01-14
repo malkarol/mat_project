@@ -123,19 +123,26 @@
                             <option value="adam">rmsprop</option>
                         </select>
                     </div>
-                    <legend class="col-form-label col-sm-2 pt-0"><strong>Picture size</strong></legend>
+                    <div class="d-flex flex-row w-50">
+                        <div class="d-flex flex-row align-items-center col-6">
+                            <legend class="col-form-label"><strong>Picture size</strong></legend>
+                            <div class="">
+                                <input class="mlparams" type="number" id="numOfEpochs" min="1" max="100" v-model="picture_size">
+                            </div>
+                        </div>
+                        <div class="d-flex flex-row align-items-center col-3 px-3 w-50">
+                            <legend class="col-form-label"><strong>Color</strong></legend>
 
-                    <div class="col-sm-2">
-                        <input class="mlparams" type="number" id="numOfEpochs" min="1" max="100" v-model="picture_size">
-                    </div>
-                    <legend class="col-form-label col-sm-2 "><strong>Color</strong></legend>
+                            <div class="col-sm-7">
+                                <select id="optimizer" class="form-select mlparams" required data-width="25%" v-model="color">
+                                    <option value="1" selected>Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                        </div>
 
-                    <div class="col-sm-2">
-                        <select id="optimizer" class="form-select mlparams" required data-width="25%" v-model="color">
-                            <option value="1" selected>Yes</option>
-                            <option value="0">No</option>
-                        </select>
                     </div>
+
                 </fieldset>
                 <fieldset class="row mb-3">
                     <div class="col-xs-4">
