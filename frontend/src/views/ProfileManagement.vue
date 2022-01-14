@@ -187,7 +187,7 @@ export default {
                     this.username = resp.data.username
                     this.email = resp.data.email
                     this.fullName = resp.data.first_name + ' ' + resp.data.last_name
-                    this.pricingPlan = resp.data.pricing_plan < 1 ? 1 : resp.data.pricing_plan
+                    this.pricingPlan = resp.data.pricing_plan == 1 ? 1 : 0
                     this.mlBackground = resp.data.ml_background
                     this.isFetching = false
                 })
