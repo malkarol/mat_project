@@ -316,6 +316,8 @@ export default {
             }
         },
         leaveSession() {
+            if (!confirm("Are you sure you wish to leave this session?"))
+                return
             axios.delete('api/v1/leavesession/' + this.session.session_id)
                 .then(response => {
                     this.backToSessions()
@@ -331,6 +333,8 @@ export default {
                 })
         },
         deleteSession() {
+            if (!confirm("Are you sure you would like to delete this session? This action cannot be undone."))
+                return
             axios.delete('api/v1/session/' + this.session.session_id)
                 .then(response => {
                     this.backToSessions()
