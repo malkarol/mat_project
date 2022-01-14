@@ -38,7 +38,7 @@
             <br>
             <div class="list-group"  style="min-height: 1000px">
 
-                <div v-for="(session, index) in pagedSessions" class="border border-5" :key="session.name" v-bind:pagedSessions="pagedSessions">
+                <div v-for="(session, index) in pagedSessions" class="border border-5" :key="session.session_id" v-bind:pagedSessions="pagedSessions">
                     <div class="list-group-item list-group-item-action" :class="{'bg-primary text-white':index == selected}" @click="selected = index">
                         <div data-bs-toggle="collapse" :data-bs-target="'#example_' + index" aria-expanded="false" :aria-controls="'example_' + index">
                             <div class="d-flex w-100 justify-content-between">
@@ -317,7 +317,7 @@ export default {
             this.filterSessions = this.sessions
 
             if (this.search != null && this.search.length > 0) {
-                this.filterSessions = this.filterSessions.filter(session => {
+                this.filterSessions = this.sessions.filter(session => {
                     return session.name.toLowerCase().includes(this.search.toLowerCase())
                 })
             }
