@@ -154,7 +154,7 @@ def join_session(request):
     if request.method == 'POST':
         if request.data['private_key'] != '0' and request.data['private_key'] != session.private_key:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        
+
         sessSerializer = SessionSerializer(session)
 
         sessionTmp = sessSerializer.data
@@ -236,7 +236,7 @@ def add_many_participants(request):
                 session = Session.objects.get(pk=serializer.data['session_id'])
                 send_mail_with_privatekey(session)
                 session.save()
-                
+
             print(request.data['usernames'])
 
 
@@ -281,6 +281,33 @@ def add_many_participants(request):
                 serializerParticipant.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_results_for_participants(request,pk):
+    if request.method == 'GET':
+        participant_list = Participant.objects.filter(session__session_id=pk)
+        serializer = ParticipantSerializer(participant_list, many=True)
+        participants = {}
+        losses = []
+        names = []
+        accuracies = []
+        for user in serializer.data:
+            losses.append(user['loss'])
+            accuracies.append(user['accuracy'])
+
+        users_ids = [x['user'] for x in serializer.data]
+        users_list = User.objects.filter(id__in=users_ids)
+        serializerUser = UserSerializer(users_list, many=True)
+        print()
+        for user_2 in users_list:
+            names.append(user_2.username)
+
+        participants['names'] = names
+        participants['losses'] = losses
+        participants['accuracy'] = accuracies
+
+        return Response(participants, status=status.HTTP_201_CREATED)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -424,7 +451,7 @@ def leave_session(request, spk):
         try:
             participant = Participant.objects.filter(session_id=spk).filter(user_id=request.user.id)[0]
             session = Session.objects.get(pk = spk)
-            
+
             participant.delete()
             session.actual_num_of_participants -=  1
             session.save()
@@ -565,7 +592,7 @@ def get_zip(request, pk):
         files = StorageFile.objects.filter(related_session = pk)
         session = Session.objects.get(pk = pk)
         b = BytesIO()
-        
+
         with zipfile.ZipFile(b, 'w') as zf:
             for file in files:
                 try:
@@ -584,15 +611,15 @@ def test_model(request):
     fh = storage.open('/session_Id_72/hello.h5', 'rb')
     with open("test.h5", 'wb') as f:
         f.write(fh.read())
-    
+
     model = tf.keras.Sequential()
     model.add(tf.keras.Input(shape=(16,)))
     model.add(tf.keras.layers.Dense(8))
-    
+
     model.load_weights(fh)
     print(model.get_weights())
     return Response(status=status.HTTP_200_OK)
-    
+
 
 
 @api_view(['POST'])
@@ -725,4 +752,4 @@ def generate_private_key(session):
     string = str(session.creation_date) + session.name
     encoded = string.encode()
     return hashlib.sha256(encoded).hexdigest()
-    
+

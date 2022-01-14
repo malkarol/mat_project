@@ -210,12 +210,23 @@
 
                 </div>
                 <div v-if="this.session.founder == this.$store.state.user.username" class="tab-pane fade" id="nav-manageSession" role="tabpanel" aria-labelledby="nav-manageSession-tab">
+                     <div class="row mt-3">
+                        <div class="col mb-3 shadow p-3 mb-5 d-flex justify-content-center rounded" style="background-color: #f1f1f1;
+                                    height=500">
+                            <h4 for="lastName" class='mb-3'> <strong>Results:</strong></h4>
+                            <div id="chart" style="height=500; width=500;">
+                                <Chart />
+                            </div>
+                        </div>
+                        </div>
                     <div class="row mt-3">
                         <div class="col mb-3 shadow p-3 mb-5 d-flex justify-content-center rounded" style="background-color: #f1f1f1;">
                             <button class="btn btn-primary btn-lg btn-success mt-3 mb-3 mx-1" @click="deleteSession()">Delete session</button>
                         </div>
                     </div>
                 </div>
+
+
             </div>
             <div class="d-flex justify-content-between">
                 <button class="btn btn-primary btn-lg btn-block" @click="backToSessions()">Back to sessions</button>
@@ -233,6 +244,7 @@
 <script>
 // import participantJson from '@/participants.json'
 import axios from 'axios'
+import Chart from '@/components/Chart.vue'
 
 export default {
     data() {
@@ -243,7 +255,9 @@ export default {
             session: {},
             participants: [],
             errors: [],
-            data_path: ''
+            data_path: '',
+            usernames: []
+
 
         }
     },
@@ -274,6 +288,12 @@ export default {
                 this.errors.push('Something went wrong. Please try again.')
             }
         })
+
+        for (const user in this.participants)
+            this.usernames.push(user['username'])
+    },
+    components: {
+        Chart,
     },
     methods: {
         styleFounder(username) {

@@ -21,7 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('djoser.urls')),
     path('api/v1/', include('djoser.urls.authtoken')),
-    path('',include('account.urls')),
+    path('api/v1/',include('account.urls')),
     path('api/v1/',include('session_handler.urls')),
     path('api/v1/',include('ml_handler.urls')),
 

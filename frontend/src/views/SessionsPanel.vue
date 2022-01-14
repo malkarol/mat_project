@@ -155,7 +155,7 @@ export default {
         axios.get('/api/v1/sessions/').then(response => {
                 this.sessions = response.data
 
-                if (this.$store.state.user.pricing_plan == 0)
+                if (this.$store.state.user.pricing_plan != 1)
                 {this.sessions = this.sessions.filter(session => {
                     return session.pricing_plan == 0
                 })}
@@ -323,18 +323,14 @@ export default {
             }
             console.log(this.$store.state.user.pricing_plan != 0)
             if (this.$store.state.user.pricing_plan != 0){
-            if (publicCheck.checked && privateCheck.checked) {
-                this.filterSessions = this.filterSessions
-            } else if (publicCheck.checked && !privateCheck.checked) {
+           if (publicCheck.checked ) {
                 this.filterSessions = this.filterSessions.filter(session => {
                     return session.pricing_plan == 0
                 })
-            } else if (privateCheck.checked && !publicCheck.checked) {
+            } if (privateCheck.checked) {
                 this.filterSessions = this.filterSessions.filter(session => {
                     return session.pricing_plan == 1
                 })
-            } else {
-                this.filterSessions = []
             }
             }
 

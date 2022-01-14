@@ -264,54 +264,41 @@ export default {
                 }
             })
         },
-        testIf() {
-            console.log(this.color)
-            if (this.color === "1") {
-                console.log("SUCCESS")
-            }
-            console.log("kurde bele")
-        },
-        testFilterParticipants() {
-            axios
-                .get('/api/v1/participants/filter/' + this.$store.state.user.id)
-                .then(response => {
-                    console.log(response)
-                }).catch(error => {
-                    if (error.response) {
-                        for (const property in error.response.data) {
-                            this.errors.push(`${property}: ${error.response.data[property]}`)
-                        }
-                    } else if (error.message) {
-                        this.errors.push('Something went wrong. Please try again.')
-                    }
-                })
-        },
-        testAddingParticipants() {
-            const formData = {
-                usernames: this.participants,
-                session: 8
-            }
-            axios
-                .post('/api/v1/sessions/', formData)
-                .then(response => {
-                    console.log(response)
-                })
-        },
-        showParams() {
-            var els = document.getElementsByClassName("mlparams");
-            Array.prototype.forEach.call(els, function (el) {
-                // Do stuff here
+        // testFilterParticipants() {
+        //     axios
+        //         .get('/api/v1/participants/filter/' + this.$store.state.user.id)
+        //         .then(response => {
+        //             console.log(response)
+        //         }).catch(error => {
+        //             if (error.response) {
+        //                 for (const property in error.response.data) {
+        //                     this.errors.push(`${property}: ${error.response.data[property]}`)
+        //                 }
+        //             } else if (error.message) {
+        //                 this.errors.push('Something went wrong. Please try again.')
+        //             }
+        //         })
+        // },
+        // testAddingParticipants() {
+        //     const formData = {
+        //         usernames: this.participants,
+        //         session: 8
+        //     }
+        //     axios
+        //         .post('/api/v1/sessions/', formData)
+        //         .then(response => {
+        //             console.log(response)
+        //         })
+        // },
+        // showParams() {
+        //     var els = document.getElementsByClassName("mlparams");
+        //     Array.prototype.forEach.call(els, function (el) {
+        //         // Do stuff here
 
-                console.log(el.value);
-            });
-        },
-        showUsers() {
-            console.log("siemka")
-            console.log(this.participants)
-        },
-        printDate() {
-            console.log(this.date)
-        },
+        //         console.log(el.value);
+        //     });
+        // },
+
         backToSessions() {
             this.$router.push('/sessions')
         },
