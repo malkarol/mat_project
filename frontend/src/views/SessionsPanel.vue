@@ -27,16 +27,16 @@
                     <label class="form-check-label mx-2" for="createdSessionsCheck"><strong>Joined sessions</strong></label><br>
                 </div>
                 <div v-if="this.$store.state.user.pricing_plan == 1" class="mx-3">
-                    <input @change="updateSessionList()" checked type="checkbox" class="form-check-input" id="privateCheck">
+                    <input v-model="privateSessions" @change="updateSessionList()" type="checkbox" class="form-check-input" id="privateCheck">
                     <label class="form-check-label mx-2" for="privateCheck"><strong>Show Private</strong></label><br>
                 </div>
                 <div v-if="this.$store.state.user.pricing_plan == 1">
-                    <input @change="updateSessionList()" checked type="checkbox" class="form-check-input" id="publicCheck">
+                    <input v-model="publicSessions" @change="updateSessionList()" checked type="checkbox" class="form-check-input" id="publicCheck">
                     <label class="form-check-label mx-2" for="publicCheck"><strong>Show Public</strong></label><br>
                 </div>
             </div>
             <br>
-            <div class="list-group"  style="min-height: 1000px">
+            <div class="list-group" style="min-height: 1000px">
 
                 <div v-for="(session, index) in pagedSessions" class="border border-5" :key="session.session_id" v-bind:pagedSessions="pagedSessions">
                     <div class="list-group-item list-group-item-action" :class="{'bg-primary text-white':index == selected}" @click="selected = index">
@@ -147,18 +147,25 @@ export default {
             pagedSessions: [],
             pageSize: 10,
             currentPage: 1,
+            publicSessions: true,
+            privateSessions: false,
             isFetching: true,
             errors: []
         }
+    },
+    updated() {
+        if (this.currentPage == 1 && document.getElementById("page_1") != null)
+            document.getElementById("page_1").classList.add('active')
     },
     mounted() {
         axios.get('/api/v1/sessions/').then(response => {
                 this.sessions = response.data
 
-                if (this.$store.state.user.pricing_plan != 1)
-                {this.sessions = this.sessions.filter(session => {
-                    return session.pricing_plan == 0
-                })}
+                if (this.$store.state.user.pricing_plan != 1) {
+                    this.sessions = this.sessions.filter(session => {
+                        return session.pricing_plan == 0
+                    })
+                }
                 console.log(this.sessions)
                 this.updateSessionList()
             }).catch(error => {
@@ -183,10 +190,6 @@ export default {
                     this.errors.push('Something went wrong. Please try again.')
                 }
             })
-    },
-    updated(){
-        if (this.currentPage == 1 && document.getElementById("page_1") != null)
-            document.getElementById("page_1").classList.add('active')
     },
     methods: {
         hello() {
@@ -233,7 +236,7 @@ export default {
         },
         changeCurrPage(index) {
             var elem = document.getElementById('page_' + this.currentPage)
-            if (elem != null){
+            if (elem != null) {
                 elem.classList.remove('active')
             }
             this.currentPage = index
@@ -321,20 +324,24 @@ export default {
                     return session.name.toLowerCase().includes(this.search.toLowerCase())
                 })
             }
-            console.log(this.$store.state.user.pricing_plan != 0)
-            if (this.$store.state.user.pricing_plan != 0){
-           if (publicCheck.checked ) {
-                this.filterSessions = this.filterSessions.filter(session => {
-                    return session.pricing_plan == 0
-                })
-            } if (privateCheck.checked) {
-                this.filterSessions = this.filterSessions.filter(session => {
-                    return session.pricing_plan == 1
-                })
-            }
+
+            if (this.$store.state.user.pricing_plan != 0) {
+                if (publicCheck.checked && privateCheck.checked) {
+                    this.filterSessions = this.filterSessions
+                } else if (publicCheck.checked && !privateCheck.checked) {
+                    this.filterSessions = this.filterSessions.filter(session => {
+                        return session.pricing_plan == 0
+                    })
+                } else if (privateCheck.checked && !publicCheck.checked) {
+                    this.filterSessions = this.filterSessions.filter(session => {
+                        return session.pricing_plan == 1
+                    })
+                } else {
+                    this.filterSessions = []
+                }
             }
 
-            if (joinedSessionsCheck.checked){
+            if (joinedSessionsCheck.checked) {
                 this.filterSessions = this.filterSessions.filter(session => {
                     return this.joinedSessions.some(e => e == session.session_id)
                 })
@@ -345,7 +352,7 @@ export default {
                     return session.founder == this.$store.state.user.username
                 })
             }
-            if (parseInt(this.filterSessions.length/this.pageSize) < 1)
+            if (parseInt(this.filterSessions.length / this.pageSize) < 1)
                 this.currentPage = 1
 
             const start = (this.currentPage - 1) * this.pageSize
