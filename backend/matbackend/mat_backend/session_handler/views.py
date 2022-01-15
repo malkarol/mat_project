@@ -311,7 +311,7 @@ def get_results_for_participants(request,pk):
 
 
 @api_view(['POST'])
-def upload_global_weights(request):
+def upload_initial_global_weights(request):
     if request.method == 'POST':
         try:
             print(request.user.id)
@@ -656,7 +656,7 @@ def global_model_script(request,pk):
         print(parameters)
         response_content = '\n'.join(lines)
         response = FileResponse(response_content, content_type="text/plain,charset=utf-8")
-        response['Content-Disposition'] = 'attachment; filename=initialize_weights.py'
+        response['Content-Disposition'] = 'attachment; filename=global_model_script.py'
         return response
 
 @api_view(['GET'])

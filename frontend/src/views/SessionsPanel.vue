@@ -133,7 +133,7 @@
 </template>
 
 <script>
-// import sessionsJson from '@/sessions.json'
+//import sessionsJson from '@/sessions.json'
 import axios from 'axios'
 
 export default {
@@ -150,7 +150,8 @@ export default {
             publicSessions: true,
             privateSessions: false,
             isFetching: true,
-            errors: []
+            errors: [],
+            password:''
         }
     },
     updated() {
