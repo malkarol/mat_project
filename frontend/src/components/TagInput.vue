@@ -58,7 +58,7 @@
 
           if (val.length > 0 && !this.tags.includes(val) && this.isOwner(val,this.isUsers)===false) {
             this.tags.push(val)
-            this.$emit("filterSessions", "someValue");
+            this.$emit("filterSessions");
             event.target.value = ''
           }
           console.log(this.tags)
@@ -81,14 +81,14 @@
       },
       removeTag (index){
         this.tags.splice(index,1)
-        this.$emit("filterSessions", "someValue");
+        this.$emit("filterSessions")
         console.log(this.tags)
       },
       removeLastTag (event) {
         if (event.target.value.length === 0)
         {
           this.removeTag(this.tags.length - 1)
-          this.$emit("filterSessions", "someValue");
+          this.$emit("filterSessions")
         }
          console.log(this.tags)
       },

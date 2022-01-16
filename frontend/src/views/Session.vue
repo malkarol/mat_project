@@ -107,10 +107,6 @@
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                     <h4 for="uploadWeights"> <strong>Step 1. Download learning script</strong></h4>
                                     <p>Download learning script for this model to train it on your private data</p>
-                                    <div>
-                                        <label for="uploadWeights" class="form-label text-muted">Only .h5 files.</label>
-                                        <input class="form-control form-control-lg" id="uploadWeights" accept=".h5" type="file">
-                                    </div>
                                     <button class="btn btn-primary btn-lg btn-success  mt-3  " @click="generateLocalModel()">Download local learning script</button>
                                 </div>
                             </div>
