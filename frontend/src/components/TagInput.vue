@@ -22,7 +22,30 @@
         disabled: false,
       }
     },
-    props:['tags', 'name','maxInput','isUsers'],
+    props:
+    {
+      filteredSessions:{
+        type: Array,
+        default: () => []
+      },
+      tags:{
+        type: Array,
+        default: () => []
+      },
+      maxInput:{
+        type:Number,
+        default: 10
+      },
+      isUsers:{
+        type:Boolean,
+        default: false
+      },
+      name:{
+        type:String,
+        default: "tags"
+      }
+    },
+    emits: ["filterSessions"],
     methods: {
       addTag (event) {
 
@@ -35,6 +58,7 @@
 
           if (val.length > 0 && !this.tags.includes(val) && this.isOwner(val,this.isUsers)===false) {
             this.tags.push(val)
+            this.$emit("filterSessions", "someValue");
             event.target.value = ''
           }
           console.log(this.tags)
@@ -57,12 +81,14 @@
       },
       removeTag (index){
         this.tags.splice(index,1)
+        this.$emit("filterSessions", "someValue");
         console.log(this.tags)
       },
       removeLastTag (event) {
         if (event.target.value.length === 0)
         {
           this.removeTag(this.tags.length - 1)
+          this.$emit("filterSessions", "someValue");
         }
          console.log(this.tags)
       },

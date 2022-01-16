@@ -7,13 +7,19 @@
                 <hr />
             </div>
 
-            <p>Type something in the input field to search the list for specific items:</p>
+            <p>Type something in the input field to search the list for specific sessions:</p>
             <div class="d-flex justify-content-between">
                 <div @change="updateSessionList()" class="col-sm-6"><input class="form-control" v-model="search" type="text" placeholder="Search..."></div>
                 <div>
                     <button type="button" class="btn btn-success" @click='goToNewSessionView'>
                         Create new session
                     </button>
+                </div>
+            </div>
+            <div class="d-flex flex-column justify-content-start">
+                <label for="tags" class="col-sm-2 col-form-label"> <strong>By tags</strong></label>
+                <div class="col-sm-6">
+                    <TagInput @filterSessions="updateSessionList" :filteredSessions="filterSessions" :tags="filterTags" :name="'tags'" :maxInput="15" :isUsers="false" />
                 </div>
             </div>
             <br>
@@ -135,8 +141,12 @@
 <script>
 //import sessionsJson from '@/sessions.json'
 import axios from 'axios'
+import TagInput from '@/components/TagInput.vue'
 
 export default {
+    components: {
+        TagInput
+    },
     data() {
         return {
             selected: undefined,
@@ -151,7 +161,8 @@ export default {
             privateSessions: false,
             isFetching: true,
             errors: [],
-            password:''
+            password: '',
+            filterTags: []
         }
     },
     updated() {
@@ -325,6 +336,12 @@ export default {
             if (this.search != null && this.search.length > 0) {
                 this.filterSessions = this.sessions.filter(session => {
                     return session.name.toLowerCase().includes(this.search.toLowerCase())
+                })
+            }
+
+            if (this.filterTags != null && this.filterTags.length > 0) {
+                this.filterSessions = this.filterSessions.filter(session => {
+                    return session.tags.some(item => this.filterTags.includes(item))
                 })
             }
 
