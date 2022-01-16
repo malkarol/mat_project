@@ -139,6 +139,17 @@ def get_managed_sessions(request, name):
         sessionsObjects = Session.objects.filter(founder = name)
         sessions = SessionSerializer(sessionsObjects, many=True)
         return Response(x for x in sessions.data)
+@api_view(['GET'])
+def get_session_model_progress(request, spk):
+    try:
+        session = Session.objects.get(pk=spk)
+    except Session.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    participants = Participant.objects.filter(session = session)
+    serializer = ParticipantSerializer(participants, many=True)
+    return Response(participant for participant in serializer.data)
+
+
 
 @api_view(['POST'])
 def join_session(request):
