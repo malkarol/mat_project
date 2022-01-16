@@ -8,9 +8,9 @@
             </div>
             <nav>
                 <div class="nav nav-tabs mb-4" id="nav-tab" role="tablist">
-                    <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">General information</button>
-                    <button class="nav-link" id="nav-upload-tab" data-bs-toggle="tab" data-bs-target="#nav-upload" type="button" role="tab" aria-controls="nav-upload" aria-selected="false">Upload your local model</button>
-                    <button class="nav-link" id="nav-getGlobal-tab" data-bs-toggle="tab" data-bs-target="#nav-getGlobal" type="button" role="tab" aria-controls="nav-getGlobal" aria-selected="false">Get global model</button>
+                    <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Information</button>
+                    <button class="nav-link" id="nav-upload-tab" data-bs-toggle="tab" data-bs-target="#nav-upload" type="button" role="tab" aria-controls="nav-upload" aria-selected="false">Learning panel</button>
+                    <button class="nav-link" id="nav-getGlobal-tab" data-bs-toggle="tab" data-bs-target="#nav-getGlobal" type="button" role="tab" aria-controls="nav-getGlobal" aria-selected="false">Results</button>
                     <button class="nav-link" id="nav-manageSession-tab" data-bs-toggle="tab" data-bs-target="#nav-manageSession" type="button" role="tab" aria-controls="nav-manageSession" aria-selected="false">Manage session</button>
                 </div>
             </nav>
@@ -129,52 +129,54 @@
                                     </div>
                                 </div>
                             </form>
-                            <div class="row">
-                                <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
-                                    <div>
-                                        <label for="uploadWeights" class="form-label text-muted">Only .h5 files.</label>
-                                        <input class="form-control form-control-lg" id="uploadWeights" accept=".h5" type="file">
-                                    </div>
-                                    <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="initializeGlobalWeightsScript()" value="Get script to calculate global weights" />
-                                    <input type="button" class="btn btn-primary btn-lg btn-success mt-3 mx-5" @click="uploadGlobalWeights()" value="Upload global weights" />
-
-                                </div>
-                            </div>
-                            <button class="btn btn-primary btn-lg btn-success mb-3" @click="generateLocalModel()">Download script for this parameters</button>
-                            <button class="btn btn-primary btn-lg btn-success mb-3" @click="getInitialWeights()">Get initial weights</button>
 
                         </div>
                     </div>
                 </div>
                 <div class="tab-pane fade" id="nav-upload" role="tabpanel" aria-labelledby="nav-upload-tab">
                     <div class="col-md-8 order-md-1">
+                         <div class="row">
+                                <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                                    <h4 for="uploadWeights"> <strong>1. Download learning script</strong></h4>
+                                    <div>
+                                        <label for="uploadWeights" class="form-label text-muted">Only .h5 files.</label>
+                                        <input class="form-control form-control-lg" id="uploadWeights" accept=".h5" type="file">
+                                    </div>
+                                    <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="initializeGlobalWeightsScript()" value="Get script to calculate global weights" />
+                                    <input type="button" class="btn btn-primary btn-lg btn-success mt-3 mx-5" @click="uploadGlobalWeights()" value="Upload global weights" />
+                                    <button class="btn btn-primary btn-lg btn-success  mt-3  " @click="generateLocalModel()">Download script for this parameters</button>
+                                    <button class="btn btn-primary btn-lg btn-success mt-3  mx-5" @click="getInitialWeights()">Get initial weights</button>
+
+                                </div>
+                            </div>
+
                         <div class="row mt-3">
 
-                            <p class="form-control-plaintext col mb-3 shadow p-3 mb-5 text-danger rounded " style="background-color: #f1f1f1;" id="staticText"> <strong>Important !!! </strong>
+                            <!-- <p class="form-control-plaintext col mb-3 shadow p-3 mb-5 text-danger rounded " style="background-color: #f1f1f1;" id="staticText"> <strong>Important !!! </strong>
                                 <br> At the bottom of previous tab, called <strong>General information</strong>, you could generate a configurated Python script with model implementation.
                                 <br> At this tab you are expected to upload a file that contains weights of pretrained model and were generated by mentioned script.
                                 <br> Of course it should be in <strong>.h5 format</strong>.
-                            </p>
+                            </p> -->
                         </div>
                         <form>
                             <div class="row mt-3">
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
-                                    <h4 for="lastName"> <strong>Upload weights from local model:</strong></h4>
+                                    <h4 for="lastName"> <strong>2. Upload weights from local model</strong></h4>
                                     <div>
                                         <label for="uploadLocal" class="form-label text-muted">(Only .h5 files)</label>
                                         <input class="form-control form-control-lg" id="uploadLocal" accept=".h5" type="file">
                                     </div>
                                     <input type="button" class="btn btn-primary btn-lg btn-success mt-3 mb-3" @click="uploadLocalWeights()" value="Upload local weights" />
-                                    <div>
+                                    <!-- <div>
                                         <label for="uploadLocalJson" class="form-label text-muted">(Only .json files)</label>
                                         <input class="form-control form-control-lg" id="uploadLocalJson" accept=".json" type="file">
                                     </div>
-                                    <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="uploadLocalWeightsJson()" value="Upload local weights" />
+                                    <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="uploadLocalWeightsJson()" value="Upload local weights" /> -->
                                 </div>
                             </div>
                             <div class="row mt-3">
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
-                                    <h4 for="lastName"> <strong>Upload results file:</strong></h4>
+                                    <h4 for="lastName"> <strong>3. Upload results file</strong></h4>
                                     <div>
                                         <label for="uploadLocalResults" class="form-label text-muted">(Only .json files)</label>
                                         <input class="form-control form-control-lg" id="uploadLocalResults" accept=".json" type="file">
@@ -190,22 +192,37 @@
 
                 <div class="tab-pane fade" id="nav-getGlobal" role="tabpanel" aria-labelledby="nav-getGlobal-tab">
                     <div class="row mt-3">
-                        <div class="col mb-3 shadow p-3 mb-5 d-flex justify-content-center rounded" style="background-color: #f1f1f1;">
-                            <div>
-                                <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getFile()">Global model script for predictions</button>
-                                <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getGlobalModel()">Global model script for idividual learning</button>
-                            </div>
-                            <div>
+                        <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                        <h4><strong>1. Aggregation:</strong></h4>
+                            <div class="d-flex justify-content-center">
                                 <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregateModelsScript()">Aggregate models locally</button>
                                 <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregation()">Aggregate models on server</button>
-
-                            </div>
-                            <div>
                                 <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getManyWeights()">Get local weights</button>
-                                <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="backToSessions()">Show results</button>
+
                             </div>
 
                         </div>
+                        <div class="row mt-3">
+                            <div class="col mb-3 shadow p-3 mb-5 rounded" style="background-color: #f1f1f1;">
+                            <h4><strong>2. Federated Averaging:</strong></h4>
+                                <div class=" d-flex justify-content-center">
+                                <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getFile()">Global model script for predictions</button>
+                                <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getGlobalModel()">Global model script for idividual learning</button>
+                                 <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="fillData">Show results</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div v-if="renderChart == true" class="row mt-3">
+                        <div class=" col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                            <h4 for="lastName" class='mb-3'> <strong>Accuracy and loss diagrams:</strong></h4>
+                            <div class="d-flex justify-content-center" >
+                            <ChartResult :key="componentKey" v-bind:chartData="chartDataAccuracy" :chartOptions="chartOptions" />
+                            <ChartResult :key="componentKeyLoss" v-bind:chartData="chartDataLoss" :chartOptions="chartOptions" />
+                            </div>
+                        </div>
+
                     </div>
 
                 </div>
@@ -213,13 +230,7 @@
                     <div class="row mt-3">
                         <div class="col mb-3 shadow p-3 mb-5 rounded" style="background-color: #f1f1f1;
                                    ">
-                                   <div class=" d-flex justify-content-center">
-                            <h4 for="lastName" class='mb-3'> <strong>Results:</strong></h4>
-                            <ChartResult :key="componentKey" v-bind:chartData="chartDataAccuracy" :chartOptions="chartOptions" />
-                            <ChartResult :key="componentKeyLoss" v-bind:chartData="chartDataLoss" :chartOptions="chartOptions" />
 
-                            </div>
-                            <button @click="fillData">Show results</button>
                         </div>
                     </div>
                     <div class="row mt-3">
@@ -288,6 +299,11 @@ export default {
             },
             chartOptions: {
                 responsive: true,
+                size:{
+
+                        height: 25
+
+                    },
                 scales: {
                     yAxes: [{
                         ticks: {
