@@ -2,6 +2,7 @@ from rest_framework import serializers
 from session_handler.models import Participant, Session, SessionResult, StorageFile
 
 class ParticipantSerializer(serializers.ModelSerializer):
+    user_name = serializers.ReadOnlyField()
     class Meta:
         model = Participant
         fields = '__all__'

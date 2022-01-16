@@ -102,7 +102,7 @@
                 </div>
                 <div class="tab-pane fade" id="nav-upload" role="tabpanel" aria-labelledby="nav-upload-tab">
                     <div class="row">
-                        <div class="col px-4">
+                        <div class="col-6 px-4">
                             <div class="row">
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                     <h4 for="uploadWeights"> <strong>Step 1. Download learning script</strong></h4>
@@ -155,7 +155,7 @@
                             </form>
 
                         </div>
-                        <div class="col px-4">
+                        <div class="col-4 px-4">
                             <div class="col shadow p-3 rounded" style="background-color: #f1f1f1;">
                                 <h4> <strong> Participants' progress </strong> </h4>
                                 <hr />
@@ -163,15 +163,16 @@
                                     <thead>
                                         <tr>
                                             <th scope="col">#</th>
-                                            <th scope="col">Participant</th>
-                                            <th scope="col">Local learning weights uploaded</th>
+                                            <th class="text-center" scope="col">Participant</th>
+                                            <th class="text-center" scope="col">Weights uploaded</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr v-for="(participant, index) in participants" :key="participant.username">
+                                        <tr v-for="(participant, index) in this.participantsProgress" :key="participant.username">
                                             <th scope="row">{{index+1}}</th>
-                                            <td>{{participant.username}}</td>
-                                            <td>{{participant.user_id}}</td>
+                                            <td class="text-center">{{participant.user_name}}</td>
+                                            <td class="text-center" v-if="participant.is_model_uploaded" ><strong>&#10004;</strong></td>
+                                            <td class="text-center" v-else><strong>&#10060;</strong></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -275,6 +276,7 @@ export default {
             localLearningScriptDownloaded: false,
             localModelWeightUploaded: false,
             resultsFileUploaded: false,
+            participantsProgress: [],
             chartDataAccuracy: {
                 labels: ["Hello"], //response.data.names,
                 datasets: [{
@@ -344,7 +346,8 @@ export default {
 
         for (const user in this.participants)
             this.usernames.push(user['username'])
-        
+        this.getParticipantsProgress()
+
     },
     components: {
         ChartResult,
@@ -354,6 +357,21 @@ export default {
             if (username === this.session.founder) {
                 return "background-color: #ffc34d;"
             }
+        },
+        getParticipantsProgress() {
+            axios.get('/api/v1/participantstrainingprocess/' + this.$route.params.id)
+                .then(response => {
+                    this.participantsProgress = response.data
+                    console.log(this.participantsProgress)
+                }).catch(error => {
+                    if (error.response) {
+                        for (const property in error.response.data) {
+                            this.errors.push(`${property}: ${error.response.data[property]}`)
+                        }
+                    } else if (error.message) {
+                        this.errors.push('Something went wrong. Please try again.')
+                    }
+                })
         },
         forceRerender() {
             this.componentKey += 1
@@ -574,6 +592,7 @@ export default {
                 .catch(function () {
                     console.log('FAILURE!!');
                 })
+
         },
         getInitialWeights() {
             axios({
@@ -815,6 +834,7 @@ export default {
                 ).then(function () {
                     console.log('SUCCESS!!');
                     this.uploadLocalWeights = true
+                    this.getParticipantsProgress()
                 })
                 .catch(function () {
                     console.log('FAILURE!!');

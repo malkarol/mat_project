@@ -67,6 +67,9 @@ class Participant(models.Model):
     # are local weights uploaded
     is_model_uploaded = models.BooleanField(default=False)
     is_owner = models.BooleanField(default=False)
+    @property
+    def user_name(self):
+        return self.user.username
 
 
 class SessionResult(models.Model):

@@ -43,6 +43,7 @@ urlpatterns=[
     path('leavesession/<int:spk>', views.leave_session),
     path('getzip/<int:pk>', views.get_zip),
     path('testmodel/', views.test_model),
+    path('participantstrainingprocess/<int:spk>', views.get_session_model_progress),
     # instructions
     path('instructions/lm/', views.get_instructions_local_model),
     path('results-for-chart/<int:pk>',views.get_results_for_participants)
