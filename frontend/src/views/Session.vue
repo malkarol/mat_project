@@ -15,7 +15,7 @@
                 </div>
             </nav>
 
-            <div class="tab-content" id="nav-tabContent">
+            <div v-if="!this.$store.state.isLoading" class="tab-content" id="nav-tabContent">
                 <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
                     <div class="row">
                         <div class="col-md order-md-2">
@@ -93,39 +93,6 @@
 
                                             </tbody>
                                         </table>
-                                        <!-- <fieldset class="row mb-2">
-                    <legend class="col-form-label col-sm-2 pt-0"><strong>Classification type</strong></legend>
-                    <div class="col-sm-4">
-                        <label class="d-flex justify-content-center"> Image</label>
-                    </div>
-
-                    <legend class="col-form-label col-sm-2 pt-0"><strong>Model</strong></legend>
-                <div class="col-sm-4">
-                    <label class="d-flex justify-content-center"> Simple Multi-layer Perceptor</label>
-                </div>
-            </fieldset>
-            <hr />
-              <fieldset class="row mb-2">
-                    <legend class="col-form-label col-sm-2 pt-0"><strong>Optimizer</strong></legend>
-                    <div class="col-sm-4">
-                    <label class="d-flex justify-content-center"> Stochiastic Gradient Descent</label>
-                    </div>
-                    <legend class="col-form-label col-sm-2 pt-0"><strong>Loss function</strong></legend>
-
-                <div class="col-sm-4">
-                     <label class="d-flex justify-content-center"> categorical crossentropy</label>
-
-                </div>
-            </fieldset>
-            <hr />
-             <fieldset class="row mb-2 ">
-                    <legend class="col-form-label col-sm-2 pt-0"><strong>Number of local epochs</strong></legend>
-                    <div class="col-sm-4">
-                        <label class="d-flex justify-content-center"> 4</label>
-                    </div>
-
-            </fieldset> -->
-
                                     </div>
                                 </div>
                             </form>
@@ -134,97 +101,121 @@
                     </div>
                 </div>
                 <div class="tab-pane fade" id="nav-upload" role="tabpanel" aria-labelledby="nav-upload-tab">
-                    <div class="col-md-8 order-md-1">
-                         <div class="row">
+                    <div class="row">
+                        <div class="col px-4">
+                            <div class="row">
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
-                                    <h4 for="uploadWeights"> <strong>1. Download learning script</strong></h4>
+                                    <h4 for="uploadWeights"> <strong>Step 1. Download learning script</strong></h4>
+                                    <p>Download learning script for this model to train it on your private data</p>
                                     <div>
                                         <label for="uploadWeights" class="form-label text-muted">Only .h5 files.</label>
                                         <input class="form-control form-control-lg" id="uploadWeights" accept=".h5" type="file">
                                     </div>
-                                    <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="initializeGlobalWeightsScript()" value="Get script to calculate global weights" />
-                                    <input type="button" class="btn btn-primary btn-lg btn-success mt-3 mx-5" @click="uploadGlobalWeights()" value="Upload global weights" />
-                                    <button class="btn btn-primary btn-lg btn-success  mt-3  " @click="generateLocalModel()">Download script for this parameters</button>
-                                    <button class="btn btn-primary btn-lg btn-success mt-3  mx-5" @click="getInitialWeights()">Get initial weights</button>
-
+                                    <button class="btn btn-primary btn-lg btn-success  mt-3  " @click="generateLocalModel()">Download local learning script</button>
                                 </div>
                             </div>
 
-                        <div class="row mt-3">
+                            <div class="row mt-3">
 
-                            <!-- <p class="form-control-plaintext col mb-3 shadow p-3 mb-5 text-danger rounded " style="background-color: #f1f1f1;" id="staticText"> <strong>Important !!! </strong>
+                                <!-- <p class="form-control-plaintext col mb-3 shadow p-3 mb-5 text-danger rounded " style="background-color: #f1f1f1;" id="staticText"> <strong>Important !!! </strong>
                                 <br> At the bottom of previous tab, called <strong>General information</strong>, you could generate a configurated Python script with model implementation.
                                 <br> At this tab you are expected to upload a file that contains weights of pretrained model and were generated by mentioned script.
                                 <br> Of course it should be in <strong>.h5 format</strong>.
                             </p> -->
-                        </div>
-                        <form>
-                            <div class="row mt-3">
-                                <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
-                                    <h4 for="lastName"> <strong>2. Upload weights from local model</strong></h4>
-                                    <div>
-                                        <label for="uploadLocal" class="form-label text-muted">(Only .h5 files)</label>
-                                        <input class="form-control form-control-lg" id="uploadLocal" accept=".h5" type="file">
-                                    </div>
-                                    <input type="button" class="btn btn-primary btn-lg btn-success mt-3 mb-3" @click="uploadLocalWeights()" value="Upload local weights" />
-                                    <!-- <div>
+                            </div>
+                            <form>
+                                <div v-if="this.localLearningScriptDownloaded" class="row mt-3">
+                                    <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                                        <h4 for="lastName"> <strong>Step 2. Upload model weights from your local training</strong></h4>
+                                        <p>Here is the place to upload your model weights after you performed local model training </p>
+                                        <div>
+                                            <label for="uploadLocal" class="form-label text-muted">(Only .h5 files)</label>
+                                            <input class="form-control form-control-lg" id="uploadLocal" accept=".h5" type="file">
+                                        </div>
+                                        <input type="button" class="btn btn-primary btn-lg btn-success mt-3 mb-3" @click="uploadLocalWeights()" value="Upload local weights" />
+                                        <!-- <div>
                                         <label for="uploadLocalJson" class="form-label text-muted">(Only .json files)</label>
                                         <input class="form-control form-control-lg" id="uploadLocalJson" accept=".json" type="file">
                                     </div>
                                     <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="uploadLocalWeightsJson()" value="Upload local weights" /> -->
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
-                                    <h4 for="lastName"> <strong>3. Upload results file</strong></h4>
-                                    <div>
-                                        <label for="uploadLocalResults" class="form-label text-muted">(Only .json files)</label>
-                                        <input class="form-control form-control-lg" id="uploadLocalResults" accept=".json" type="file">
                                     </div>
-                                    <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="LocalLearningResults()" value="Upload results" />
                                 </div>
+                                <div v-if="this.localModelWeightUploaded" class="row mt-3">
+                                    <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                                        <h4 for="lastName"> <strong>Step 3. Upload results file</strong></h4>
+                                        <p>Here upload your {{this.$store.state.user.username}}_results.json file with accuracy and loss</p>
+                                        <div>
+                                            <label for="uploadLocalResults" class="form-label text-muted">(Only .json files)</label>
+                                            <input class="form-control form-control-lg" id="uploadLocalResults" accept=".json" type="file">
+                                        </div>
+                                        <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="LocalLearningResults()" value="Upload results" />
+                                    </div>
+                                </div>
+
+                            </form>
+
+                        </div>
+                        <div class="col px-4">
+                            <div class="col shadow p-3 rounded" style="background-color: #f1f1f1;">
+                                <h4> <strong> Participants' progress </strong> </h4>
+                                <hr />
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Participant</th>
+                                            <th scope="col">Local learning weights uploaded</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(participant, index) in participants" :key="participant.username">
+                                            <th scope="row">{{index+1}}</th>
+                                            <td>{{participant.username}}</td>
+                                            <td>{{participant.user_id}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
-
-                        </form>
-
+                        </div>
                     </div>
                 </div>
 
                 <div class="tab-pane fade" id="nav-getGlobal" role="tabpanel" aria-labelledby="nav-getGlobal-tab">
-                    <div class="row mt-3">
-                        <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
-                        <h4><strong>1. Aggregation:</strong></h4>
-                            <div class="d-flex justify-content-center">
-                                <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregateModelsScript()">Aggregate models locally</button>
-                                <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregation()">Aggregate models on server</button>
-                                <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getManyWeights()">Get local weights</button>
+                    <div class="col-md-8 order-md-1">
+                        <div class="row mt-3">
+                            <div v-if="this.session.founder == this.$store.state.user.username" class="col mb-3 shadow p-3 mb-5 rounded" style="background-color: #f1f1f1;">
+                                <h4><strong>1. Available actions for aggregation:</strong></h4>
+                                <div class="d-flex justify-content-center">
+                                    <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregateModelsScript()">Aggregate models locally</button>
+                                    <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregation()">Aggregate models on server</button>
+                                    <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getManyWeights()">Get local weights</button>
+
+                                </div>
 
                             </div>
-
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col mb-3 shadow p-3 mb-5 rounded" style="background-color: #f1f1f1;">
-                            <h4><strong>2. Federated Averaging:</strong></h4>
-                                <div class=" d-flex justify-content-center">
-                                <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getFile()">Global model script for predictions</button>
-                                <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getGlobalModel()">Global model script for idividual learning</button>
-                                 <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="fillData">Show results</button>
+                            <div class="row mt-3">
+                                <div class="col mb-3 shadow p-3 mb-5 rounded" style="background-color: #f1f1f1;">
+                                    <h4><strong>2. Federated Averaging:</strong></h4>
+                                    <div class=" d-flex justify-content-center">
+                                        <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getFile()">Global model script for predictions</button>
+                                        <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getGlobalModel()">Global model script for idividual learning</button>
+                                        <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="fillData">Show results</button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                    </div>
-                    <div v-if="renderChart == true" class="row mt-3">
-                        <div class=" col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
-                            <h4 for="lastName" class='mb-3'> <strong>Accuracy and loss diagrams:</strong></h4>
-                            <div class="d-flex justify-content-center" >
-                            <ChartResult :key="componentKey" v-bind:chartData="chartDataAccuracy" :chartOptions="chartOptions" />
-                            <ChartResult :key="componentKeyLoss" v-bind:chartData="chartDataLoss" :chartOptions="chartOptions" />
+                        </div>
+                        <div v-if="renderChart == true" class="row mt-3">
+                            <div class=" col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                                <h4 for="lastName" class='mb-3'> <strong>Accuracy and loss diagrams:</strong></h4>
+                                <div class="d-flex justify-content-center">
+                                    <ChartResult :key="componentKey" v-bind:chartData="chartDataAccuracy" :chartOptions="chartOptions" />
+                                    <ChartResult :key="componentKeyLoss" v-bind:chartData="chartDataLoss" :chartOptions="chartOptions" />
+                                </div>
                             </div>
+
                         </div>
-
                     </div>
-
                 </div>
                 <div class="tab-pane fade" id="nav-manageSession" role="tabpanel" aria-labelledby="nav-manageSession-tab">
                     <div class="row mt-3">
@@ -243,7 +234,7 @@
             </div>
             <div class="d-flex justify-content-between">
                 <button class="btn btn-primary btn-lg btn-block" @click="backToSessions()">Back to sessions</button>
-                <button v-if="session.founder != this.$store.state.user.username" class="btn btn-danger btn-lg btn-block" @click="leaveSession()">Leave session</button>
+                <button v-if="session.founder != this.$store.state.user.username && !this.$store.state.isLoading" class="btn btn-danger btn-lg btn-block" @click="leaveSession()">Leave session</button>
             </div>
         </div>
     </div>
@@ -281,6 +272,9 @@ export default {
             usernames: [],
             componentKey: 0,
             componentKeyLoss: 0,
+            localLearningScriptDownloaded: false,
+            localModelWeightUploaded: false,
+            resultsFileUploaded: false,
             chartDataAccuracy: {
                 labels: ["Hello"], //response.data.names,
                 datasets: [{
@@ -299,11 +293,11 @@ export default {
             },
             chartOptions: {
                 responsive: true,
-                size:{
+                size: {
 
-                        height: 25
+                    height: 25
 
-                    },
+                },
                 scales: {
                     yAxes: [{
                         ticks: {
@@ -319,10 +313,11 @@ export default {
         //this.fillData()
     },
     mounted() {
+        this.$store.state.isLoading = true
         axios.get('/api/v1/session/' + this.$route.params.id)
             .then(response => {
                 this.session = response.data
-
+                this.$store.state.isLoading = false
             }).catch(error => {
                 if (error.response) {
                     for (const property in error.response.data) {
@@ -335,6 +330,7 @@ export default {
 
         axios.get('/api/v1/participants/session/' + this.$route.params.id).then(response => {
             this.participants = response.data
+            console.log(this.participants)
 
         }).catch(error => {
             if (error.response) {
@@ -348,6 +344,7 @@ export default {
 
         for (const user in this.participants)
             this.usernames.push(user['username'])
+        
     },
     components: {
         ChartResult,
@@ -360,7 +357,7 @@ export default {
         },
         forceRerender() {
             this.componentKey += 1
-            this.componentKeyLoss +=1
+            this.componentKeyLoss += 1
         },
         fillData() {
             this.$store.state.isLoading = true
@@ -371,18 +368,18 @@ export default {
                     this.chartDataAccuracy = {
                         labels: response.data.names.concat(response.data.names).concat(response.data.names).concat(response.data.names).concat(response.data.names),
                         datasets: [{
-                                label: 'Accuracy',
-                                backgroundColor: 'rgb(77, 137, 255)',
-                                data: response.data.accuracy.concat(response.data.accuracy).concat(response.data.accuracy).concat(response.data.accuracy).concat(response.data.accuracy)
-                            }]
+                            label: 'Accuracy',
+                            backgroundColor: 'rgb(77, 137, 255)',
+                            data: response.data.accuracy.concat(response.data.accuracy).concat(response.data.accuracy).concat(response.data.accuracy).concat(response.data.accuracy)
+                        }]
                     }
                     this.chartDataLoss = {
                         labels: response.data.names.concat(response.data.names).concat(response.data.names).concat(response.data.names).concat(response.data.names),
                         datasets: [{
-                                label: 'Loss',
+                            label: 'Loss',
                             backgroundColor: '#f87979',
                             data: response.data.losses.concat(response.data.losses).concat(response.data.losses).concat(response.data.losses).concat(response.data.losses)
-                            }]
+                        }]
                     }
                     console.log(this.chartData)
                     this.renderChart = true;
@@ -529,6 +526,7 @@ export default {
                     }
                 ).then(function () {
                     console.log('SUCCESS!!');
+                    this.resultsFileUploaded = true
                 })
                 .catch(function () {
                     console.log('FAILURE!!');
@@ -673,6 +671,7 @@ export default {
                     fileLink.click();
 
                     console.log(response)
+                    this.localLearningScriptDownloaded = true
                 })
             }).catch(error => {
                 if (error.response) {
@@ -815,6 +814,7 @@ export default {
                     }
                 ).then(function () {
                     console.log('SUCCESS!!');
+                    this.uploadLocalWeights = true
                 })
                 .catch(function () {
                     console.log('FAILURE!!');
