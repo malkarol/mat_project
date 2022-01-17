@@ -84,10 +84,9 @@
 
                     <div class="col-sm-4">
 
-                        <select id="modelType" class="form-select" required data-width="25%" v-model="modelType">
+                        <select @change="getParameters()" id="modelType" class="form-select" required data-width="25%" v-model="modelType">
                             <option value="" selected disabled hidden>Choose...</option>
-                            <option value="SimpleMLP">SimpleMLP</option>
-                            <option value="CNN">CNN</option>
+                            <option v-for="model in availableModels" :key="model" v-bind:availableModels="availableModels" :value="model">{{model}}</option>
                         </select>
                     </div>
                 </fieldset>
@@ -199,10 +198,14 @@ export default {
             date,
         }
     },
+    mounted(){
+        this.getAvailableModels()
+    },
     data() {
         return {
 
             // for new session form
+            availableModels: [],
             sessionName: '',
             description: '',
             min_num_of_participants: 2,
@@ -245,6 +248,36 @@ export default {
         Datepicker,
     },
     methods: {
+        getAvailableModels(){
+            axios
+                .get('/api/v1/get-available-models/')
+                .then(response => {
+                    this.availableModels = response.data
+                }).catch(error => {
+                    if (error.response) {
+                        for (const property in error.response.data) {
+                            this.errors.push(`${property}: ${error.response.data[property]}`)
+                        }
+                    } else if (error.message) {
+                        this.errors.push('Something went wrong. Please try again.')
+                    }
+                })
+        },
+        getParameters() {
+            axios
+                .get('/api/v1/getparameters/' + this.modelType)
+                .then(response => {
+                    console.log(response.data)
+                }).catch(error => {
+                    if (error.response) {
+                        for (const property in error.response.data) {
+                            this.errors.push(`${property}: ${error.response.data[property]}`)
+                        }
+                    } else if (error.message) {
+                        this.errors.push('Something went wrong. Please try again.')
+                    }
+                })
+        },
         get_many_files() {
             axios({
                 url: '/api/v1/get-tar/',

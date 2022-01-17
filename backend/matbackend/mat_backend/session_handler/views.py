@@ -29,6 +29,42 @@ import session_handler.file_finder as ff
 import ml_handler.aggregation as agreg
 from session_handler.ScriptGenerator import ScriptsExecutor
 
+from tensorflow.keras.applications.vgg16 import VGG16
+from tensorflow.keras.applications.vgg19 import VGG19
+from tensorflow.keras.applications.resnet50 import ResNet50
+from tensorflow.keras.applications.resnet_v2 import ResNet50V2
+from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2
+from tensorflow.keras.applications.mobilenet import MobileNet
+from tensorflow.keras.applications.inception_v3 import InceptionV3
+from tensorflow.keras.applications.inception_resnet_v2 import InceptionResNetV2
+from tensorflow.keras.applications.xception import Xception
+from tensorflow.keras.applications.densenet import DenseNet121
+from tensorflow.keras.applications.densenet import DenseNet169
+from tensorflow.keras.applications.densenet import DenseNet201
+from tensorflow.keras.applications.efficientnet import EfficientNetB0, EfficientNetB1, EfficientNetB2, EfficientNetB3
+
+import inspect
+
+models_dict = {
+    'Xception': Xception,
+    'VGG19': VGG19,
+    'VGG16': VGG16,
+    'ResNet50V2': ResNet50V2,
+    'ResNet50': ResNet50,
+    'MobileNetV2': MobileNetV2,
+    'MobileNet': MobileNet,
+    'InceptionV3': InceptionV3,
+    'InceptionResNetV2': InceptionResNetV2,
+    'EfficientNetB0': EfficientNetB0,
+    'EfficientNetB1': EfficientNetB1,
+    'EfficientNetB2': EfficientNetB2,
+    'EfficientNetB3': EfficientNetB3,
+    'DenseNet121': DenseNet121,
+    'DenseNet169': DenseNet169,
+    'DenseNet201': DenseNet201
+}
+
+
 # 3. File upload
 storage = GoogleCloudStorage()
 # 1. Session CRUD
@@ -292,6 +328,24 @@ def add_many_participants(request):
                 serializerParticipant.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_parameters_list_for_model(request, name):
+    attributes = inspect.signature(models_dict[name])
+    params = dict()
+    param_keys = list(attributes.parameters.keys())
+    param_values = list(attributes.parameters.values())
+    for i in range(len(param_keys)):
+        if (param_keys[i] == "kwargs"):
+            continue
+        params[param_keys[i]] = param_values[i].default
+    return Response(params, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_available_models(request):
+    return Response(models_dict.keys(), status=status.HTTP_200_OK)
+
+
 
 @api_view(['GET'])
 def get_results_for_participants(request,pk):

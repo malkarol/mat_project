@@ -32,6 +32,8 @@ urlpatterns=[
     path('create-filled-session/', views.add_many_participants),
     # join session
     path('join-session/', views.join_session),
+    path('getparameters/<str:name>', views.get_parameters_list_for_model),
+    path('get-available-models/', views.get_available_models),
     # check in which sessions user is
     path('participants/filter/<int:pk>', views.get_joined_sessions),
     path('session/<int:spk>/participant/<int:ppk>', views.participant_for_session),
