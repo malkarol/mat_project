@@ -1,3 +1,4 @@
+# source : https://www.learndatasci.com/tutorials/hands-on-transfer-learning-keras/
 #import required libraries - we do need the models, flatten, dense, input layers
 import numpy as np
 import pandas as pd
