@@ -15,7 +15,7 @@
                     <th scope="row">{{index}}</th>
                     <td>{{parameter.name}}
                     </td>
-                    <td><input v-if="isSelect(parameter.name)== false" type="number" :disabled="parameter.Selected"
+                    <td><input :id="'input_'+index" v-if="isSelect(parameter.name)== false" type="number" :disabled="parameter.Selected"
                     v-model="parameter.value"
                     :min="getMin(parameter.name)"
                     :max="getMax(parameter.name)"
@@ -41,7 +41,7 @@
                         </select>
                     </td>
 
-                    <td><input type="checkbox"  v-model="parameter.Selected" @checked="checkBoxChecked(paramater)"/></td>
+                    <td><input type="checkbox"  v-model="parameter.Selected" @click="resetValue(index)"/></td>
                 </tr>
             </tbody>
         </table>
@@ -60,6 +60,10 @@ export default {
   },
 props:['parameters'],
   methods: {
+    resetValue(id) {
+        console.log(this.parameters[id])
+        this.parameters[id].value = this.parameters[id].defaultVal
+    },
     checkBoxChecked(param){
         param.value = param.defaultVal
         console.log(param.value)
