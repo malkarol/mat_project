@@ -73,7 +73,7 @@
 
 
                  <fieldset class="row mb-5">
-                     <FixedTable/>
+                     <FixedTable :parameters = "fixedParams" />
                  </fieldset>
                   <fieldset class="row mb-5">
                      <h5 class="col-form col-sm-2 pt-0"><strong>Model Type</strong></h5>
@@ -99,8 +99,20 @@
                         </select>
                     </div>
                  </fieldset>
+                  <fieldset v-if="modelTypes == 'simple_model'"  class="row mb-5">
+                     <h5 class="col-form col-sm-2 pt-0"><strong>Model name</strong></h5>
+                <div class="col-sm-4">
+
+                        <select  id="modelType" class="form-select" required data-width="25%" v-model="modelType" >
+                            <option value="" selected disabled hidden >Choose...</option>
+                            <option value="CNN">Simple CNN</option>
+                            <option value="VGG">One block VGG</option>
+
+                        </select>
+                    </div>
+                  </fieldset>
                  <fieldset v-if="showEditable== true" class="row mb-5">
-                     <EditableTable :responseParams="responseModelParams"/>
+                     <!-- <EditableTable :responseParams="responseModelParams"/> -->
                  </fieldset>
 
                 <div class="row mb-3">
@@ -112,8 +124,10 @@
                 <div class="d-flex justify-content-between mt-5">
                     <button class="btn btn-success btn-lg px-5">Save</button>
                     <button class="btn btn-danger btn-lg px-5" @click="backToSessions()">Cancel</button>
+
                 </div>
             </form>
+            <!-- <button class="btn btn-danger btn-lg px-5" @click="tosth()">tosth</button> -->
         </div>
     </div>
 </div>
@@ -152,6 +166,76 @@ export default {
     },
     data() {
         return {
+            fixedParams:[{
+            name:'number_of_epochs',
+            value:5,
+            defaultVal: 10,
+            Selected: false
+        },
+        {
+            name:'loss_function',
+            values:["categorical_crossentropy",
+            "sparse_categorical_crossentropy",
+            "binary_crossentropy"],
+            value: "categorical_crossentropy",
+            defaultVal: "categorical_crossentropy",
+            Selected: false
+        },
+        {
+            name:'optimizer',
+            values:["SGD",
+            "RMSprop",
+            "Adam",
+            "Adadelta",
+            "Adagra"
+            ],
+            value: "SGD",
+            defaultVal: "SGD",
+            Selected: false
+        },
+        {
+            name:'learning_rate',
+            value:0.01,
+            defaultVal: 0.01,
+            Selected: false
+
+        },
+         {
+            name:'momentum',
+            value:0.9,
+            defaultVal: 0.9,
+            Selected: false
+
+        },
+        {
+            name:'batch_size',
+            value: 32,
+            defaultVal: 32,
+            Selected: false
+
+
+        },
+        {
+            name:'validation_split',
+            value: 0.2,
+            defaultVal: 0.2,
+            Selected: false
+
+        },
+        {
+            name:'width_size',
+            value:32,
+            defaultVal: 32,
+            Selected: false
+
+        },
+        {
+            name:'height_size',
+            value:32,
+            defaultVal: 32,
+            Selected: false
+
+        }],
             responseModelParams:[],
             showEditable:false,
             modelTypes:"",
@@ -163,9 +247,7 @@ export default {
             min_num_of_participants: 2,
             max_num_of_participants: 3,
             actual_num_of_participants: 0,
-            parameters_keys: ['classification_type', 'optimizer', 'loss_function',
-                'num_of_epochs', 'picture_size', 'num_of_classes', 'load', 'learning', 'color'
-            ],
+            parameters_keys: [],
             pricing_plan: 0,
             minNumParticipants: 3,
             maxNumParticipants: 5,
@@ -174,9 +256,7 @@ export default {
             optimizer: '',
             lossFunction: '',
             num_of_epochs: 1,
-            color: "1",
-            picture_size: 28,
-            num_of_classes: 2,
+
             load_origin: 'local',
 
             // for tag controls
@@ -202,6 +282,17 @@ export default {
         EditableTable
     },
     methods: {
+        updateMyValue(newValue)
+        {
+            this.fixedParams = newValue
+        },
+        tosth()
+        {
+            console.log(this.fixedParams)
+
+        },
+
+
          onChange(event) {
             console.log(event.target.value)
         },
@@ -315,29 +406,34 @@ export default {
             if (this.errors.length > 0) {
                 return
             }
+            this.parameters_keys = []
+            this.parameters_keys.push('model_name')
+            this.parameters_keys = this.fixedParams.map(a => a.name);
 
             this.parameters_values = []
-            this.parameters_values.push(this.classificationType)
-            this.parameters_values.push(this.optimizer)
-            this.parameters_values.push(this.lossFunction)
-            this.parameters_values.push(this.num_of_epochs)
-            this.parameters_values.push(this.picture_size)
-            this.parameters_values.push(this.num_of_classes)
+            this.parameters_values.push(this.modelType)
+            this.parameters_values = this.fixedParams.map(a => a.value);
+            // this.parameters_values.push(this.classificationType)
+            // this.parameters_values.push(this.optimizer)
+            // this.parameters_values.push(this.lossFunction)
+            // this.parameters_values.push(this.num_of_epochs)
+            // this.parameters_values.push(this.picture_size)
+            // this.parameters_values.push(this.num_of_classes)
 
-            if (this.color === "1" && this.load_origin === "local") {
-                this.parameters_values.push('load_color_images')
-            } else if (this.load_origin === "local") {
-                this.parameters_values.push('load_images')
-            } else {
-                this.parameters_values.push(this.load_origin)
-            }
-            if (this.color === "1") {
-                this.parameters_values.push('local_learning')
-                this.parameters_values.push(3)
-            } else {
-                this.parameters_values.push('local_learning_b_and_w')
-                this.parameters_values.push(1)
-            }
+            // if (this.color === "1" && this.load_origin === "local") {
+            //     this.parameters_values.push('load_color_images')
+            // } else if (this.load_origin === "local") {
+            //     this.parameters_values.push('load_images')
+            // } else {
+            //     this.parameters_values.push(this.load_origin)
+            // }
+            // if (this.color === "1") {
+            //     this.parameters_values.push('local_learning')
+            //     this.parameters_values.push(3)
+            // } else {
+            //     this.parameters_values.push('local_learning_b_and_w')
+            //     this.parameters_values.push(1)
+            // }
 
             const formData = {
                 session: {

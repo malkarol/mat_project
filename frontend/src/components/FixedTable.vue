@@ -16,7 +16,7 @@
                     <td>{{parameter.name}}
                     </td>
                     <td><input v-if="isSelect(parameter.name)== false" type="number" :disabled="parameter.Selected"
-                    :value="parameter.Selected ? parameter.defaultVal : parameter.value"
+                    v-model="parameter.value"
                     :min="getMin(parameter.name)"
                     :max="getMax(parameter.name)"
                     :step="getStep(parameter.name)" />
@@ -36,11 +36,12 @@
                     :step="getStep(parameter.name)" /> </td>
                         </span> -->
 
-                    <select  :disabled="parameter.Selected" v-else>
-                        <option v-for="item in parameter.value" :key="item" :selected="parameter.Selected == true && item == parameter.defaultVal">{{item}}</option>
+                    <select   :disabled="parameter.Selected" v-else>
+                        <option v-for="item in parameter.values" :key="item" :selected="parameter.Selected == true && item == parameter.defaultVal">{{item}}</option>
                         </select>
                     </td>
-                    <td><input type="checkbox"  v-model="parameter.Selected" /></td>
+
+                    <td><input type="checkbox"  v-model="parameter.Selected" @checked="checkBoxChecked(paramater)"/></td>
                 </tr>
             </tbody>
         </table>
@@ -54,68 +55,26 @@ export default {
         hover: false,
         dictonaries:[],
         responses:{},
-        parameters:[
-         {
-            name:'number_of_epochs',
-            value:5,
-            defaultVal: 10,
-            Selected: false
-        },
-        {
-            name:'loss_function',
-            value:["categorical_crossentropy",
-            "sparse_categorical_crossentropy",
-            "binary_crossentropy"],
-            defaultVal: "categorical_crossentropy",
-            Selected: false
-        },
-        {
-            name:'optimizer',
-            value:["SGD",
-            "RMSprop",
-            "Adam",
-            "Adadelta",
-            "Adagra"
-            ],
-            defaultVal: "SGD",
-            Selected: false
-        },
-        {
-            name:'batch_size',
-            value: 32,
-            defaultVal: 32,
-            Selected: false
 
-
-        },
-        {
-            name:'validation_split',
-            value: 0.2,
-            defaultVal: 0.2,
-            Selected: false
-
-        },
-        {
-            name:'width_size',
-            value:32,
-            defaultVal: 32,
-            Selected: false
-
-        },
-        {
-            name:'height_size',
-            value:32,
-            defaultVal: 32,
-            Selected: false
-
-        }
-
-
-
-        ]
     }
   },
+props:['parameters'],
   methods: {
+    checkBoxChecked(param){
+        param.value = param.defaultVal
+        console.log(param.value)
+    },
+
+    getValue(parameter){
+        if(parameter.Selected)
+        {
+            parameter.value =  parameter.defaultVal
+        }
+
+        return parameter.value
+
+
+    },
     getMax(name)
     {
         switch(name){
@@ -127,6 +86,10 @@ export default {
                 return 100
             case 'input_size':
                 return 224
+            case 'learning_rate':
+                return 0.1
+            case 'momentum':
+                return 0.9
             default:
                 return 128
 
@@ -143,6 +106,10 @@ export default {
                 return 5
             case 'input_size':
                 return 32
+            case 'learning_rate':
+                return 0.0001
+            case 'momentum':
+                return 0.1
             default:
                 return 2
 
@@ -153,6 +120,10 @@ export default {
         switch(name){
             case 'validation_split':
                 return 0.05
+            case 'learning_rate':
+                return 0.0001
+            case 'momentum':
+                return 0.1
             default:
                 return 1
 
