@@ -605,7 +605,7 @@ def local_model_script(request,pk):
 @api_view(['POST'])
 def upload_local_model(request):
     try:
-       session = Session.objects.get(pk=request.data['session'])
+       session = Session.objects.get(pk=request.data['session_id'])
     except Session.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == 'POST':
@@ -615,23 +615,23 @@ def upload_local_model(request):
         # users_ids = [x['user'] for x in serializerPart.data]
         # if request.user.id in users_ids:
         try:
-            participant = Participant.objects.filter(session__session_id=request.data['session']).get(user__id = request.user.id)
+            participant = Participant.objects.filter(session__session_id=request.data['session_id']).get(user__id = request.user.id)
         except Participant.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        file_object = request.FILES['files']
+        file_object = request.FILES['model_weights']
         print(type(file_object))
-        session = Session.objects.get(pk=request.data['session'])
+        session = Session.objects.get(pk=request.data['session_id'])
         target_path = f'/sessions/session_Id_{session.session_id}/local_weights/' + file_object.name
         path = storage.save(target_path, ContentFile(file_object.read()))
         file = StorageFile.objects.create(name=file_object.name, path=path, related_session=session)
         # file = StorageFile.objects.create(name=file_object.name, path=path, related_session=session)
         print(file.file_id)
-        participant = Participant.objects.filter(session__session_id=request.data['session']).get(user__id = request.user.id)
+        participant = Participant.objects.filter(session__session_id=request.data['session_id']).get(user__id = request.user.id)
         serializerParticipant = ParticipantSerializer(participant)
         print(serializerParticipant.data)
         participant.is_model_uploaded = True
         participant.weights_uploaded = file
-        participant.local_data_count = int(file.name.split('_')[-1].split('.')[0])
+        participant.local_data_count = request.data['local_data_count']#int(file.name.split('_')[-1].split('.')[0])
         participant.save()
         # print(serializerParticipant.data)
 
