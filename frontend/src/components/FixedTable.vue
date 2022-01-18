@@ -82,6 +82,8 @@ props:['parameters'],
     getMax(name)
     {
         switch(name){
+            case 'number_of_classes':
+                return 1000
             case 'validation_split':
                 return 0.4
             case 'batch_size':
@@ -102,6 +104,8 @@ props:['parameters'],
     getMin(name)
     {
         switch(name){
+            case 'number_of_classes':
+                return 2
             case 'validation_split':
                 return 0.1
             case 'batch_size':

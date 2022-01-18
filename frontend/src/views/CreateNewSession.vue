@@ -235,6 +235,13 @@ export default {
             defaultVal: 32,
             Selected: false
 
+        },
+         {
+            name:'number_of_classes',
+            value:2,
+            defaultVal: 2,
+            Selected: false
+
         }],
             responseModelParams:[],
             showEditable:false,

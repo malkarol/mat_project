@@ -55,17 +55,19 @@ the chain.
 class ParametersScript(AbstractHandler):
     def handle(self, request: Any, parameters) -> str:
         if request == 'parameters':
-            tmp_params = {x: parameters[x] for x in parameters if x not in ['learning','load','color','picture_size']}
-            input_list =[parameters['picture_size'],parameters['color']]
+            tmp_params = {x: parameters[x] for x in parameters if x not in ['learning','load','color','picture_size','optimizer']}
+            input_list =[parameters['width_size'],parameters['height_size']]
             lines =['']
             for key, value in tmp_params.items():
-                if '('not in value and  not isinstance(value, list) and value.isdigit() == False:
+                if '('not in value and  not isinstance(value, list) and value.isdigit() == False and value.replace(".", "", 1).isdigit()== False:
                     new_line = f'{key} = "{value}"'
                 else:
                     new_line = f'{key} = {value}'
                 lines.append(new_line)
-            input_size = f'input_shape = ({input_list[0]}, {input_list[0]}, {input_list[1]})'
+            input_size = f'input_shape = [{input_list[0]}, {input_list[1]}]'
+            optimizer = f'optimizer = tf.keras.optimizers.{parameters["optimizer"]}(learning_rate=learning_rate,momentum=momentum)'
             lines.append(input_size)
+            lines.append(optimizer)
             text = "\n".join(lines)
             return text
         else:
@@ -75,8 +77,11 @@ class PrepationScript(AbstractHandler):
     def handle(self, request: Any, parameters) -> str:
         if request == 'preparation':
             file_path = ff.get_file_path('preparation')
+            line =''
+            if ff.get_file_path(parameters['model_name']) == 'pretrained':
+                line = "\n"+ff.get_pretrained_import_line(parameters['model_name'])
             storage_file = storage.open(file_path , 'r')
-            return storage_file.read().decode('ascii')
+            return storage_file.read().decode('ascii')+line
         else:
             return super().handle(request,parameters)
 
@@ -92,14 +97,11 @@ class InitializeWeightsScript(AbstractHandler):
 class LoadingScript(AbstractHandler):
     def handle(self, request: Any, parameters) -> str:
         if request == 'load':
-            file_path = ff.get_file_path(parameters['load'])
+            file_path = ff.get_file_path(parameters['load_data'])
             storage_file = storage.open(file_path , 'r')
             return storage_file.read().decode('ascii')
         elif request == 'load_global':
-            if parameters['color'] == '1':
-                file_path = ff.get_file_path('load_default')
-            else:
-                file_path = ff.get_file_path('load_color_default')
+            file_path = ff.get_file_path(parameters['load_data'])
             storage_file = storage.open(file_path , 'r')
             return storage_file.read().decode('ascii')
         else:
@@ -118,8 +120,24 @@ class ModelScript(AbstractHandler):
     def handle(self, request: Any, parameters) -> str:
         if request == 'model':
             file_path = ff.get_file_path(parameters['model_name'])
-            storage_file = storage.open(file_path , 'r')
-            return storage_file.read().decode('ascii')
+            if (file_path != 'pretrained'):
+                storage_file = storage.open(file_path , 'r')
+                return storage_file.read().decode('ascii')
+            else:
+                model = parameters['model_name']
+                pretrained_lines = f"""
+def define_model(input_shape,number_of_classes):
+    base_model = {model}(input_shape=input_shape + [3], weights='imagenet', include_top=False) #Training with Imagenet weights\n
+    # This sets the base that the layers are not trainable. If we'd want to train the layers with custom data, these two lines can be ommitted.
+    for layer in base_model.layers:
+        layer.trainable = False
+    x = Flatten()(base_model.output) #Output obtained on vgg16 is now flattened.
+    prediction = Dense(number_of_classes, activation='softmax')(x) # We have 5 classes, and so, the prediction is being done on len(folders) - 5 classes
+    #Creating model object
+    model = Model(inputs=base_model.input, outputs=prediction)
+    return model
+    """
+                return pretrained_lines
         else:
             return super().handle(request,parameters)
 
@@ -160,13 +178,9 @@ def generate_initial_weights(handler: Handler, session_params) -> None:
     commands = ['preparation','model','parameters','initialize_weights']
     results = []
     for comm in  commands:
-        print(f"\nClient: Who wants a {comm}?")
         result = handler.handle(comm,session_params)
         if result:
-            print(f"  {result}", end="")
             results.append(result)
-        else:
-            print(f"  {comm} was left untouched.", end="")
     return results
 
 def generate_aggregation_script(handler: Handler, session_params) -> None:
@@ -177,29 +191,21 @@ def generate_aggregation_script(handler: Handler, session_params) -> None:
     commands = ['preparation','model','parameters','aggregate_locally']
     results = []
     for comm in  commands:
-        print(f"\nClient: Who wants a {comm}?")
         result = handler.handle(comm,session_params)
         if result:
-            print(f"  {result}", end="")
             results.append(result)
-        else:
-            print(f"  {comm} was left untouched.", end="")
     return results
 
 def generate_global_model(handler: Handler, session_params) -> None:
     """
     The template method defines the skeleton of an algorithm.
     """
-    commands = ['preparation','model','parameters','load_global','local_learning']
+    commands = ['preparation','model','pre','parameters','load_global','local_learning']
     results = []
     for comm in  commands:
-        print(f"\nClient: Who wants a {comm}?")
         result = handler.handle(comm,session_params)
         if result:
-            print(f"  {result}", end="")
             results.append(result)
-        else:
-            print(f"  {comm} was left untouched.", end="")
     return results
 
 class ScriptsExecutor():
