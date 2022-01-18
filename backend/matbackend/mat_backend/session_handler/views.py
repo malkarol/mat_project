@@ -29,19 +29,17 @@ import session_handler.file_finder as ff
 import ml_handler.aggregation as agreg
 from session_handler.ScriptGenerator import ScriptsExecutor
 
-from tensorflow.keras.applications.vgg16 import VGG16
-from tensorflow.keras.applications.vgg19 import VGG19
-from tensorflow.keras.applications.resnet50 import ResNet50
-from tensorflow.keras.applications.resnet_v2 import ResNet50V2
-from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2
-from tensorflow.keras.applications.mobilenet import MobileNet
-from tensorflow.keras.applications.inception_v3 import InceptionV3
-from tensorflow.keras.applications.inception_resnet_v2 import InceptionResNetV2
-from tensorflow.keras.applications.xception import Xception
-from tensorflow.keras.applications.densenet import DenseNet121
-from tensorflow.keras.applications.densenet import DenseNet169
-from tensorflow.keras.applications.densenet import DenseNet201
-from tensorflow.keras.applications.efficientnet import EfficientNetB0, EfficientNetB1, EfficientNetB2, EfficientNetB3
+from tensorflow.keras.applications.vgg16 import *
+from tensorflow.keras.applications.vgg19 import *
+from tensorflow.keras.applications.resnet50 import *
+from tensorflow.keras.applications.resnet_v2 import *
+from tensorflow.keras.applications.mobilenet_v2 import *
+from tensorflow.keras.applications.mobilenet import *
+from tensorflow.keras.applications.inception_v3 import *
+from tensorflow.keras.applications.inception_resnet_v2 import *
+from tensorflow.keras.applications.xception import *
+from tensorflow.keras.applications.densenet import *
+from tensorflow.keras.applications.efficientnet import *
 
 import inspect
 
@@ -371,7 +369,7 @@ def get_results_for_participants(request,pk):
 
 
 @api_view(['POST'])
-def upload_initial_global_weights(request):
+def upload_global_weights(request):
     if request.method == 'POST':
         try:
             session = Session.objects.get(session_id = request.data['session_id'])
