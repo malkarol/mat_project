@@ -364,15 +364,12 @@ def get_results_for_participants(request,pk):
 def upload_initial_global_weights(request):
     if request.method == 'POST':
         try:
-            print(request.user.id)
-            print(request.data['session'])
-
-            session = Session.objects.get(session_id = request.data['session'])
+            session = Session.objects.get(session_id = request.data['session_id'])
         except Participant.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        file_object = request.FILES['files']
-        target_path = f'/sessions/session_Id_'+request.data['session']+'/' + 'global_weights.h5'
+        file_object = request.FILES['model_weights']
+        target_path = f'/sessions/session_Id_'+request.data['session_id']+'/' + 'global_weights.h5'
         if session.founder==request.user.username:
             path = storage.save(target_path, ContentFile(file_object.read()))
             return Response(status=status.HTTP_200_OK)
@@ -779,6 +776,7 @@ def aggregate_script(request, pk):
             parameters['model_name'] = class_name
             parameters['load_data'] = 'load_data'
             parameters['learning'] = 'learning'
+            parameters['session_id'] = session.session_id
 
             list_of_participants = Participant.objects.filter(session__session_id = pk)
             username_list = []
