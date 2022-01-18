@@ -119,37 +119,6 @@
                                 <br> Of course it should be in <strong>.h5 format</strong>.
                             </p> -->
                             </div>
-                            <form>
-                                <div v-if="this.localLearningScriptDownloaded" class="row mt-3">
-                                    <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
-                                        <h4 for="lastName"> <strong>Step 2. Upload model weights from your local training</strong></h4>
-                                        <p>Here is the place to upload your model weights after you performed local model training </p>
-                                        <div>
-                                            <label for="uploadLocal" class="form-label text-muted">(Only .h5 files)</label>
-                                            <input class="form-control form-control-lg" id="uploadLocal" accept=".h5" type="file">
-                                        </div>
-                                        <input type="button" class="btn btn-primary btn-lg btn-success mt-3 mb-3" @click="uploadLocalWeights()" value="Upload local weights" />
-                                        <!-- <div>
-                                        <label for="uploadLocalJson" class="form-label text-muted">(Only .json files)</label>
-                                        <input class="form-control form-control-lg" id="uploadLocalJson" accept=".json" type="file">
-                                    </div>
-                                    <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="uploadLocalWeightsJson()" value="Upload local weights" /> -->
-                                    </div>
-                                </div>
-                                <div v-if="this.localModelWeightUploaded" class="row mt-3">
-                                    <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
-                                        <h4 for="lastName"> <strong>Step 3. Upload results file</strong></h4>
-                                        <p>Here upload your {{this.$store.state.user.username}}_results.json file with accuracy and loss</p>
-                                        <div>
-                                            <label for="uploadLocalResults" class="form-label text-muted">(Only .json files)</label>
-                                            <input class="form-control form-control-lg" id="uploadLocalResults" accept=".json" type="file">
-                                        </div>
-                                        <input type="button" class="btn btn-primary btn-lg btn-success mt-3" @click="LocalLearningResults()" value="Upload results" />
-                                    </div>
-                                </div>
-
-                            </form>
-
                         </div>
                         <div class="col-4 px-4">
                             <div class="col shadow p-3 rounded" style="background-color: #f1f1f1;">
@@ -167,7 +136,7 @@
                                         <tr v-for="(participant, index) in this.participantsProgress" :key="participant.username">
                                             <th scope="row">{{index+1}}</th>
                                             <td class="text-center">{{participant.user_name}}</td>
-                                            <td class="text-center" v-if="participant.is_model_uploaded" ><strong>&#10004;</strong></td>
+                                            <td class="text-center" v-if="participant.is_model_uploaded"><strong>&#10004;</strong></td>
                                             <td class="text-center" v-else><strong>&#10060;</strong></td>
                                         </tr>
                                     </tbody>
@@ -180,7 +149,8 @@
                 <div class="tab-pane fade" id="nav-getGlobal" role="tabpanel" aria-labelledby="nav-getGlobal-tab">
                     <div class="col-md-8 order-md-1">
                         <div class="row mt-3">
-                            <div v-if="this.session.founder == this.$store.state.user.username" class="col mb-3 shadow p-3 mb-5 rounded" style="background-color: #f1f1f1;">
+                            <!--v-if="this.session.founder == this.$store.state.user.username"-->
+                            <div class="col mb-3 shadow p-3 mb-5 rounded" style="background-color: #f1f1f1;">
                                 <h4><strong>1. Available actions for aggregation:</strong></h4>
                                 <div class="d-flex justify-content-center">
                                     <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregateModelsScript()">Aggregate models locally</button>
@@ -378,7 +348,7 @@ export default {
             axios.get('/api/v1/results-for-chart/' + this.$route.params.id)
                 .then(response => {
                     console.log("w środku")
-
+                    console.log(response)
                     this.chartDataAccuracy = {
                         labels: response.data.names.concat(response.data.names).concat(response.data.names).concat(response.data.names).concat(response.data.names),
                         datasets: [{
@@ -547,27 +517,38 @@ export default {
                 })
         },
         getManyWeights() {
-            console.log(this.participants[0].username)
-            const array = this.participants; // changed the input array a bit so that the `array[i].id` would actually work - obviously the asker's true array is more than some contrived strings
-            let users = [];
-            let promises = [];
-            for (let i = 0; i < array.length; i++) {
-                promises.push(
-                    axios.get('/api/v1/get-global-weights/' + this.session.session_id).then(response => {
-                        // do something with response
-                        const fileURL = window.URL.createObjectURL(new Blob([response.data]));
-                        const fileLink = document.createElement('a');
+            axios({
+                url: 'api/v1/get-local-weights/' + this.session.session_id,
+                //url: 'api/v1/testmodel/',
+                method: 'GET',
+                responseType: 'blob',
+            }).then((response) => {
+                console.log(response)
+                var fileURL = window.URL.createObjectURL(new Blob([response.data], {
+                    type: 'application/zip'
+                }));
+                var fileLink = document.createElement('a');
 
-                        fileLink.href = fileURL;
-                        fileLink.setAttribute('download', `local_weights_${this.participants[i].username}.h5`); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
-                        document.body.appendChild(fileLink);
+                fileLink.href = fileURL;
+                fileLink.setAttribute('download', this.session.name + 'localweights.zip');
+                document.body.appendChild(fileLink);
 
-                        fileLink.click();
-                    })
-                )
-            }
+                fileLink.click();
 
-            Promise.all(promises).then(() => console.log(users));
+                console.log(response)
+            })
+
+            // console.log(this.participants[0].username)
+            // const array = this.participants; // changed the input array a bit so that the `array[i].id` would actually work - obviously the asker's true array is more than some contrived strings
+            // let users = [];
+            // let promises = [];
+            // for (let i = 0; i < array.length; i++) {
+            //     promises.push(
+
+            //     )
+            // }
+
+            // Promise.all(promises).then(() => console.log(users));
         },
         uploadLocalWeightsJson() {
             const imagefile = document.querySelector('#uploadLocalJson');
@@ -634,7 +615,7 @@ export default {
         },
         getFile() {
             axios({
-                url: 'api/v1/getzip/' + this.session.session_id,
+                url: 'api/v1/get-local-weights/' + this.session.session_id,
                 //url: 'api/v1/testmodel/',
                 method: 'GET',
                 responseType: 'blob',

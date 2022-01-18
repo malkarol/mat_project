@@ -628,6 +628,8 @@ def upload_local_model(request):
         print(serializerParticipant.data)
         participant.is_model_uploaded = True
         participant.weights_uploaded = file
+        participant.accuracy = request.data['accuracy']
+        participant.loss = request.data['loss']
         participant.local_data_count = request.data['local_data_count']#int(file.name.split('_')[-1].split('.')[0])
         participant.save()
         # print(serializerParticipant.data)
