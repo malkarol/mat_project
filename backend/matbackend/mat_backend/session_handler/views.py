@@ -591,6 +591,7 @@ def local_model_script(request,pk):
         parameters= dict(zip_iterator)
         parameters['username'] = request.user.username
         parameters['model_name'] = class_name
+        parameters['session_id'] = session.session_id
         parameters['load_data'] = 'load_data'
         parameters['learning'] = 'learning'
 

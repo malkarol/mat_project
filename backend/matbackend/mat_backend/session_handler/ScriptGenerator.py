@@ -55,7 +55,7 @@ the chain.
 class ParametersScript(AbstractHandler):
     def handle(self, request: Any, parameters) -> str:
         if request == 'parameters':
-            tmp_params = {x: parameters[x] for x in parameters if x not in ['learning','load','color','picture_size','optimizer']}
+            tmp_params = {x: parameters[x] for x in parameters if x not in ['session_id','learning','load','color','picture_size','optimizer']}
             input_list =[parameters['width_size'],parameters['height_size']]
             lines =['']
             for key, value in tmp_params.items():
@@ -67,6 +67,7 @@ class ParametersScript(AbstractHandler):
             input_size = f'input_shape = [{input_list[0]}, {input_list[1]}]'
             optimizer = f'optimizer = tf.keras.optimizers.{parameters["optimizer"]}(learning_rate=learning_rate,momentum=momentum)'
             lines.append(input_size)
+            lines.append(f'session_id = {parameters["session_id"]}')
             lines.append(optimizer)
             text = "\n".join(lines)
             return text
