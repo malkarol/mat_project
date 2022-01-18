@@ -24,6 +24,7 @@ urlpatterns=[
     path('upload-local-model/', views.upload_local_model),
     # generate local model script for session
     path('generate-local-model/<int:pk>', views.local_model_script),
+    path('get-local-weights/<int:pk>', views.get_local_weights),
     # generate global model script for session
     path('generate-global-model/<int:pk>', views.global_model_script),
      # generate aggregate script for session

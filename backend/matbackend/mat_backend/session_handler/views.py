@@ -656,6 +656,26 @@ def get_zip(request, pk):
             response['Content-Disposition'] = f'attachment; filename={session.name}_FILES.zip'
             return response
 
+@api_view(['GET'])
+def get_local_weights(request,pk):
+    if request.method == 'GET':
+        files = StorageFile.objects.filter(related_session = pk).filter(path__contains = '/local_weights/').filter(name__contains = '.h5')
+        print(len(files))
+        session = Session.objects.get(pk = pk)
+        b = BytesIO()
+
+        with zipfile.ZipFile(b, 'w') as zf:
+            for file in files:
+                try:
+                    fh = storage.open(file.path, 'rb')
+                    print(fh.name)
+                    zf.writestr(f"session_{session.name}_localweights/{file.name}", bytes(fh.read()))
+                except Exception as e:
+                    print(e)
+            response = HttpResponse(b.getvalue(), content_type="application/x-zip-compressed")
+            response['Content-Disposition'] = f'attachment; filename={session.name}_FILES.zip'
+            return response
+
 import tensorflow as tf
 @api_view(['GET'])
 def test_model(request):
