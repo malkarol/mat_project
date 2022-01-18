@@ -168,6 +168,16 @@ def get_session_model_progress(request, spk):
     serializer = ParticipantSerializer(participants, many=True)
     return Response(participant for participant in serializer.data)
 
+@api_view(['POST'])
+def upload_global_model_results(request, pk):
+    try:
+        session = Session.objects.get(pk = pk)
+    except Session.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    accuracy = request.data['accuracy']
+    loss = request.data['loss']
+    result = SessionResult.objects.create(session=session, finished=True, global_model_accuracy=accuracy, global_model_loss=loss)
+    result.save()
 
 
 @api_view(['POST'])
@@ -724,6 +734,7 @@ def global_model_script(request,pk):
         parameters['model_name'] = class_name
         parameters['load_data'] = 'load_data'
         parameters['learning'] = 'learning'
+        parameters['session_id'] = session.session_id
         lines = ScriptsExecutor().create_global_model(parameters)
         print(parameters)
         response_content = '\n'.join(lines)

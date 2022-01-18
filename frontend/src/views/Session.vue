@@ -166,7 +166,7 @@
                                     <div class=" d-flex justify-content-center">
                                         <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getFile()">Global model script for predictions</button>
                                         <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getGlobalModel()">Global model script for idividual learning</button>
-                                        <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="fillData">Show results</button>
+                                        <input type="button" class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="fillData()" value="Show results"/>
                                     </div>
                                 </div>
                             </div>
@@ -344,31 +344,28 @@ export default {
             this.componentKeyLoss += 1
         },
         fillData() {
-            this.$store.state.isLoading = true
             axios.get('/api/v1/results-for-chart/' + this.$route.params.id)
                 .then(response => {
                     console.log("w środku")
                     console.log(response)
                     this.chartDataAccuracy = {
-                        labels: response.data.names.concat(response.data.names).concat(response.data.names).concat(response.data.names).concat(response.data.names),
+                        labels: response.data.names,
                         datasets: [{
                             label: 'Accuracy',
                             backgroundColor: 'rgb(77, 137, 255)',
-                            data: response.data.accuracy.concat(response.data.accuracy).concat(response.data.accuracy).concat(response.data.accuracy).concat(response.data.accuracy)
+                            data: response.data.accuracy,
                         }]
                     }
                     this.chartDataLoss = {
-                        labels: response.data.names.concat(response.data.names).concat(response.data.names).concat(response.data.names).concat(response.data.names),
+                        labels: response.data.names,
                         datasets: [{
                             label: 'Loss',
                             backgroundColor: '#f87979',
-                            data: response.data.losses.concat(response.data.losses).concat(response.data.losses).concat(response.data.losses).concat(response.data.losses)
+                            data: response.data.losses,
                         }]
                     }
-                    console.log(this.chartData)
                     this.renderChart = true;
                     this.forceRerender()
-                    this.$store.state.isLoading = false
                 }).catch(error => {
                     if (error.response) {
                         for (const property in error.response.data) {
