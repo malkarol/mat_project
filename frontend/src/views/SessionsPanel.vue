@@ -3,7 +3,7 @@
     <div class="card border-0 shadow rounded-3 my-5">
         <div class="card-body p-4 p-sm-5 mb-5">
             <div>
-                <h2>Sessions</h2>
+                <h3>Sessions</h3>
                 <hr />
             </div>
 

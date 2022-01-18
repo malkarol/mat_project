@@ -23,13 +23,13 @@
             </div>
             <form @submit.prevent="submitForm">
                 <div class="row mb-3">
-                    <label for="sessionName" class="col-sm-2 col-form-label"> <strong>Session name</strong></label>
+                    <h5 for="sessionName" class="col-sm-2 col-form"> <strong>Session name</strong></h5>
                     <div class="col-sm-10">
                         <input type="text" class="form-control" id="sessionName" placeholder="e.g. My first session or Prostate Cancer Detection 2022" v-model="sessionName">
                     </div>
                 </div>
                 <div class="row mb-3">
-                    <label for="pricingPlan" class="col-sm-2 col-form-label"><strong>Pricing plan</strong></label>
+                    <h5 for="pricingPlan" class="col-sm-2 col-form"><strong>Pricing plan</strong></h5>
                     <div class="col-sm-10">
                         <select id="pricingPlan" class="form-select" required v-model="pricing_plan">
                             <option value="" selected disabled hidden>...</option>
@@ -39,27 +39,27 @@
                     </div>
                 </div>
                 <div class="row mb-3">
-                    <label for="tags" class="col-sm-2 col-form-label"> <strong>Tags</strong></label>
+                    <h5 for="tags" class="col-sm-2 col-form"> <strong>Tags</strong></h5>
                     <div class="col-sm-10">
                         <TagInput :tags="tags" :name="tagsComponentName" :maxInput="maxTags" :isUsers="false" />
                     </div>
                 </div>
 
                 <div class="row mb-3">
-                    <label for="description" class="col-sm-2 col-form-label"> <strong>Description</strong></label>
+                    <h5 for="description" class="col-sm-2 col-form"> <strong>Description</strong></h5>
                     <div class="col-sm-10">
                         <textarea class="form-control" id="description" rows="3" v-model="description"></textarea>
                     </div>
                 </div>
                 <div class="row mb-3">
-                    <label for="description" class="col-sm-2 col-form-label"> <strong>Participants</strong></label>
+                    <h5 for="description" class="col-sm-2 col-form"> <strong>Participants</strong></h5>
                     <div class="col-sm-10">
                         <div class="form-group mb-3">
-                            <label class="col-form-label col-sm-2" for="minimumNumOfParticipants"> Minimum number </label>
+                            <label class="col-form col-sm-2" for="minimumNumOfParticipants"> Minimum number </label>
                             <input type="number" id="minimumNumOfParticipants" min="3" max="100" v-model="minNumParticipants">
                         </div>
                         <div class="form-group mb-3">
-                            <label class="col-form-label col-sm-2" for="maximumNumOfParticipants">Maximum number </label>
+                            <label class="col-form col-sm-2" for="maximumNumOfParticipants">Maximum number </label>
                             <input type="number" id="maximumNumOfParticipants" min="3" max="100" v-model="maxNumParticipants">
                         </div>
                         <div class="form-group mb-3">
@@ -71,94 +71,40 @@
 
                 </div>
 
-                <fieldset class="row mb-3">
-                    <legend class="col-form-label col-sm-2 pt-0"><strong>Classification type</strong></legend>
+
+                 <fieldset class="row mb-5">
+                     <FixedTable/>
+                 </fieldset>
+                  <fieldset class="row mb-5">
+                     <h5 class="col-form col-sm-2 pt-0"><strong>Model Type</strong></h5>
+
                     <div class="col-sm-4">
-                        <select id="classificationType" class="form-select mlparams" required data-width="25%" v-model="classificationType">
+
+                        <select id="modelTypes" class="form-select" required data-width="25%" v-model="modelTypes">
                             <option value="" selected disabled hidden>Choose...</option>
-                            <option value="image">Image</option>
-                            <option value="text">Text</option>
+                            <option value="simple_model">Simple models</option>
+                            <option value="complex_model">Keras pre-trained models</option>
+
                         </select>
                     </div>
-                    <legend class="col-form-label col-sm-2 pt-0"><strong>Model</strong></legend>
+                 </fieldset>
+                 <fieldset v-if="modelTypes == 'complex_model'"  class="row mb-5">
+                     <h5 class="col-form col-sm-2 pt-0"><strong>Model name</strong></h5>
 
                     <div class="col-sm-4">
 
-                        <select @change="getParameters()" id="modelType" class="form-select" required data-width="25%" v-model="modelType">
-                            <option value="" selected disabled hidden>Choose...</option>
+                        <select @change="getParameters()" id="modelType" class="form-select" required data-width="25%" v-model="modelType" >
+                            <option value="" selected disabled hidden >Choose...</option>
                             <option v-for="model in availableModels" :key="model" v-bind:availableModels="availableModels" :value="model">{{model}}</option>
                         </select>
                     </div>
-                </fieldset>
+                 </fieldset>
+                 <fieldset v-if="showEditable== true" class="row mb-5">
+                     <EditableTable :responseParams="responseModelParams"/>
+                 </fieldset>
 
-                <fieldset class="row mb-3">
-                    <legend class="col-form-label col-sm-2 pt-0"><strong>Optimizer</strong></legend>
-                    <div class="col-sm-4">
-                        <select id="optimizer" class="form-select mlparams" required data-width="25%" v-model="optimizer">
-                            <option value="" selected disabled hidden>Choose...</option>
-                            <option value="SGD">SGD</option>
-                            <option value="RMSprop">rmsprop</option>
-                            <option value="adam">rmsprop</option>
-                        </select>
-                    </div>
-                    <legend class="col-form-label col-sm-2 pt-0"><strong>Loss function</strong></legend>
-
-                    <div class="col-sm-4">
-
-                        <select id="lossFunction" class="form-select mlparams" required data-width="25%" v-model="lossFunction">
-                            <option value="" selected disabled hidden>Choose...</option>
-                            <option value="binary_crossentropy">binary_crossentropy</option>
-                            <option value="categorical_crossentropy">categorical_crossentropy</option>
-                        </select>
-                    </div>
-                </fieldset>
-                <fieldset class="row mb-3">
-                    <legend class="col-form-label col-sm-2 pt-0"><strong>Dataset origin</strong></legend>
-                    <div class="col-sm-4">
-                        <select id="optimizer" class="form-select mlparams" required data-width="25%" v-model="load_origin">
-                            <option value="local" selected>local</option>
-                            <option value="MNIST_FROM_keras">MNIST from Tensorflow</option>
-                            <option value="CIFAR10_from_keras">CIFAR10 from Tensorflow</option>
-                            <option value="adam">rmsprop</option>
-                        </select>
-                    </div>
-                    <div class="d-flex flex-row w-50">
-                        <div class="d-flex flex-row align-items-center col-6">
-                            <legend class="col-form-label"><strong>Picture size</strong></legend>
-                            <div class="">
-                                <input class="mlparams" type="number" id="numOfEpochs" min="1" max="100" v-model="picture_size">
-                            </div>
-                        </div>
-                        <div class="d-flex flex-row align-items-center col-3 px-3 w-50">
-                            <legend class="col-form-label"><strong>Color</strong></legend>
-
-                            <div class="col-sm-7">
-                                <select id="optimizer" class="form-select mlparams" required data-width="25%" v-model="color">
-                                    <option value="1" selected>Yes</option>
-                                    <option value="0">No</option>
-                                </select>
-                            </div>
-                        </div>
-
-                    </div>
-
-                </fieldset>
-                <fieldset class="row mb-3">
-                    <div class="col-xs-4">
-                        <legend class="col-form-label col-sm-2 pt-0"><strong>Number of classes</strong></legend>
-                        <div class="col-sm-4 mb-3">
-                            <input class="mlparams" type="number" id="numOfClasses" min="2" max="100" v-model="num_of_classes">
-                        </div>
-                    </div>
-                    <div class="col-xs-4">
-                        <legend class="col-form-label col-sm-2 pt-0"><strong>Number of epochs</strong></legend>
-                        <div class="col-sm-4">
-                            <input class="mlparams" type="number" id="numOfEpochs" min="1" max="100" v-model="num_of_epochs">
-                        </div>
-                    </div>
-                </fieldset>
                 <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label"> <strong>Date range for learning session</strong></label>
+                    <h5 class="col-sm-2 col-sm-2-pt-0"> <strong>Date range for learning session</strong></h5>
                     <div class="col-sm-10">
                         <Datepicker range style="width: 330px;" v-model="date" />
                     </div>
@@ -175,6 +121,9 @@
 
 <script>
 import TagInput from '@/components/TagInput.vue'
+import FixedTable from '@/components/FixedTable.vue'
+import EditableTable from '@/components/EditableTable.vue'
+
 import Datepicker from 'vue3-date-time-picker'
 import 'vue3-date-time-picker/dist/main.css'
 import {
@@ -203,6 +152,9 @@ export default {
     },
     data() {
         return {
+            responseModelParams:[],
+            showEditable:false,
+            modelTypes:"",
 
             // for new session form
             availableModels: [],
@@ -246,12 +198,18 @@ export default {
     components: {
         TagInput,
         Datepicker,
+        FixedTable,
+        EditableTable
     },
     methods: {
+         onChange(event) {
+            console.log(event.target.value)
+        },
         getAvailableModels(){
             axios
                 .get('/api/v1/get-available-models/')
                 .then(response => {
+                    console.log(response.data)
                     this.availableModels = response.data
                 }).catch(error => {
                     if (error.response) {
@@ -267,7 +225,9 @@ export default {
             axios
                 .get('/api/v1/getparameters/' + this.modelType)
                 .then(response => {
+                    this.responseModelParams = response.data
                     console.log(response.data)
+                    this.showEditable = true
                 }).catch(error => {
                     if (error.response) {
                         for (const property in error.response.data) {

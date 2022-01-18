@@ -45,24 +45,7 @@ from tensorflow.keras.applications.efficientnet import EfficientNetB0, Efficient
 
 import inspect
 
-models_dict = {
-    'Xception': Xception,
-    'VGG19': VGG19,
-    'VGG16': VGG16,
-    'ResNet50V2': ResNet50V2,
-    'ResNet50': ResNet50,
-    'MobileNetV2': MobileNetV2,
-    'MobileNet': MobileNet,
-    'InceptionV3': InceptionV3,
-    'InceptionResNetV2': InceptionResNetV2,
-    'EfficientNetB0': EfficientNetB0,
-    'EfficientNetB1': EfficientNetB1,
-    'EfficientNetB2': EfficientNetB2,
-    'EfficientNetB3': EfficientNetB3,
-    'DenseNet121': DenseNet121,
-    'DenseNet169': DenseNet169,
-    'DenseNet201': DenseNet201
-}
+
 
 
 # 3. File upload
@@ -331,10 +314,12 @@ def add_many_participants(request):
 
 @api_view(['GET'])
 def get_parameters_list_for_model(request, name):
-    attributes = inspect.signature(models_dict[name])
+    attributes = inspect.signature(eval(name))
     params = dict()
     param_keys = list(attributes.parameters.keys())
     param_values = list(attributes.parameters.values())
+
+
     for i in range(len(param_keys)):
         if (param_keys[i] == "kwargs"):
             continue
@@ -343,7 +328,8 @@ def get_parameters_list_for_model(request, name):
 
 @api_view(['GET'])
 def get_available_models(request):
-    return Response(models_dict.keys(), status=status.HTTP_200_OK)
+    functions = [m[0] for m in inspect.getmembers(tf.keras.applications, inspect.isfunction)]
+    return Response(functions, status=status.HTTP_200_OK)
 
 
 

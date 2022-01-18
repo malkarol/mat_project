@@ -184,7 +184,7 @@ export default {
         },
         getUserData() {
             this.$store.state.isLoading = true
-            
+
             axios.get('api/v1/user/' + this.$store.state.user.id)
                 .then((resp) => {
                     console.log(resp.data)
@@ -196,7 +196,7 @@ export default {
                     this.isFetching = false
                     this.$store.state.isLoading = false
                 })
-            
+
         },
         changeInformation() {
             this.validateForm()
