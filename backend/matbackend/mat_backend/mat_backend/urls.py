@@ -24,5 +24,5 @@ urlpatterns = [
     path('api/v1/',include('account.urls')),
     path('api/v1/',include('session_handler.urls')),
     path('api/v1/',include('ml_handler.urls')),
-
+    path('api/v1/', include('webapp.urls'))
 ]
