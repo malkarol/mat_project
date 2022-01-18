@@ -620,7 +620,7 @@ def upload_local_model(request):
         file_object = request.FILES['files']
         print(type(file_object))
         session = Session.objects.get(pk=request.data['session'])
-        target_path = f'/sessions/session_Id_{session.session_id}/local_weigths/' + file_object.name
+        target_path = f'/sessions/session_Id_{session.session_id}/local_weights/' + file_object.name
         path = storage.save(target_path, ContentFile(file_object.read()))
         file = StorageFile.objects.create(name=file_object.name, path=path, related_session=session)
         # file = StorageFile.objects.create(name=file_object.name, path=path, related_session=session)

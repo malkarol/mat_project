@@ -9,14 +9,12 @@ from django.core.files.base import ContentFile
 storage = GoogleCloudStorage()
 
 @api_view(['POST'])
-@authentication_classes([])
-@permission_classes([])
 def upload_weights(request):
     if request.method == 'POST':
-        file_object = request.FILES['model_weights.h5']
+        file_object = request.FILES['model_weights']
         session = Session.objects.get(pk=request.data['session_id'])
         print(request.data['session_id'])
-        target_path = './sessions/testowewagi.h5'#f'/session_Id_{session.session_id}/' + file_object.name
+        target_path = f'/sessions/session_Id_{session.session_id}/local_weights/' + file_object.name
         path = storage.save(target_path, ContentFile(file_object.read()))
         file = StorageFile.objects.create(name=file_object.name, path=path, related_session=session)
         return Response(status=status.HTTP_200_OK)
