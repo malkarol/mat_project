@@ -13,12 +13,29 @@
             <tbody>
                 <tr v-for="(parameter, index) in parameters" :key="parameter">
                     <th scope="row">{{index}}</th>
-                    <td>{{parameter.name}}</td>
+                    <td>{{parameter.name}}
+                    </td>
                     <td><input v-if="isSelect(parameter.name)== false" type="number" :disabled="parameter.Selected"
                     :value="parameter.Selected ? parameter.defaultVal : parameter.value"
                     :min="getMin(parameter.name)"
                     :max="getMax(parameter.name)"
                     :step="getStep(parameter.name)" />
+                    <!-- <span  v-else-if="parameter.name === 'input_size'" > -->
+
+
+                    <!-- <td><input  id="inputWidth" type="number" :disabled="parameter.Selected"
+                    :value="parameter.Selected ? parameter.defaultVal : parameter.value"
+                    :min="getMin(parameter.name)"
+                    :max="getMax(parameter.name)"
+                    :step="getStep(parameter.name)" /></td>
+
+                    <td><input  id="inputHeight"  type="number" :disabled="parameter.Selected"
+                    :value="parameter.Selected ? parameter.defaultVal : parameter.value"
+                    :min="getMin(parameter.name)"
+                    :max="getMax(parameter.name)"
+                    :step="getStep(parameter.name)" /> </td>
+                        </span> -->
+
                     <select  :disabled="parameter.Selected" v-else>
                         <option v-for="item in parameter.value" :key="item" :selected="parameter.Selected == true && item == parameter.defaultVal">{{item}}</option>
                         </select>
@@ -34,6 +51,7 @@
 export default {
   data () {
     return {
+        hover: false,
         dictonaries:[],
         responses:{},
         parameters:[
@@ -78,9 +96,16 @@ export default {
 
         },
         {
-            name:'input_size',
-            value:1,
-            defaultVal: 1,
+            name:'width_size',
+            value:32,
+            defaultVal: 32,
+            Selected: false
+
+        },
+        {
+            name:'height_size',
+            value:32,
+            defaultVal: 32,
             Selected: false
 
         }
@@ -100,6 +125,8 @@ export default {
                 return 128
             case 'number_of_epochs':
                 return 100
+            case 'input_size':
+                return 224
             default:
                 return 128
 
@@ -114,6 +141,8 @@ export default {
                 return 32
             case 'number_of_epochs':
                 return 5
+            case 'input_size':
+                return 32
             default:
                 return 2
 
