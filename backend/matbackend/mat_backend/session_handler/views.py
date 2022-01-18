@@ -290,8 +290,7 @@ def add_many_participants(request):
             # target_path = f'/sessions/session_Id_{session_id}/global_weights.h5'
             # path = storage.save(target_path, ContentFile(global_weights))
             participants = []
-            print("przed valied")
-            print(users)
+
 
             for user in serializerUser.data:
                 participant = {}
@@ -305,7 +304,7 @@ def add_many_participants(request):
             owner['is_owner'] = True
             participants.append(owner)
 
-            print("przed drugim valied")
+
             serializerParticipant = ParticipantSerializer(data=participants, many=True)
             if serializerParticipant.is_valid():
                 serializerParticipant.save()
@@ -455,7 +454,6 @@ def generate_global_weights(request,pk):
                 zip_iterator = zip(serializer.data['parameters_keys'],serializer.data['parameters_values'])
                 parameters= dict(zip_iterator)
                 parameters['model_name'] = class_name
-                parameters['optimizer'] = ff.get_optimizer(parameters['optimizer'])
                 lines = ScriptsExecutor().create_initial_weights(parameters)
                 print(parameters)
                 response_content = '\n'.join(lines)
@@ -593,7 +591,9 @@ def local_model_script(request,pk):
         parameters= dict(zip_iterator)
         parameters['username'] = request.user.username
         parameters['model_name'] = class_name
-        parameters['optimizer'] = ff.get_optimizer(parameters['optimizer'])
+        parameters['load_data'] = 'load_data'
+        parameters['learning'] = 'learning'
+
         lines = ScriptsExecutor().create_local_model(parameters)
         print(parameters)
         response_content = '\n'.join(lines)
@@ -702,7 +702,8 @@ def global_model_script(request,pk):
         parameters= dict(zip_iterator)
         parameters['username'] = request.user.username
         parameters['model_name'] = class_name
-        parameters['optimizer'] = ff.get_optimizer(parameters['optimizer'])
+        parameters['load_data'] = 'load_data'
+        parameters['learning'] = 'learning'
         lines = ScriptsExecutor().create_global_model(parameters)
         print(parameters)
         response_content = '\n'.join(lines)
@@ -755,7 +756,9 @@ def aggregate_script(request, pk):
             parameters= dict(zip_iterator)
             parameters['username'] = request.user.username
             parameters['model_name'] = class_name
-            parameters['optimizer'] = ff.get_optimizer(parameters['optimizer'])
+            parameters['load_data'] = 'load_data'
+            parameters['learning'] = 'learning'
+
             list_of_participants = Participant.objects.filter(session__session_id = pk)
             username_list = []
             clients_counts = []
