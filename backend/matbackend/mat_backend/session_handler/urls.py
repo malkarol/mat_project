@@ -12,7 +12,7 @@ urlpatterns=[
 
     path('generate-zip/<int:pk>',views.generate_zip),
     # upload global weights
-    path('upload-initial-global-weights/', views.upload_initial_global_weights),
+    path('upload-global-weights/', views.upload_global_weights),
     path('upload-local-weights-json/', views.upload_local_weights_json),
 
     path('upload-local-results-json/', views.upload_local_results_json),
