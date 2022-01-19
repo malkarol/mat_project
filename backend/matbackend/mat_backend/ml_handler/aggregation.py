@@ -21,6 +21,20 @@ from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras import backend as K
 import session_handler.file_finder as ff
+from tensorflow.keras.models import Model
+import ssl
+from tensorflow.keras.applications.vgg16 import *
+from tensorflow.keras.applications.vgg19 import *
+from tensorflow.keras.applications.resnet50 import *
+from tensorflow.keras.applications.resnet_v2 import *
+from tensorflow.keras.applications.mobilenet_v2 import *
+from tensorflow.keras.applications.mobilenet import *
+from tensorflow.keras.applications.inception_v3 import *
+from tensorflow.keras.applications.inception_resnet_v2 import *
+from tensorflow.keras.applications.xception import *
+from tensorflow.keras.applications.densenet import *
+from tensorflow.keras.applications.efficientnet import *
+ssl._create_default_https_context = ssl._create_unverified_context
 from storages.backends.gcloud import GoogleCloudStorage
 storage = GoogleCloudStorage()
 
@@ -93,6 +107,59 @@ class Aggregator():
                 # TO DO
                 # zmienic 1 na local_count - liczbe danych uzytych przez klienta
                 # zmienic 3 na global_count - liczbe danych uzytych przez wszystkich klientow
+                scaling_factor = weight_scalling_factor(client_counts[i], sum_local_counts)
+                scaled_weights = scale_model_weights(local_model.get_weights(), scaling_factor)
+                scaled_local_weight_list.append(scaled_weights)
+                i = i + 1
+                # to not consume many resources on backend
+                K.clear_session()
+            # to get the average over all the local model, we simply take the sum of the scaled weights
+            average_weights = sum_scaled_weights(scaled_local_weight_list)
+            global_model = eval( self.parameters['model_name']+f"({self.num_classes},{self.input_shape})")
+            global_model.compile(loss=parameters["loss_function"],
+                          optimizer=eval(parameters["optimizer"]),
+                          metrics=["accuracy"])
+            global_model.set_weights(average_weights)
+            global_model.save_weights("tmp_aver_weight.h5")
+            return "tmp_aver_weight.h5"
+
+class PretrainedAggregator(Aggregator):
+    def __init__(self,input_shape, num_classes, parameters, session_id):
+        Aggregator.__init__(self,input_shape, num_classes, parameters, session_id)
+
+    def aggregate(self, parameters):
+        # iterator for local_counts
+            i = 0
+            scaled_local_weight_list =list()
+            client_counts = [int(x) for x in self.parameters['clients_counts']]
+
+            sum_local_counts = sum(client_counts)
+            # loop through each client and create new local model
+            for client in self.parameters['client_names']:
+
+                base_model = eval( self.parameters['model_name'])(input_shape=self.input_shape + [3], weights='imagenet', include_top=False) #Training with Imagenet weights
+
+                # This sets the base that the layers are not trainable. If we'd want to train the layers with custom data, these two lines can be ommitted.
+                for layer in base_model.layers:
+                    layer.trainable = False
+                x = Flatten()(base_model.output) #Output obtained on vgg16 is now flattened.
+                prediction = Dense(self.num_classes, activation='softmax')(x) # We have 5 classes, and so, the prediction is being done on len(folders) - 5 classes
+                #Creating model object
+                model = Model(inputs=base_model.input, outputs=prediction)
+                local_model = model
+                local_model.compile(loss=parameters["loss_function"],
+                          optimizer=eval(parameters["optimizer"]),
+                          metrics=["accuracy"])
+
+                # set local model weight to the weight of the global model
+                # local_model.set_weights(global_weights)
+                content = self.getClientsWeightsFromJson(client,client_counts[i])
+                with open("tmp_weight.h5", 'wb') as f:
+                    f.write(content)
+
+                local_model.load_weights('tmp_weight.h5')
+                os.remove("tmp_weight.h5")
+                # scale the model weights and add to list
                 scaling_factor = weight_scalling_factor(client_counts[i], sum_local_counts)
                 scaled_weights = scale_model_weights(local_model.get_weights(), scaling_factor)
                 scaled_local_weight_list.append(scaled_weights)

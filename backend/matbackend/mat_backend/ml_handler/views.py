@@ -86,18 +86,22 @@ def aggregate_on_server(request, pk):
             print("\n\n")
             print(participant_final_list)
             print("\n\n")
-            parameters['model_name']= ff.get_class_name(serializer.data['model_name'])
+
             parameters['client_names'] =[ x[0] for x in users_final_list ]
             parameters['clients_counts'] = [ x[0] for x in participant_final_list ]
             print(clients_counts)
-            color = int(parameters['color'])
-            width = height = int(parameters['picture_size'])
-            num_of_classes =parameters['num_of_classes']
-            input_shape = (height,width,color)
+            width = int(parameters['width_size'])
+            height = int(parameters['height_size'])
+            num_of_classes =parameters['number_of_classes']
+            input_shape = (height,width)
             print("\n\n")
             print(input_shape)
             print("\n\n")
-            aggregator = agreg.Aggregator(input_shape,num_of_classes,parameters,pk)
+            parameters['model_name'] = ff.get_class_name(serializer.data['model_name'])
+            if ff.get_class_name(serializer.data['model_name']) != serializer.data['model_name']:
+                aggregator = agreg.Aggregator(input_shape,num_of_classes,parameters,pk)
+            else:
+                aggregator = agreg.PretrainedAggregator(input_shape,num_of_classes,parameters,pk)
             text_path = aggregator.aggregate(parameters)
             file = open(text_path,'rb')
             target_path = f'/sessions/session_Id_{session.session_id}/aggregated_weights.h5'
