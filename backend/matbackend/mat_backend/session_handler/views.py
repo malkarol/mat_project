@@ -167,6 +167,13 @@ def get_session_model_progress(request, spk):
     serializer = ParticipantSerializer(participants, many=True)
     return Response(participant for participant in serializer.data)
 
+@api_view(['GET'])
+def download_zip_testdata(request):
+    path = f'/common/TEST.zip'
+    storage_file = storage.open(path, 'rb')
+    response = FileResponse(storage_file)
+    return response
+
 @api_view(['POST'])
 def upload_global_model_results(request):
     try:
@@ -383,22 +390,26 @@ def upload_global_weights(request):
 
         file_object = request.FILES['model_weights']
         target_path = f'/sessions/session_Id_'+request.data['session_id']+'/' + 'global_weights.h5'
-        ses_result = SessionResult.objects.get(session__id = request.data['session_id'])
-        sess_res_Serializer = SessionResultSerializer(ses_result)
+        ses_result = SessionResult.objects.get(session__session_id = request.data['session_id'])
+        ses_result.finished = True
+        ses_result.global_model_accuracy = request.data['accuracy']
+        ses_result.global_model_loss = request.data['loss']
+        ses_result.save()
+        # sess_res_Serializer = SessionResultSerializer(ses_result)
 
-        resultsTmp = sess_res_Serializer.data
-        resultsTmp.data['accuracy'] = request.data['accuracy']
-        resultsTmp.data['loss'] = request.data['loss']
-        resultsTmp.data['finished'] = True
-
-        sessSerializer = SessionResultSerializer(session, data=resultsTmp)
-        if sessSerializer.is_valid():
-            sessSerializer.save()
-        result = SessionResultSerializer(data=ses_result.data)
-        result.save()
+        # resultsTmp = sess_res_Serializer.data
+        # resultsTmp['finished'] = True
+        # resultsTmp['accuracy'] = request.data['accuracy']
+        # resultsTmp['loss'] = request.data['loss']
+        #print(request.data['accuracy'])
+        #print(request.data['loss'])
+        #sessSerializer = SessionResultSerializer(session, data=resultsTmp)
         if session.founder==request.user.username:
-            path = storage.save(target_path, ContentFile(file_object.read()))
-            return Response(status=status.HTTP_200_OK)
+                path = storage.save(target_path, ContentFile(file_object.read()))
+                return Response(status=status.HTTP_200_OK)
+        # if sessSerializer.is_valid():
+        #     sessSerializer.save()
+            
     return Response(status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])

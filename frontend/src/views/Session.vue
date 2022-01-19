@@ -166,7 +166,7 @@
                                     <div class=" d-flex justify-content-center">
                                         <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getFile()">Global model script for predictions</button>
                                         <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getGlobalModel()">Global model script for idividual learning</button>
-                                        <input type="button" class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="fillData()" value="Show results"/>
+                                        <input type="button" class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="fillData()" value="Show results" />
                                     </div>
                                 </div>
                             </div>
@@ -632,6 +632,29 @@ export default {
                 console.log(response)
             })
         },
+        downloadTestDataset() {
+            axios({
+                url: 'api/v1/download-zip-testdata/',
+                //url: 'api/v1/testmodel/',
+                method: 'GET',
+                responseType: 'blob',
+            }).then((response) => {
+                console.log(response)
+                var fileURL = window.URL.createObjectURL(new Blob([response.data], {
+                    type: 'application/zip'
+                }));
+                var fileLink = document.createElement('a');
+
+                fileLink.href = fileURL;
+                fileLink.setAttribute('download', this.session.name + 'test_dataset.zip');
+                document.body.appendChild(fileLink);
+
+                fileLink.click();
+
+                console.log(response)
+            })
+        },
+
         generateLocalModel() {
 
             axios({
@@ -664,6 +687,7 @@ export default {
                     fileLink.click();
 
                     console.log(response)
+                    this.downloadTestDataset()
                     this.localLearningScriptDownloaded = true
                 })
             }).catch(error => {

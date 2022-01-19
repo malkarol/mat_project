@@ -125,7 +125,7 @@
                 <label for="uploadDataset" class="form-label text-muted">(Only .h5 files)</label>
                 <input class="form-control form-control-lg" id="uploadDataset" accept=".zip" type="file">
 
-                <input type="button" class="btn btn-primary btn-lg btn-success mt-3 mb-3" @click="uploadTestSet()" value="Upload test data" />
+                <input type="button" class="btn btn-primary btn-lg btn-success mt-3 mb-3" @click="" value="Upload test data" />
                 </div>
                 <div class="d-flex justify-content-between mt-5">
                     <button class="btn btn-success btn-lg px-5">Save</button>
@@ -489,7 +489,7 @@ export default {
             await axios
                 .post('/api/v1/create-filled-session/', formData)
                 .then(response => {
-
+                    this.uploadTestSet()
                     console.log(response.data)
                     // // add owner
                     //  const participantData = {
