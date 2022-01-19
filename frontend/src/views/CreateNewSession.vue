@@ -112,7 +112,7 @@
                     </div>
                   </fieldset>
                  <fieldset v-if="showEditable== true" class="row mb-5">
-                     <!-- <EditableTable :responseParams="responseModelParams"/> -->
+                     <EditableTable :responseParams="responseModelParams"/>
                  </fieldset>
 
                 <div class="row mb-3">

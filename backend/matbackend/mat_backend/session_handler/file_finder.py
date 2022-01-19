@@ -52,7 +52,7 @@ def get_class_name(x):
         'VGG': 'VGGOneBlock',
 
 
-    }[x]    # message will be returned default if x is not found
+    }.get(x, x)    # message will be returned default if x is not found
 
 def get_optimizer(x):
     return {

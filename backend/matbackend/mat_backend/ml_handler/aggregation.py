@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
+import tensorflow as tf
 from sklearn.metrics import accuracy_score
 import io
 import json
@@ -86,7 +87,7 @@ class Aggregator():
             i = 0
             scaled_local_weight_list =list()
             client_counts = [int(x) for x in self.parameters['clients_counts']]
-
+            optimizer = eval(parameters["optimizer"])
             sum_local_counts = sum(client_counts)
             # loop through each client and create new local model
             for client in self.parameters['client_names']:
@@ -117,7 +118,7 @@ class Aggregator():
             average_weights = sum_scaled_weights(scaled_local_weight_list)
             global_model = eval( self.parameters['model_name']+f"({self.num_classes},{self.input_shape})")
             global_model.compile(loss=parameters["loss_function"],
-                          optimizer=eval(parameters["optimizer"]),
+                          optimizer=optimizer,
                           metrics=["accuracy"])
             global_model.set_weights(average_weights)
             global_model.save_weights("tmp_aver_weight.h5")
@@ -135,6 +136,7 @@ class PretrainedAggregator(Aggregator):
 
             sum_local_counts = sum(client_counts)
             # loop through each client and create new local model
+            print(self.parameters['client_names'])
             for client in self.parameters['client_names']:
 
                 base_model = eval( self.parameters['model_name'])(input_shape=self.input_shape + [3], weights='imagenet', include_top=False) #Training with Imagenet weights
@@ -164,14 +166,26 @@ class PretrainedAggregator(Aggregator):
                 scaled_weights = scale_model_weights(local_model.get_weights(), scaling_factor)
                 scaled_local_weight_list.append(scaled_weights)
                 i = i + 1
+                print(i)
                 # to not consume many resources on backend
                 K.clear_session()
             # to get the average over all the local model, we simply take the sum of the scaled weights
+            print("before sum")
             average_weights = sum_scaled_weights(scaled_local_weight_list)
-            global_model = eval( self.parameters['model_name']+f"({self.num_classes},{self.input_shape})")
-            global_model.compile(loss=parameters["loss_function"],
-                          optimizer=eval(parameters["optimizer"]),
-                          metrics=["accuracy"])
+            base_model = eval( self.parameters['model_name'])(input_shape=self.input_shape + [3], weights='imagenet', include_top=False) #Training with Imagenet weights
+
+                # This sets the base that the layers are not trainable. If we'd want to train the layers with custom data, these two lines can be ommitted.
+            for layer in base_model.layers:
+                layer.trainable = False
+            x = Flatten()(base_model.output) #Output obtained on vgg16 is now flattened.
+            prediction = Dense(self.num_classes, activation='softmax')(x) # We have 5 classes, and so, the prediction is being done on len(folders) - 5 classes
+            #Creating model object
+            global_model = Model(inputs=base_model.input, outputs=prediction)
+            local_model =  global_model
+            local_model.compile(loss=parameters["loss_function"],
+                      optimizer=eval(parameters["optimizer"]),
+                      metrics=["accuracy"])
             global_model.set_weights(average_weights)
             global_model.save_weights("tmp_aver_weight.h5")
+            print("done")
             return "tmp_aver_weight.h5"

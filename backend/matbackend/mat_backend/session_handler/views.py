@@ -168,8 +168,9 @@ def get_session_model_progress(request, spk):
     return Response(participant for participant in serializer.data)
 
 @api_view(['GET'])
-def download_zip_testdata(request):
-    path = f'/common/TEST.zip'
+def download_zip_testdata(request,pk):
+    
+    path = f'/sessions/session_Id_{pk}/TEST.zip'
     storage_file = storage.open(path, 'rb')
     response = FileResponse(storage_file)
     return response
@@ -867,3 +868,10 @@ def generate_private_key(session):
     encoded = string.encode()
     return hashlib.sha256(encoded).hexdigest()
 
+@api_view(['POST'])
+def upload_many(request,pk):
+    if request.method == 'POST':
+        file_object = request.FILES['files']
+        target_path =  f'/sessions/session_Id_{pk}/TEST.zip'+ file_object.name
+        path = storage.save(target_path, ContentFile(file_object.read()))
+        return Response(status=status.HTTP_200_OK)

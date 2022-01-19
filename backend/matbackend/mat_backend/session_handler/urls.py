@@ -18,7 +18,7 @@ urlpatterns=[
     path('upload-local-results-json/', views.upload_local_results_json),
     # generate script for global weights
     path('generate-weights-script/<int:pk>', views.generate_global_weights),
-    path('download-zip-testdata/', views.download_zip_testdata),
+    path('download-zip-testdata/<int:pk>', views.download_zip_testdata),
     path('get-global-weights/<int:pk>', views.get_global_weights),
     # generate local model script for session
     path('upload-local-model/', views.upload_local_model),

@@ -93,14 +93,17 @@ def aggregate_on_server(request, pk):
             width = int(parameters['width_size'])
             height = int(parameters['height_size'])
             num_of_classes =parameters['number_of_classes']
-            input_shape = (height,width)
+            input_shape = [height,width]
             print("\n\n")
             print(input_shape)
             print("\n\n")
+            parameters['optimizer'] = f'tf.keras.optimizers.{parameters["optimizer"]}(learning_rate={parameters["learning_rate"]},momentum={parameters["momentum"]})'
             parameters['model_name'] = ff.get_class_name(serializer.data['model_name'])
             if ff.get_class_name(serializer.data['model_name']) != serializer.data['model_name']:
+                print( parameters['model_name'])
                 aggregator = agreg.Aggregator(input_shape,num_of_classes,parameters,pk)
             else:
+                print( parameters['model_name'])
                 aggregator = agreg.PretrainedAggregator(input_shape,num_of_classes,parameters,pk)
             text_path = aggregator.aggregate(parameters)
             file = open(text_path,'rb')

@@ -634,7 +634,7 @@ export default {
         },
         downloadTestDataset() {
             axios({
-                url: 'api/v1/download-zip-testdata/',
+                url: 'api/v1/download-zip-testdata/'+ this.session.session_id,
                 //url: 'api/v1/testmodel/',
                 method: 'GET',
                 responseType: 'blob',
