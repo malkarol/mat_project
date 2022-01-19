@@ -317,6 +317,9 @@ def add_many_participants(request):
             serializerParticipant = ParticipantSerializer(data=participants, many=True)
             if serializerParticipant.is_valid():
                 serializerParticipant.save()
+                session = Session.objects.get(pk=serializer.data['session_id'])
+                ses_result = SessionResult.objects.create(session=session, finished=False)
+                ses_result.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -379,6 +382,17 @@ def upload_global_weights(request):
 
         file_object = request.FILES['model_weights']
         target_path = f'/sessions/session_Id_'+request.data['session_id']+'/' + 'global_weights.h5'
+        ses_result = SessionResult.objects.get(session__id = request.data['session_id'])
+        sess_res_Serializer = SessionResultSerializer(ses_result)
+
+        resultsTmp = sess_res_Serializer.data
+        resultsTmp.data['accuracy'] = request.data['accuracy']
+        resultsTmp.data['loss'] = request.data['loss']
+        sessSerializer = SessionResultSerializer(session, data=resultsTmp)
+        if sessSerializer.is_valid():
+            sessSerializer.save()
+        result = SessionResultSerializer(data=ses_result.data)
+        result.save()
         if session.founder==request.user.username:
             path = storage.save(target_path, ContentFile(file_object.read()))
             return Response(status=status.HTTP_200_OK)
@@ -445,6 +459,7 @@ def upload_local_weights_json(request):
         participant.local_data_count = int(file.name.split('_')[-1].split('.')[0])
         participant.save()
         return Response(status=status.HTTP_200_OK)
+
 
 @api_view(['GET'])
 def generate_global_weights(request,pk):

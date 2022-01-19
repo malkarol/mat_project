@@ -121,6 +121,12 @@
                         <Datepicker range style="width: 330px;" v-model="date" />
                     </div>
                 </div>
+                <div class="row mb-3">
+                <label for="uploadDataset" class="form-label text-muted">(Only .h5 files)</label>
+                <input class="form-control form-control-lg" id="uploadDataset" accept=".zip" type="file">
+
+                <input type="button" class="btn btn-primary btn-lg btn-success mt-3 mb-3" @click="uploadTestSet()" value="Upload test data" />
+                </div>
                 <div class="d-flex justify-content-between mt-5">
                     <button class="btn btn-success btn-lg px-5">Save</button>
                     <button class="btn btn-danger btn-lg px-5" @click="backToSessions()">Cancel</button>
@@ -289,6 +295,24 @@ export default {
         EditableTable
     },
     methods: {
+         uploadTestSet() {
+            let formData = new FormData()
+            const imagefile = document.querySelector('#uploadDataset');
+            formData.append('files', imagefile.files[0]);
+            console.log(formData)
+            axios.post('upload-many/', // testowy endpoint - to zrob zeby nie byl testowy
+                    formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                ).then(function () {
+                    console.log('SUCCESS!!');
+                })
+                .catch(function () {
+                    console.log('FAILURE!!');
+                })
+        },
         updateMyValue(newValue)
         {
             this.fixedParams = newValue
