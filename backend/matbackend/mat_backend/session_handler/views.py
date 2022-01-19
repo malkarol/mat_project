@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import JSONParser
 from zipfile import *
 from django.core.files.storage import default_storage
-from sqlalchemy import true
+
 
 from account.models import User
 from account.serializers import UserSerializer
