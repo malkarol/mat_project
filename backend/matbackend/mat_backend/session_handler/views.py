@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import JSONParser
 from zipfile import *
 from django.core.files.storage import default_storage
+from sqlalchemy import true
 
 from account.models import User
 from account.serializers import UserSerializer
@@ -388,6 +389,8 @@ def upload_global_weights(request):
         resultsTmp = sess_res_Serializer.data
         resultsTmp.data['accuracy'] = request.data['accuracy']
         resultsTmp.data['loss'] = request.data['loss']
+        resultsTmp.data['finished'] = True
+
         sessSerializer = SessionResultSerializer(session, data=resultsTmp)
         if sessSerializer.is_valid():
             sessSerializer.save()
