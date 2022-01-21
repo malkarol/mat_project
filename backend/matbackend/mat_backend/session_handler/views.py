@@ -12,7 +12,7 @@ from rest_framework.parsers import JSONParser
 from zipfile import *
 from django.core.files.storage import default_storage
 
-
+from rest_framework.parsers import JSONParser
 from account.models import User
 from account.serializers import UserSerializer
 from session_handler.models import Session, SessionResult, Participant, StorageFile
@@ -267,26 +267,25 @@ def join_session(request):
 #         users.append(user)
 #     serializerUser =UserSerializer(data=users,many=True)
 
-
+import json
 @api_view(['POST'])
 def add_many_participants(request):
     """
     Used when creating session.
     """
     if request.method =='POST':
-        users = User.objects.filter(username__in = request.data['usernames'])
-        serializerUser = UserSerializer(users,many=True)
-        request.data['session']['actual_num_of_participants'] =  request.data['session']['actual_num_of_participants'] + len(users)
-        serializer = SessionSerializer(data=request.data['session'])
+        users = User.objects.filter(username__in = request.data['usernames'].split(','))
+
+        session_stream = io.BytesIO(bytes(request.data['session'],encoding="utf-8"))
+        serializer = SessionSerializer(data=JSONParser().parse(session_stream))
+
         if serializer.is_valid():
+            serializer.validated_data['actual_num_of_participants'] = serializer.validated_data['actual_num_of_participants'] + len(users)
             serializer.save()
             if serializer.validated_data['pricing_plan'] == Session.PricingPlanEnum.PREMIUM:
                 session = Session.objects.get(pk=serializer.data['session_id'])
                 send_mail_with_privatekey(session)
                 session.save()
-
-            print(request.data['usernames'])
-
 
             session_id = serializer.data['session_id']
             target_path = f'/sessions/session_Id_{session_id}/accuracy_and_loss/'
@@ -294,25 +293,16 @@ def add_many_participants(request):
             target_path = f'/sessions/session_Id_{session_id}/local_weights/'
             storage.save(target_path,ContentFile(bytes('', 'utf-8')))
 
-            # input_shape = (28, 28, 1)
-            # class_name = serializer.data['model_name']
-            # num_classes = 10
-            # print(class_name)
-            # zip_iterator = zip(serializer.data['parameters_keys'],serializer.data['parameters_values'])
-            # parameters= dict(zip_iterator)
-            # print("\n\n")
-            # print(parameters)
-            # print("\n\n")
-            # aggregator = agreg.Aggregator(class_name,input_shape,num_classes)
-            # global_weights = aggregator.initialize_global_weights(parameters)
-            # target_path = f'/sessions/session_Id_{session_id}/global_weights.h5'
-            # path = storage.save(target_path, ContentFile(global_weights))
+            file_object = request.data['files']
+            target_path =  f'/sessions/session_Id_{session_id}/TEST_SET.zip'
+            storage.save(target_path, ContentFile(file_object.read()))
+
             participants = []
-
-
-            for user in serializerUser.data:
+            print("Seria user data")
+            print(users)
+            for user in users:
                 participant = {}
-                participant['user'] = user['id']
+                participant['user'] = user.id
                 participant['session'] = session_id
                 participant['is_owner'] = False
                 participants.append(participant)
@@ -867,14 +857,6 @@ def generate_private_key(session):
     string = str(session.creation_date) + session.name
     encoded = string.encode()
     return hashlib.sha256(encoded).hexdigest()
-
-@api_view(['POST'])
-def upload_many(request,pk):
-    if request.method == 'POST':
-        file_object = request.FILES['files']
-        target_path =  f'/sessions/session_Id_{pk}/TEST_SET.zip'
-        path = storage.save(target_path, ContentFile(file_object.read()))
-        return Response(status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def global_model_results(request, pk):

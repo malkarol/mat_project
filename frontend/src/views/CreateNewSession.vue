@@ -71,12 +71,11 @@
 
                 </div>
 
-
-                 <fieldset class="row mb-5">
-                     <FixedTable :parameters = "fixedParams" />
-                 </fieldset>
-                  <fieldset class="row mb-5">
-                     <h5 class="col-form col-sm-2 pt-0"><strong>Model Type</strong></h5>
+                <fieldset class="row mb-5">
+                    <FixedTable :parameters="fixedParams" />
+                </fieldset>
+                <fieldset class="row mb-5">
+                    <h5 class="col-form col-sm-2 pt-0"><strong>Model Type</strong></h5>
 
                     <div class="col-sm-4">
 
@@ -87,33 +86,33 @@
 
                         </select>
                     </div>
-                 </fieldset>
-                 <fieldset v-if="modelTypes == 'complex_model'"  class="row mb-5">
-                     <h5 class="col-form col-sm-2 pt-0"><strong>Model name</strong></h5>
+                </fieldset>
+                <fieldset v-if="modelTypes == 'complex_model'" class="row mb-5">
+                    <h5 class="col-form col-sm-2 pt-0"><strong>Model name</strong></h5>
 
                     <div class="col-sm-4">
 
-                        <select @change="getParameters()" id="modelType" class="form-select" required data-width="25%" v-model="modelType" >
-                            <option value="" selected disabled hidden >Choose...</option>
+                        <select @change="getParameters()" id="modelType" class="form-select" required data-width="25%" v-model="modelType">
+                            <option value="" selected disabled hidden>Choose...</option>
                             <option v-for="model in availableModels" :key="model" v-bind:availableModels="availableModels" :value="model">{{model}}</option>
                         </select>
                     </div>
-                 </fieldset>
-                  <fieldset v-if="modelTypes == 'simple_model'"  class="row mb-5">
-                     <h5 class="col-form col-sm-2 pt-0"><strong>Model name</strong></h5>
-                <div class="col-sm-4">
+                </fieldset>
+                <fieldset v-if="modelTypes == 'simple_model'" class="row mb-5">
+                    <h5 class="col-form col-sm-2 pt-0"><strong>Model name</strong></h5>
+                    <div class="col-sm-4">
 
-                        <select  id="modelType" class="form-select" required data-width="25%" v-model="modelType" >
-                            <option value="" selected disabled hidden >Choose...</option>
+                        <select id="modelType" class="form-select" required data-width="25%" v-model="modelType">
+                            <option value="" selected disabled hidden>Choose...</option>
                             <option value="CNN">Simple CNN</option>
                             <option value="VGG">One block VGG</option>
 
                         </select>
                     </div>
-                  </fieldset>
-                 <fieldset v-if="showEditable== true" class="row mb-5">
-                     <EditableTable :responseParams="responseModelParams"/>
-                 </fieldset>
+                </fieldset>
+                <fieldset v-if="showEditable== true" class="row mb-5">
+                    <EditableTable :responseParams="responseModelParams" />
+                </fieldset>
 
                 <div class="row mb-3">
                     <h5 class="col-sm-2 col-sm-2-pt-0"> <strong>Date range for learning session</strong></h5>
@@ -122,10 +121,22 @@
                     </div>
                 </div>
                 <div class="row mb-3">
-                <label for="uploadDataset" class="form-label text-muted">(Only .h5 files)</label>
-                <input class="form-control form-control-lg" id="uploadDataset" accept=".zip" type="file">
-
-                <input type="button" class="btn btn-primary btn-lg btn-success mt-3 mb-3" @click="" value="Upload test data" />
+                    <label for="uploadDataset" class="form-label text-muted">(Only .zip files)</label>
+                    <input class="form-control form-control-lg" id="uploadDataset" accept=".zip" type="file">
+                    <div class="text-center" v-if="creatingSession">
+                        <div class="lds-dual-ring"></div>
+                        <div>Creating session...</div>
+                    </div>
+                    <div class="d-flex justify-content-center text-center text-success mt-5" v-if="sessionCreated">
+                        <p class=" border-success p-3 border rounded">
+                            Session created successfully!
+                        </p>
+                    </div>
+                    <div class="d-flex justify-content-center text-center text-danger mt-5" v-if="sessionErrors">
+                        <p class=" border-danger p-3 border rounded">
+                            We have encountered some errors, please try again
+                        </p>
+                    </div>
                 </div>
                 <div class="d-flex justify-content-between mt-5">
                     <button class="btn btn-success btn-lg px-5">Save</button>
@@ -167,91 +178,95 @@ export default {
             date,
         }
     },
-    mounted(){
+    mounted() {
         this.getAvailableModels()
     },
     data() {
         return {
-            fixedParams:[{
-            name:'number_of_epochs',
-            value:5,
-            defaultVal: 10,
-            Selected: false
-        },
-        {
-            name:'loss_function',
-            values:["categorical_crossentropy",
-            "sparse_categorical_crossentropy",
-            "binary_crossentropy"],
-            value: "categorical_crossentropy",
-            defaultVal: "categorical_crossentropy",
-            Selected: false
-        },
-        {
-            name:'optimizer',
-            values:["SGD",
-            "RMSprop",
-            "Adam",
-            "Adadelta",
-            "Adagra"
+            creatingSession: false,
+            sessionCreated: false,
+            sessionErrors: false,
+            fixedParams: [{
+                    name: 'number_of_epochs',
+                    value: 5,
+                    defaultVal: 10,
+                    Selected: false
+                },
+                {
+                    name: 'loss_function',
+                    values: ["categorical_crossentropy",
+                        "sparse_categorical_crossentropy",
+                        "binary_crossentropy"
+                    ],
+                    value: "categorical_crossentropy",
+                    defaultVal: "categorical_crossentropy",
+                    Selected: false
+                },
+                {
+                    name: 'optimizer',
+                    values: ["SGD",
+                        "RMSprop",
+                        "Adam",
+                        "Adadelta",
+                        "Adagra"
+                    ],
+                    value: "SGD",
+                    defaultVal: "SGD",
+                    Selected: false
+                },
+                {
+                    name: 'learning_rate',
+                    value: 0.01,
+                    defaultVal: 0.01,
+                    Selected: false
+
+                },
+                {
+                    name: 'momentum',
+                    value: 0.9,
+                    defaultVal: 0.9,
+                    Selected: false
+
+                },
+                {
+                    name: 'batch_size',
+                    value: 32,
+                    defaultVal: 32,
+                    Selected: false
+
+                },
+                {
+                    name: 'validation_split',
+                    value: 0.2,
+                    defaultVal: 0.2,
+                    Selected: false
+
+                },
+                {
+                    name: 'width_size',
+                    value: 32,
+                    defaultVal: 32,
+                    Selected: false
+
+                },
+                {
+                    name: 'height_size',
+                    value: 32,
+                    defaultVal: 32,
+                    Selected: false
+
+                },
+                {
+                    name: 'number_of_classes',
+                    value: 2,
+                    defaultVal: 2,
+                    Selected: false
+
+                }
             ],
-            value: "SGD",
-            defaultVal: "SGD",
-            Selected: false
-        },
-        {
-            name:'learning_rate',
-            value:0.01,
-            defaultVal: 0.01,
-            Selected: false
-
-        },
-         {
-            name:'momentum',
-            value:0.9,
-            defaultVal: 0.9,
-            Selected: false
-
-        },
-        {
-            name:'batch_size',
-            value: 32,
-            defaultVal: 32,
-            Selected: false
-
-
-        },
-        {
-            name:'validation_split',
-            value: 0.2,
-            defaultVal: 0.2,
-            Selected: false
-
-        },
-        {
-            name:'width_size',
-            value:32,
-            defaultVal: 32,
-            Selected: false
-
-        },
-        {
-            name:'height_size',
-            value:32,
-            defaultVal: 32,
-            Selected: false
-
-        },
-         {
-            name:'number_of_classes',
-            value:2,
-            defaultVal: 2,
-            Selected: false
-
-        }],
-            responseModelParams:[],
-            showEditable:false,
-            modelTypes:"",
+            responseModelParams: [],
+            showEditable: false,
+            modelTypes: "",
 
             // for new session form
             availableModels: [],
@@ -295,39 +310,18 @@ export default {
         EditableTable
     },
     methods: {
-         uploadTestSet() {
-            let formData = new FormData()
-            const imagefile = document.querySelector('#uploadDataset');
-            formData.append('files', imagefile.files[0]);
-            console.log(formData)
-            axios.post('upload-many/', // testowy endpoint - to zrob zeby nie byl testowy
-                    formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    }
-                ).then(function () {
-                    console.log('SUCCESS!!');
-                })
-                .catch(function () {
-                    console.log('FAILURE!!');
-                })
-        },
-        updateMyValue(newValue)
-        {
+        updateMyValue(newValue) {
             this.fixedParams = newValue
         },
-        tosth()
-        {
+        tosth() {
             console.log(this.fixedParams)
 
         },
 
-
-         onChange(event) {
+        onChange(event) {
             console.log(event.target.value)
         },
-        getAvailableModels(){
+        getAvailableModels() {
             axios
                 .get('/api/v1/get-available-models/')
                 .then(response => {
@@ -386,47 +380,18 @@ export default {
                 }
             })
         },
-        // testFilterParticipants() {
-        //     axios
-        //         .get('/api/v1/participants/filter/' + this.$store.state.user.id)
-        //         .then(response => {
-        //             console.log(response)
-        //         }).catch(error => {
-        //             if (error.response) {
-        //                 for (const property in error.response.data) {
-        //                     this.errors.push(`${property}: ${error.response.data[property]}`)
-        //                 }
-        //             } else if (error.message) {
-        //                 this.errors.push('Something went wrong. Please try again.')
-        //             }
-        //         })
-        // },
-        // testAddingParticipants() {
-        //     const formData = {
-        //         usernames: this.participants,
-        //         session: 8
-        //     }
-        //     axios
-        //         .post('/api/v1/sessions/', formData)
-        //         .then(response => {
-        //             console.log(response)
-        //         })
-        // },
-        // showParams() {
-        //     var els = document.getElementsByClassName("mlparams");
-        //     Array.prototype.forEach.call(els, function (el) {
-        //         // Do stuff here
-
-        //         console.log(el.value);
-        //     });
-        // },
 
         backToSessions() {
             this.$router.push('/sessions')
         },
+        sleep(miliseconds) {
+            var currentTime = new Date().getTime();
+
+            while (currentTime + miliseconds >= new Date().getTime()) {}
+        },
         async submitForm() {
             this.errors = []
-
+            this.creatingSession = true
             if (this.maxNumParticipants <= this.minNumParticipants) {
                 this.errors.push("Minimum number of participants cannot be greater than maximum number of participants")
             }
@@ -435,6 +400,8 @@ export default {
             }
 
             if (this.errors.length > 0) {
+                this.creatingSession = false
+                this.sessionErrors = true
                 return
             }
             this.parameters_keys = []
@@ -444,30 +411,8 @@ export default {
             this.parameters_values = []
             this.parameters_values.push(this.modelType)
             this.parameters_values = this.fixedParams.map(a => a.value);
-            // this.parameters_values.push(this.classificationType)
-            // this.parameters_values.push(this.optimizer)
-            // this.parameters_values.push(this.lossFunction)
-            // this.parameters_values.push(this.num_of_epochs)
-            // this.parameters_values.push(this.picture_size)
-            // this.parameters_values.push(this.num_of_classes)
-
-            // if (this.color === "1" && this.load_origin === "local") {
-            //     this.parameters_values.push('load_color_images')
-            // } else if (this.load_origin === "local") {
-            //     this.parameters_values.push('load_images')
-            // } else {
-            //     this.parameters_values.push(this.load_origin)
-            // }
-            // if (this.color === "1") {
-            //     this.parameters_values.push('local_learning')
-            //     this.parameters_values.push(3)
-            // } else {
-            //     this.parameters_values.push('local_learning_b_and_w')
-            //     this.parameters_values.push(1)
-            // }
-
-            const formData = {
-                session: {
+            const imagefile = document.querySelector('#uploadDataset');
+            let session = JSON.stringify({
                     name: this.sessionName,
                     description: this.description,
                     founder: this.$store.state.user.username,
@@ -480,40 +425,27 @@ export default {
                     parameters_values: this.parameters_values,
                     pricing_plan: this.pricing_plan,
                     tags: this.tags,
-                    model_name: this.modelType
-                },
-                usernames: this.participants
+                    model_name: this.modelType,
+                    test_dataset: []
+                })
+            const formData = new FormData() 
+            formData.append('session', session)
+            formData.append('usernames', this.participants)
+            formData.append('files', imagefile.files[0])
 
-            }
             this.$store.commit('setIsLoading', true)
             await axios
-                .post('/api/v1/create-filled-session/', formData)
+                .post('/api/v1/create-filled-session/', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                })
                 .then(response => {
-                    this.uploadTestSet()
                     console.log(response.data)
-                    // // add owner
-                    //  const participantData = {
-                    //     user: this.$store.state.user.id,
-                    //     session: response.data['session_id'],
-                    //     is_owner: true
-                    //  }
-                    // axios
-                    // .post('/api/v1/participants/', participantData)
-                    // .then(response => {
-                    //      console.log(response)
-                    // })
-                    // .catch( error => {
-                    //   if (error.response) {
-                    //     for (const property in error.response.data){
-                    //       this.errors.push(`${property}: ${error.response.data[property]}`)
-                    //     }
-                    //   } else if (error.message){
-                    //     this.errors.push('Something went wrong. Please try again.')
-                    //   }
-                    // })
 
-                    // now add participants
-
+                    this.creatingSession = false
+                    this.sessionCreated = true
+                    this.sleep(3000)
                     this.$router.push('/sessions/')
                 })
                 .catch(error => {
@@ -524,6 +456,8 @@ export default {
                     } else if (error.message) {
                         this.errors.push('Something went wrong. Please try again.')
                     }
+                    this.sessionErrors = true
+                    this.creatingSession = false
                 })
             this.$store.commit('setIsLoading', false)
         }
