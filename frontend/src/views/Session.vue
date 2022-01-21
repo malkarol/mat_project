@@ -87,7 +87,7 @@
                                             <tbody>
                                                 <tr v-for="(parameter, index) in session.parameters_keys" :key="parameter">
                                                     <th scope="row">{{index}}</th>
-                                                    <td>{{parameter}}</td>
+                                                    <td>{{this.getParamName(parameter)}}</td>
                                                     <td>{{session.parameters_values[index]}}</td>
                                                 </tr>
 
@@ -330,6 +330,22 @@ export default {
         ChartResult,
     },
     methods: {
+        getParamName(x){
+            const paramDic = {
+                'number_of_epochs': "Number of epochs",
+                'loss_function': "Loss function",
+                'optimizer': "Optimizer",
+                'learning_rate': "Learning rate",
+                'momentum': "Momentum",
+                'batch_size': "Batch size",
+                'validation_split': "Validation split",
+                'width_size': "Width size",
+                'height_size': "Height size",
+                'number_of_classes': "Number of classes",
+
+            }
+            return paramDic[x]
+        },
         getGlobalModelResults(){
             axios.get('/api/v1/global-model-results/' + this.$route.params.id)
                 .then(response => {
