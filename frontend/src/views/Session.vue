@@ -103,37 +103,41 @@
                 <div class="tab-pane fade" id="nav-upload" role="tabpanel" aria-labelledby="nav-upload-tab">
                     <div class="row">
                         <div class="col-6 px-4">
-                            <div v-if="showStep1" class="row">
+                            <div v-if="showStep1 || debug" class="row">
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                     <h4 for="uploadWeights"> <strong>Step 1. Download learning script</strong></h4>
                                     <p>Download learning script for this model to train it on your private data</p>
                                     <button class="btn btn-primary btn-lg btn-success  mt-3  " @click="generateLocalModel()">Download local learning script</button>
                                 </div>
                             </div>
-                            <div v-if="showStep2" class="row">
+                            <div v-if="showStep2 || debug" class="row">
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                     <h4 for="uploadWeights"> <strong>Step 2. Wait for other participants to upload their model weights</strong></h4>
                                     <p>Some participants still need to train their local model and upload the weights.</p>
                                 </div>
                             </div>
-                            <div v-if="showStep3 && this.session.founder != this.$store.state.user.username" class="row">
+                            <div v-if="showStep3 && this.session.founder != this.$store.state.user.username || debug" class="row">
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                     <h4 for="uploadWeights"> <strong>Step 3. Wait for the session founder to perform aggregation</strong></h4>
                                     <p>...</p>
                                 </div>
                             </div>
-                            <div v-if="showStep3 && this.session.founder == this.$store.state.user.username" class="row">
+                            <div v-if="showStep3 && this.session.founder == this.$store.state.user.username || debug" class="row">
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                     <h4 for="uploadWeights"> <strong>Step 3. Aggregate your model</strong></h4>
                                     <p>All participants have uploaded their weights. It's time for you to start the aggregation process
                                         to calculate the weights for the final model.</p>
+                                    <div class="text-center mb-3" v-if="aggregating">
+                                        <div class="lds-dual-ring"></div>
+                                        <div>Aggregating...</div>
+                                    </div>
                                     <div class="d-flex justify-content-center">
                                         <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregateModelsScript()">Aggregate models locally</button>
                                         <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregation()">Aggregate models on server</button>
                                     </div>
                                 </div>
                             </div>
-                            <div v-if="showStep4" class="row">
+                            <div v-if="showStep4 || debug" class="row">
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                     <h4 for="uploadWeights"> <strong>Step 4. Aggregation process is finished. See the results</strong></h4>
                                     <p>Aggregation process has finished successfully. Go to results tab to see the learning results and download aggregated model weights</p>
@@ -267,6 +271,7 @@ export default {
             showStep2: false,
             showStep3: false,
             showStep4: false,
+            debug: false,
             data_for_chart: {},
             startDate: '2022-01-01',
             allWeightsUploaded: false,
@@ -275,6 +280,7 @@ export default {
             globalModelAccuracy: 0,
             globalModelLoss: 0,
             participants: [],
+            aggregating: false,
             errors: [],
             data_path: '',
             renderChart: false,
@@ -403,11 +409,10 @@ export default {
                         this.showStep2 = false
                         axios.get('/api/v1/global-model-results/' + this.$route.params.id)
                             .then(response2 => {
-                                if (response2.data.finished){
+                                if (response2.data.finished) {
                                     this.showStep3 = false
                                     this.showStep4 = true
-                                }
-                                else{
+                                } else {
                                     this.showStep3 = true
                                 }
                             }).catch(error => {
@@ -419,9 +424,8 @@ export default {
                                     this.errors.push('Something went wrong. Please try again.')
                                 }
                             })
-                    }
-                    else{
-                        showStep2 = true
+                    } else {
+                        this.showStep2 = true
                     }
 
                     console.log(this.participantsProgress)
@@ -575,10 +579,10 @@ export default {
                 })
         },
         getAggregation() {
+            this.aggregating = true
             axios.get('/api/v1/aggregate-on-server/' + this.$route.params.id)
                 .then(response => {
-                    this.session = response.data
-
+                    this.aggregating = false
                 }).catch(error => {
                     if (error.response) {
                         for (const property in error.response.data) {
@@ -769,7 +773,7 @@ export default {
                 fileLink.click();
 
                 console.log(response)
-                showStep2 = true
+                this.showStep2 = true
                 axios({
                     url: '/api/v1/instructions/lm/',
                     method: 'GET',
