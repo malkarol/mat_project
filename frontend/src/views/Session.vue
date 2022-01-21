@@ -147,22 +147,21 @@
                 </div>
 
                 <div class="tab-pane fade" id="nav-getGlobal" role="tabpanel" aria-labelledby="nav-getGlobal-tab">
-                    <div class="col-md-8 order-md-1">
+                    <div class="">
                         <div class="row mt-3">
                             <!--v-if="this.session.founder == this.$store.state.user.username"-->
                             <div class="col mb-3 shadow p-3 mb-5 rounded" style="background-color: #f1f1f1;">
-                                <h4><strong>1. Available actions for aggregation:</strong></h4>
+                                <h4><strong>Available actions for aggregation:</strong></h4>
                                 <div class="d-flex justify-content-center">
                                     <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregateModelsScript()">Aggregate models locally</button>
                                     <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregation()">Aggregate models on server</button>
                                     <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getManyWeights()">Get local weights</button>
-
                                 </div>
 
                             </div>
                             <div class="row mt-3">
                                 <div class="col mb-3 shadow p-3 mb-5 rounded" style="background-color: #f1f1f1;">
-                                    <h4><strong>2. Federated Averaging:</strong></h4>
+                                    <h4><strong>Federated Averaging:</strong></h4>
                                     <div class=" d-flex justify-content-center">
                                         <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getFile()">Global model script for predictions</button>
                                         <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getGlobalModel()">Global model script for idividual learning</button>
@@ -172,15 +171,28 @@
                             </div>
 
                         </div>
-                        <div v-if="renderChart == true" class="row mt-3">
-                            <div class=" col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
-                                <h4 for="lastName" class='mb-3'> <strong>Accuracy and loss diagrams:</strong></h4>
-                                <div class="d-flex justify-content-center">
-                                    <ChartResult :key="componentKey" v-bind:chartData="chartDataAccuracy" :chartOptions="chartOptions" />
-                                    <ChartResult :key="componentKeyLoss" v-bind:chartData="chartDataLoss" :chartOptions="chartOptions" />
+                        <div v-if="renderChart" class="row mt-3">
+                            <h4>Results</h4>
+                            <div class="w-100 d-flex col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                                <div>
+                                    <h4 class='mb-3'> <strong>Accuracy and loss diagrams:</strong></h4>
+                                    <div class="d-flex justify-content-center">
+                                        <ChartResult :key="componentKey" v-bind:chartData="chartDataAccuracy" :chartOptions="chartOptions" />
+                                        <ChartResult :key="componentKeyLoss" v-bind:chartData="chartDataLoss" :chartOptions="chartOptions" />
+                                    </div>
+                                </div>
+                                <div class="text-center flex-fill d-flex flex-column">
+                                    <h4 class="mb-3"> Aggregated model results on test data:</h4>
+                                    <div class="">
+                                        <h4 class="mb-3 text-primary"> <strong>Accuracy: </strong></h4>
+                                        <h4 class="mb-3"> <strong>{{this.globalModelAccuracy}} %</strong></h4>
+                                    </div>
+                                    <div class="">
+                                        <h4 class="mb-3 text-danger"> <strong>Loss: </strong></h4>
+                                        <h4 class="mb-3"> <strong>{{this.globalModelLoss}}</strong></h4>
+                                    </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -232,6 +244,8 @@ export default {
             startDate: '2022-01-01',
             endDate: '2022-02-01',
             session: {},
+            globalModelAccuracy: 0,
+            globalModelLoss: 0,
             participants: [],
             errors: [],
             data_path: '',
@@ -277,9 +291,6 @@ export default {
             }
         }
     },
-    beforeMount() {
-        //this.fillData()
-    },
     mounted() {
         this.$store.state.isLoading = true
         axios.get('/api/v1/session/' + this.$route.params.id)
@@ -319,6 +330,22 @@ export default {
         ChartResult,
     },
     methods: {
+        getGlobalModelResults(){
+            axios.get('/api/v1/global-model-results/' + this.$route.params.id)
+                .then(response => {
+                    console.log(response)
+                    this.globalModelAccuracy = response.data.global_model_accuracy.toFixed(4) * 100
+                    this.globalModelLoss = response.data.global_model_loss.toFixed(2)
+                }).catch(error => {
+                    if (error.response) {
+                        for (const property in error.response.data) {
+                            this.errors.push(`${property}: ${error.response.data[property]}`)
+                        }
+                    } else if (error.message) {
+                        this.errors.push('Something went wrong. Please try again.')
+                    }
+                })
+        },
         styleFounder(username) {
             if (username === this.session.founder) {
                 return "background-color: #ffc34d;"
@@ -346,14 +373,14 @@ export default {
         fillData() {
             axios.get('/api/v1/results-for-chart/' + this.$route.params.id)
                 .then(response => {
-                    console.log("w środku")
-                    console.log(response)
+                    let accuracy = Array.from(response.data.accuracy, a => a.toFixed(4)*100)
+
                     this.chartDataAccuracy = {
                         labels: response.data.names,
                         datasets: [{
-                            label: 'Accuracy',
+                            label: 'Accuracy %',
                             backgroundColor: 'rgb(77, 137, 255)',
-                            data: response.data.accuracy,
+                            data: accuracy
                         }]
                     }
                     this.chartDataLoss = {
@@ -366,6 +393,7 @@ export default {
                     }
                     this.renderChart = true;
                     this.forceRerender()
+                    this.getGlobalModelResults()
                 }).catch(error => {
                     if (error.response) {
                         for (const property in error.response.data) {
@@ -634,7 +662,7 @@ export default {
         },
         downloadTestDataset() {
             axios({
-                url: 'api/v1/download-zip-testdata/'+ this.session.session_id,
+                url: 'api/v1/download-zip-testdata/' + this.session.session_id,
                 //url: 'api/v1/testmodel/',
                 method: 'GET',
                 responseType: 'blob',

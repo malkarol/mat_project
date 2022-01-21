@@ -13,6 +13,7 @@ from sklearn.metrics import accuracy_score
 import io
 import json
 import tensorflow as tf
+from session_handler.models import SessionResult
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import MaxPooling2D
@@ -24,6 +25,9 @@ from tensorflow.keras import backend as K
 import session_handler.file_finder as ff
 from tensorflow.keras.models import Model
 import ssl
+from io import BytesIO
+import zipfile, shutil
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications.vgg16 import *
 from tensorflow.keras.applications.vgg19 import *
 from tensorflow.keras.applications.resnet50 import *
@@ -136,7 +140,7 @@ class PretrainedAggregator(Aggregator):
 
             sum_local_counts = sum(client_counts)
             # loop through each client and create new local model
-            print(self.parameters['client_names'])
+
             for client in self.parameters['client_names']:
 
                 base_model = eval( self.parameters['model_name'])(input_shape=self.input_shape + [3], weights='imagenet', include_top=False) #Training with Imagenet weights
@@ -186,6 +190,49 @@ class PretrainedAggregator(Aggregator):
                       optimizer=eval(parameters["optimizer"]),
                       metrics=["accuracy"])
             global_model.set_weights(average_weights)
+
+            test_path = f'/sessions/session_Id_{self.parameters["session_id"]}/TEST_SET.zip'
+
+            self.calculate_global_model_accuracy(global_model, test_path)
+
             global_model.save_weights("tmp_aver_weight.h5")
+
+
             print("done")
             return "tmp_aver_weight.h5"
+
+    def unzip_dataset(self, testpath):
+        storage_file = storage.open(testpath, 'rb')
+        b = BytesIO(storage_file.read())
+        with zipfile.ZipFile(b, 'r') as zip_ref:
+            zip_ref.extractall(f'./user_files/session_Id_{self.parameters["session_id"]}/TESTSET/')
+        return f'./user_files/session_Id_{self.parameters["session_id"]}/TESTSET/'
+
+    def load_dataset(self, testpath):
+        test_path = self.unzip_dataset(testpath)
+        #Default image size for VGG16
+
+        # ImageDataGenerator can help perform augumentation on existing images. This way, we get more diverse train set.
+        test_datagen = ImageDataGenerator(rescale = 1./255)
+        #Through flow_from_directory - we create an array of images that can be used for training.
+        test_set = test_datagen.flow_from_directory(test_path,
+                                                target_size = tuple(self.input_shape),
+                                                batch_size = int(self.parameters['batch_size']),
+                                                class_mode = 'categorical')
+
+        return test_set
+
+    def calculate_global_model_accuracy(self, global_model, testpath):
+        loss, accuracy = global_model.evaluate(self.load_dataset(testpath))
+        ses_result = SessionResult.objects.get(session_id = self.parameters['session_id'])
+        ses_result.finished = True
+        ses_result.global_model_accuracy = accuracy
+        ses_result.global_model_loss = loss
+        ses_result.save()
+        try:
+            shutil.rmtree(f'./user_files/session_Id_{self.parameters["session_id"]}')
+        except OSError as e:
+            print("Error: %s - %s." % (e.filename, e.strerror))
+
+
+    

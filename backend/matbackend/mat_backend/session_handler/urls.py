@@ -50,9 +50,10 @@ urlpatterns=[
     path('participantstrainingprocess/<int:spk>', views.get_session_model_progress),
     # instructions
     path('instructions/lm/', views.get_instructions_local_model),
-    path('results-for-chart/<int:pk>',views.get_results_for_participants)
+    path('results-for-chart/<int:pk>',views.get_results_for_participants),
 
-
+    path('upload-many/<int:pk>',views.upload_many),
+    path('global-model-results/<int:pk>', views.global_model_results)
     # add session and participants with filed usernames
     # path('sessions/add-filled/', views.add_filled_session),
     # path('user/<int:pk>',views.user_details)

@@ -170,7 +170,7 @@ def get_session_model_progress(request, spk):
 @api_view(['GET'])
 def download_zip_testdata(request,pk):
     
-    path = f'/sessions/session_Id_{pk}/TEST.zip'
+    path = f'/sessions/session_Id_{pk}/TEST_SET.zip'
     storage_file = storage.open(path, 'rb')
     response = FileResponse(storage_file)
     return response
@@ -872,6 +872,16 @@ def generate_private_key(session):
 def upload_many(request,pk):
     if request.method == 'POST':
         file_object = request.FILES['files']
-        target_path =  f'/sessions/session_Id_{pk}/TEST.zip'+ file_object.name
+        target_path =  f'/sessions/session_Id_{pk}/TEST_SET.zip'
         path = storage.save(target_path, ContentFile(file_object.read()))
         return Response(status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def global_model_results(request, pk):
+    if request.method == 'GET':
+        try:
+            session = SessionResult.objects.get(session_id = pk)
+            serializer = SessionResultSerializer(session)
+            return Response(serializer.data) 
+        except SessionResult.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)

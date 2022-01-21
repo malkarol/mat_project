@@ -9,7 +9,7 @@ export default {
   extends: Bar,
   props: {
     chartData: {
-      type: Object,
+      type: Array,
       required: true
     },
     chartOptions: {
