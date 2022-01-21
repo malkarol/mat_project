@@ -103,14 +103,42 @@
                 <div class="tab-pane fade" id="nav-upload" role="tabpanel" aria-labelledby="nav-upload-tab">
                     <div class="row">
                         <div class="col-6 px-4">
-                            <div class="row">
+                            <div v-if="showStep1" class="row">
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                     <h4 for="uploadWeights"> <strong>Step 1. Download learning script</strong></h4>
                                     <p>Download learning script for this model to train it on your private data</p>
                                     <button class="btn btn-primary btn-lg btn-success  mt-3  " @click="generateLocalModel()">Download local learning script</button>
                                 </div>
                             </div>
-
+                            <div v-if="showStep2" class="row">
+                                <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                                    <h4 for="uploadWeights"> <strong>Step 2. Wait for other participants to upload their model weights</strong></h4>
+                                    <p>Some participants still need to train their local model and upload the weights.</p>
+                                </div>
+                            </div>
+                            <div v-if="showStep3 && this.session.founder != this.$store.state.user.username" class="row">
+                                <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                                    <h4 for="uploadWeights"> <strong>Step 3. Wait for the session founder to perform aggregation</strong></h4>
+                                    <p>...</p>
+                                </div>
+                            </div>
+                            <div v-if="showStep3 && this.session.founder == this.$store.state.user.username" class="row">
+                                <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                                    <h4 for="uploadWeights"> <strong>Step 3. Aggregate your model</strong></h4>
+                                    <p>All participants have uploaded their weights. It's time for you to start the aggregation process
+                                        to calculate the weights for the final model.</p>
+                                    <div class="d-flex justify-content-center">
+                                        <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregateModelsScript()">Aggregate models locally</button>
+                                        <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregation()">Aggregate models on server</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-if="showStep4" class="row">
+                                <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                                    <h4 for="uploadWeights"> <strong>Step 4. Aggregation process is finished. See the results</strong></h4>
+                                    <p>Aggregation process has finished successfully. Go to results tab to see the learning results and download aggregated model weights</p>
+                                </div>
+                            </div>
                             <div class="row mt-3">
 
                                 <!-- <p class="form-control-plaintext col mb-3 shadow p-3 mb-5 text-danger rounded " style="background-color: #f1f1f1;" id="staticText"> <strong>Important !!! </strong>
@@ -150,15 +178,10 @@
                     <div class="">
                         <div class="row mt-3">
                             <!--v-if="this.session.founder == this.$store.state.user.username"-->
-                            <div class="col mb-3 shadow p-3 mb-5 rounded" style="background-color: #f1f1f1;">
+                            <!--<div class="col mb-3 shadow p-3 mb-5 rounded" style="background-color: #f1f1f1;">
                                 <h4><strong>Available actions for aggregation:</strong></h4>
-                                <div class="d-flex justify-content-center">
-                                    <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregateModelsScript()">Aggregate models locally</button>
-                                    <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregation()">Aggregate models on server</button>
-                                    <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getManyWeights()">Get local weights</button>
-                                </div>
 
-                            </div>
+                            </div>-->
                             <div class="row mt-3">
                                 <div class="col mb-3 shadow p-3 mb-5 rounded" style="background-color: #f1f1f1;">
                                     <h4><strong>Federated Averaging:</strong></h4>
@@ -240,8 +263,13 @@ export default {
     data() {
         return {
             // participantList: participantJson,
+            showStep1: true,
+            showStep2: false,
+            showStep3: false,
+            showStep4: false,
             data_for_chart: {},
             startDate: '2022-01-01',
+            allWeightsUploaded: false,
             endDate: '2022-02-01',
             session: {},
             globalModelAccuracy: 0,
@@ -330,7 +358,7 @@ export default {
         ChartResult,
     },
     methods: {
-        getParamName(x){
+        getParamName(x) {
             const paramDic = {
                 'number_of_epochs': "Number of epochs",
                 'loss_function': "Loss function",
@@ -346,7 +374,7 @@ export default {
             }
             return paramDic[x]
         },
-        getGlobalModelResults(){
+        getGlobalModelResults() {
             axios.get('/api/v1/global-model-results/' + this.$route.params.id)
                 .then(response => {
                     console.log(response)
@@ -371,6 +399,31 @@ export default {
             axios.get('/api/v1/participantstrainingprocess/' + this.$route.params.id)
                 .then(response => {
                     this.participantsProgress = response.data
+                    if (this.participantsProgress.every(x => x.is_model_uploaded)) {
+                        this.showStep2 = false
+                        axios.get('/api/v1/global-model-results/' + this.$route.params.id)
+                            .then(response2 => {
+                                if (response2.data.finished){
+                                    this.showStep3 = false
+                                    this.showStep4 = true
+                                }
+                                else{
+                                    this.showStep3 = true
+                                }
+                            }).catch(error => {
+                                if (error.response) {
+                                    for (const property in error.response.data) {
+                                        this.errors.push(`${property}: ${error.response.data[property]}`)
+                                    }
+                                } else if (error.message) {
+                                    this.errors.push('Something went wrong. Please try again.')
+                                }
+                            })
+                    }
+                    else{
+                        showStep2 = true
+                    }
+
                     console.log(this.participantsProgress)
                 }).catch(error => {
                     if (error.response) {
@@ -389,7 +442,7 @@ export default {
         fillData() {
             axios.get('/api/v1/results-for-chart/' + this.$route.params.id)
                 .then(response => {
-                    let accuracy = Array.from(response.data.accuracy, a => a.toFixed(4)*100)
+                    let accuracy = Array.from(response.data.accuracy, a => a.toFixed(4) * 100)
 
                     this.chartDataAccuracy = {
                         labels: response.data.names,
@@ -716,6 +769,7 @@ export default {
                 fileLink.click();
 
                 console.log(response)
+                showStep2 = true
                 axios({
                     url: '/api/v1/instructions/lm/',
                     method: 'GET',
@@ -802,7 +856,7 @@ export default {
                     document.body.appendChild(fileLink);
 
                     fileLink.click();
-
+                    this.getManyWeights()
                     console.log(response)
                 })
             }).catch(error => {
