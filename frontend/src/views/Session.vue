@@ -10,7 +10,7 @@
                 <div class="nav nav-tabs mb-4" id="nav-tab" role="tablist">
                     <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Information</button>
                     <button class="nav-link" id="nav-upload-tab" data-bs-toggle="tab" data-bs-target="#nav-upload" type="button" role="tab" aria-controls="nav-upload" aria-selected="false">Learning panel</button>
-                    <button class="nav-link" id="nav-getGlobal-tab" data-bs-toggle="tab" data-bs-target="#nav-getGlobal" type="button" role="tab" aria-controls="nav-getGlobal" aria-selected="false">Results</button>
+                    <button v-if="showResultsTab || debug" class="nav-link" id="nav-getGlobal-tab" data-bs-toggle="tab" data-bs-target="#nav-getGlobal" type="button" role="tab" aria-controls="nav-getGlobal" aria-selected="false">Results</button>
                     <button class="nav-link" id="nav-manageSession-tab" data-bs-toggle="tab" data-bs-target="#nav-manageSession" type="button" role="tab" aria-controls="nav-manageSession" aria-selected="false">Manage session</button>
                 </div>
             </nav>
@@ -271,7 +271,8 @@ export default {
             showStep2: false,
             showStep3: false,
             showStep4: false,
-            debug: false,
+            debug: true,
+            showResultsTab: false,
             data_for_chart: {},
             startDate: '2022-01-01',
             allWeightsUploaded: false,
@@ -412,8 +413,10 @@ export default {
                                 if (response2.data.finished) {
                                     this.showStep3 = false
                                     this.showStep4 = true
+                                    this.showResultsTab = true
                                 } else {
                                     this.showStep3 = true
+                                    this.showResultsTab = false
                                 }
                             }).catch(error => {
                                 if (error.response) {

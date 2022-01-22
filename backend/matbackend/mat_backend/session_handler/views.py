@@ -30,17 +30,8 @@ import session_handler.file_finder as ff
 import ml_handler.aggregation as agreg
 from session_handler.ScriptGenerator import ScriptsExecutor
 
-from tensorflow.keras.applications.vgg16 import *
-from tensorflow.keras.applications.vgg19 import *
-from tensorflow.keras.applications.resnet50 import *
-from tensorflow.keras.applications.resnet_v2 import *
-from tensorflow.keras.applications.mobilenet_v2 import *
-from tensorflow.keras.applications.mobilenet import *
-from tensorflow.keras.applications.inception_v3 import *
-from tensorflow.keras.applications.inception_resnet_v2 import *
-from tensorflow.keras.applications.xception import *
-from tensorflow.keras.applications.densenet import *
-from tensorflow.keras.applications.efficientnet import *
+from tensorflow.keras.applications import *
+
 
 import inspect
 
