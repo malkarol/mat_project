@@ -1,20 +1,6 @@
 <template>
 <div class="col-sm-9 col-md-7 col-lg-8 mx-auto">
-    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-        <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
-        </symbol>
-        <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
-        </symbol>
-    </svg>
-    <div v-if="errors.length" class="alert alert-danger d-flex align-items-center" role="alert">
-        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:">
-            <use xlink:href="#exclamation-triangle-fill" /></svg>
-        <div v-for="error in errors" v-bind:key="error">
-            {{ error }}
-        </div>
-    </div>
+   <Errors :errors="errors"/>
     <div class="card border-0 shadow rounded-3 my-5">
         <div class="card-body p-4 p-sm-5 mb-5">
             <div>
@@ -123,7 +109,7 @@
                 <div class="row mb-3">
                     <label for="uploadDataset" class="form-label text-muted">(Only .zip files)</label>
                     <input class="form-control form-control-lg" id="uploadDataset" accept=".zip" type="file">
-                    <div class="text-center" v-if="creatingSession">
+                    <!-- <div class="text-center" v-if="creatingSession">
                         <div class="lds-dual-ring"></div>
                         <div>Creating session...</div>
                     </div>
@@ -131,12 +117,12 @@
                         <p class=" border-success p-3 border rounded">
                             Session created successfully!
                         </p>
-                    </div>
-                    <div class="d-flex justify-content-center text-center text-danger mt-5" v-if="sessionErrors">
+                    </div> -->
+                    <!-- <div class="d-flex justify-content-center text-center text-danger mt-5" v-if="sessionErrors">
                         <p class=" border-danger p-3 border rounded">
                             We have encountered some errors, please try again
                         </p>
-                    </div>
+                    </div> -->
                 </div>
                 <div class="d-flex justify-content-between mt-5">
                     <button class="btn btn-success btn-lg px-5">Save</button>
@@ -145,6 +131,7 @@
                 </div>
             </form>
             <!-- <button class="btn btn-danger btn-lg px-5" @click="tosth()">tosth</button> -->
+            <Loading />
         </div>
     </div>
 </div>
@@ -154,6 +141,8 @@
 import TagInput from '@/components/TagInput.vue'
 import FixedTable from '@/components/FixedTable.vue'
 import EditableTable from '@/components/EditableTable.vue'
+import Loading from '@/components/Loading.vue'
+import Errors from '@/components/Errors.vue'
 
 import Datepicker from 'vue3-date-time-picker'
 import 'vue3-date-time-picker/dist/main.css'
@@ -307,9 +296,14 @@ export default {
         TagInput,
         Datepicker,
         FixedTable,
-        EditableTable
+        EditableTable,
+        Loading,
+        Errors
     },
     methods: {
+        scrollToTop() {
+        window.scrollTo(0,0);
+    },
         updateMyValue(newValue) {
             this.fixedParams = newValue
         },
@@ -370,15 +364,27 @@ export default {
                 fileLink.click();
 
                 console.log(response)
-            }).catch(error => {
-                if (error.response) {
-                    for (const property in error.response.data) {
-                        this.errors.push(`${property}: ${error.response.data[property]}`)
-                    }
-                } else if (error.message) {
-                    this.errors.push('Something went wrong. Please try again.')
+            }).catch((error) => {
+          if (error.response) {
+            for (const property in error.response.data) {
+              if (error.response.data[property].length > 1) {
+                for (const elem in error.response.data[property]) {
+                  this.errors.push(
+                    `${property}: ${error.response.data[property][elem]}`
+                  );
                 }
-            })
+              } else {
+                console.log(property);
+                this.errors.push(
+                  `${property}: ${error.response.data[property]}`
+                );
+              }
+            }
+          } else if (error.message) {
+            this.errors.push("Something went wrong. Please try again.");
+          }
+          window.scrollTo(0, 0);
+        })
         },
 
         backToSessions() {
@@ -392,6 +398,7 @@ export default {
         async submitForm() {
             this.errors = []
             this.creatingSession = true
+            this.$store.commit("setIsLoading", true);
             if (this.maxNumParticipants <= this.minNumParticipants) {
                 this.errors.push("Minimum number of participants cannot be greater than maximum number of participants")
             }
@@ -402,6 +409,8 @@ export default {
             if (this.errors.length > 0) {
                 this.creatingSession = false
                 this.sessionErrors = true
+                window.scrollTo(0,0)
+                console.log("siemson")
                 return
             }
             this.parameters_keys = []
@@ -428,7 +437,7 @@ export default {
                     model_name: this.modelType,
                     test_dataset: []
                 })
-            const formData = new FormData() 
+            const formData = new FormData()
             formData.append('session', session)
             formData.append('usernames', this.participants)
             formData.append('files', imagefile.files[0])
@@ -458,6 +467,7 @@ export default {
                     }
                     this.sessionErrors = true
                     this.creatingSession = false
+                    window.scrollTo(0,0)
                 })
             this.$store.commit('setIsLoading', false)
         }
