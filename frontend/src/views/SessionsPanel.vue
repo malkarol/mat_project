@@ -1,6 +1,7 @@
 <template>
 <div class="col-lg-10 mx-auto">
     <div class="card border-0 shadow rounded-3 my-5">
+        <Errors :errors ="errors" />
         <div class="card-body p-4 p-sm-5 mb-5">
             <div>
                 <h3>Sessions</h3>
@@ -133,6 +134,7 @@
                     </li>
                 </ul>
             </nav>
+            <Loading/>
         </div>
     </div>
 </div>
@@ -142,10 +144,15 @@
 //import sessionsJson from '@/sessions.json'
 import axios from 'axios'
 import TagInput from '@/components/TagInput.vue'
+import Errors from '@/components/Errors.vue'
+import Loading from '@/components/Loading.vue'
+
 
 export default {
     components: {
-        TagInput
+        TagInput,
+        Errors,
+        Loading
     },
     data() {
         return {
@@ -169,9 +176,9 @@ export default {
         if (this.currentPage == 1 && document.getElementById("page_1") != null)
             document.getElementById("page_1").classList.add('active')
     },
-    mounted() {
+    async mounted() {
         this.$store.state.isLoading = true
-        axios.get('/api/v1/sessions/').then(response => {
+        await axios.get('/api/v1/sessions/').then(response => {
                 this.sessions = response.data
 
                 if (this.$store.state.user.pricing_plan != 1) {
@@ -181,7 +188,7 @@ export default {
                 }
                 console.log(this.sessions)
                 this.updateSessionList()
-                this.$store.state.isLoading = false
+
             }).catch(error => {
                 if (error.response) {
                     for (const property in error.response.data) {
@@ -191,7 +198,7 @@ export default {
                     this.errors.push('Something went wrong. Please try again.')
                 }
             }),
-            axios
+           await axios
             .get('/api/v1/participants/filter/' + this.$store.state.user.id)
             .then(response => {
                 this.joinedSessions = response.data
@@ -204,6 +211,8 @@ export default {
                     this.errors.push('Something went wrong. Please try again.')
                 }
             })
+            this.$store.commit("setIsLoading", false);
+
     },
     methods: {
         hello() {

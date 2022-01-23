@@ -61,7 +61,7 @@
                     <FixedTable :parameters="fixedParams" />
                 </fieldset>
                 <fieldset class="row mb-5">
-                    <h5 class="col-form col-sm-2 pt-0"><strong>Model Type</strong></h5>
+                    <h5 class="col-form col-sm-2 pt-0"><strong>Model type</strong></h5>
 
                     <div class="col-sm-4">
 
@@ -108,7 +108,7 @@
                 </div>
                 <div class="row mb-3">
                     <label for="uploadDataset" class="form-label text-muted">(Only .zip files)</label>
-                    <input class="form-control form-control-lg" id="uploadDataset" accept=".zip" type="file">
+                    <input class="form-control form-control" id="uploadDataset" accept=".zip" type="file" required>
                     <!-- <div class="text-center" v-if="creatingSession">
                         <div class="lds-dual-ring"></div>
                         <div>Creating session...</div>

@@ -13,7 +13,7 @@
             <tbody>
                 <tr v-for="(parameter, index) in parameters" :key="parameter">
                     <th scope="row">{{index}}</th>
-                    <td>{{parameter.name}}
+                    <td>{{this.getParamName(parameter.name)}}
                     </td>
                     <td><input :id="'input_'+index" v-if="isSelect(parameter.name)== false" type="number" :disabled="parameter.Selected"
                     v-model="parameter.value"
@@ -60,6 +60,22 @@ export default {
   },
 props:['parameters'],
   methods: {
+      getParamName(x) {
+            const paramDic = {
+                'number_of_epochs': "Number of epochs",
+                'loss_function': "Loss function",
+                'optimizer': "Optimizer",
+                'learning_rate': "Learning rate",
+                'momentum': "Momentum",
+                'batch_size': "Batch size",
+                'validation_split': "Validation split",
+                'width_size': "Width size",
+                'height_size': "Height size",
+                'number_of_classes': "Number of classes",
+
+            }
+            return paramDic[x]
+        },
     resetValue(id) {
         console.log(this.parameters[id])
         this.parameters[id].value = this.parameters[id].defaultVal
