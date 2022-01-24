@@ -692,9 +692,9 @@ def get_local_weights(request,pk):
                     zf.writestr(f"session_{session.name}_localweights/{file.name}", bytes(fh.read()))
                 except Exception as e:
                     print(e)
-            response = HttpResponse(b.getvalue(), content_type="application/x-zip-compressed")
-            response['Content-Disposition'] = f'attachment; filename={session.name}_FILES.zip'
-            return response
+        response = HttpResponse(b.getvalue(), content_type="application/x-zip-compressed")
+        response['Content-Disposition'] = f'attachment; filename={session.name}_FILES.zip'
+        return response
 
 import tensorflow as tf
 @api_view(['GET'])

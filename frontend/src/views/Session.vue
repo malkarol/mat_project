@@ -141,6 +141,7 @@
                                         <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregateModelsScript()">Aggregate models locally</button>
                                         <button v-if="this.session.pricing_plan == 1 || debug" class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregation()">Aggregate models on server</button>
                                     </div>
+                                    <h5 class="" v-if="downloadingLocalAggregation"><strong>Downloading weights and test dataset...</strong></h5>
                                 </div>
                             </div>
                             <div v-if="(showStep4 && isActive && !sessionEnded)|| debug" class="row">
@@ -283,13 +284,14 @@ export default {
     data() {
         return {
             // participantList: participantJson,
+            downloadingLocalAggregation: false,
             isActive: false,
             sessionEnded: false,
             showStep1: true,
             showStep2: false,
             showStep3: false,
             showStep4: false,
-            debug: false,
+            debug: true,
             showResultsTab: false,
             data_for_chart: {},
             startDate: '2022-01-01',
@@ -662,6 +664,8 @@ export default {
                 fileLink.click();
 
                 console.log(response)
+                this.downloadTestDataset()
+                this.downloadingLocalAggregation = false
             })
 
             // console.log(this.participants[0].username)
@@ -861,6 +865,7 @@ export default {
 
         },
         getAggregateModelsScript() {
+            this.downloadingLocalAggregation = true
             axios({
                 url: '/api/v1/generate-aggregate-script/' + this.session.session_id,
                 method: 'GET',
