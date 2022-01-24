@@ -177,7 +177,7 @@ export default {
             document.getElementById("page_1").classList.add('active')
     },
     async mounted() {
-        this.$store.state.isLoading = true
+        this.$store.commit("setIsLoading", true);
         await axios.get('/api/v1/sessions/').then(response => {
                 this.sessions = response.data
 

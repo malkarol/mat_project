@@ -242,6 +242,7 @@
                 <button class="btn btn-primary btn-lg btn-block" @click="backToSessions()">Back to sessions</button>
                 <button v-if="session.founder != this.$store.state.user.username && !this.$store.state.isLoading" class="btn btn-danger btn-lg btn-block" @click="leaveSession()">Leave session</button>
             </div>
+            <Loading/>
         </div>
     </div>
 </div>
@@ -255,11 +256,13 @@
 // import participantJson from '@/participants.json'
 import axios from 'axios'
 //import Chart from '@/components/Chart.vue'
-import ChartResult from '@/components/ChartResult'
+import ChartResult from '@/components/ChartResult.vue'
+import Loading from '@/components/Loading.vue'
 
 export default {
     components: {
-        ChartResult
+        ChartResult,
+        Loading
     },
     beforeCreate() {
         //this.$options.components.ChartResult = require('@/components/ChartResult.vue').default;
@@ -326,9 +329,9 @@ export default {
             }
         }
     },
-    mounted() {
+    async mounted() {
         this.$store.state.isLoading = true
-        axios.get('/api/v1/session/' + this.$route.params.id)
+        await axios.get('/api/v1/session/' + this.$route.params.id)
             .then(response => {
                 this.session = response.data
                 this.$store.state.isLoading = false
@@ -342,7 +345,7 @@ export default {
                 }
             })
 
-        axios.get('/api/v1/participants/session/' + this.$route.params.id).then(response => {
+        await axios.get('/api/v1/participants/session/' + this.$route.params.id).then(response => {
             this.participants = response.data
             console.log(this.participants)
 
@@ -360,9 +363,6 @@ export default {
             this.usernames.push(user['username'])
         this.getParticipantsProgress()
 
-    },
-    components: {
-        ChartResult,
     },
     methods: {
         getParamName(x) {
