@@ -1,6 +1,6 @@
 <template>
    <div>
-        <h5> <strong> Common Parameters </strong> </h5>
+        <h5> <strong>Learning Parameters </strong> </h5>
         <table class="table table-bordered table-hover">
             <thead>
                 <tr>

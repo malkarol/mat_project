@@ -50,25 +50,21 @@
                         </div>
                         <div class="form-group mb-3">
                             <label>Add by username (optional)</label>
-                            <TagInput :tags="participants" :name="usersComponentName" :maxInput="maxParticipants" :isUsers="true" />
+                            <TagInput :tags="participants" :name="usersComponentName" :maxInput="maxNumParticipants-1" :isUsers="true" />
 
                         </div>
                     </div>
 
                 </div>
-
                 <fieldset class="row mb-5">
-                    <FixedTable :parameters="fixedParams" />
-                </fieldset>
-                <fieldset class="row mb-5">
-                    <h5 class="col-form col-sm-2 pt-0"><strong>Model type</strong></h5>
+                    <h5 class="col-form col-sm-2 pt-0"><strong>Learning type</strong></h5>
 
-                    <div class="col-sm-4">
+                    <div class="col-sm-6">
 
-                        <select id="modelTypes" class="form-select" required data-width="25%" v-model="modelTypes">
+                        <select id="modelTypes" class="form-select" required data-width="100%" v-model="modelTypes">
                             <option value="" selected disabled hidden>Choose...</option>
-                            <option value="simple_model">Simple models</option>
-                            <option value="complex_model">Keras pre-trained models</option>
+                            <option value="simple_model">Basic machine learning</option>
+                            <option value="complex_model">Transfer learning on Keras models</option>
 
                         </select>
                     </div>
@@ -88,7 +84,7 @@
                     <h5 class="col-form col-sm-2 pt-0"><strong>Model name</strong></h5>
                     <div class="col-sm-4">
 
-                        <select id="modelType" class="form-select" required data-width="25%" v-model="modelType">
+                        <select @change="getFixed()" id="modelType" class="form-select" required data-width="25%" v-model="modelType">
                             <option value="" selected disabled hidden>Choose...</option>
                             <option value="CNN">Simple CNN</option>
                             <option value="VGG">One block VGG</option>
@@ -96,9 +92,19 @@
                         </select>
                     </div>
                 </fieldset>
-                <fieldset v-if="showEditable== true" class="row mb-5">
-                    <EditableTable :responseParams="responseModelParams" />
+                 <!-- v-if="showEditable== true" -->
+                <fieldset v-if="showFixed == true" class="row mb-5">
+                    <div class="alert alert-danger col-form " role="alert">
+                    Some acceptable values for parameters migth be greater than default values in table.
+                    <br>Check minimum accepted values <a href="https://keras.io/api/applications/" class="alert-link">here</a>.
+                    </div>
+
+                    <FixedTable :parameters="fixedParams" />
                 </fieldset>
+
+                <!-- <fieldset v-if="showEditable== true" class="row mb-5">-->
+                    <!-- <EditableTable :responseParams="responseModelParams" /> -->
+                <!--</fieldset> -->
 
                 <div class="row mb-3">
                     <h5 class="col-sm-2 col-sm-2-pt-0"> <strong>Date range for learning session</strong></h5>
@@ -256,7 +262,7 @@ export default {
             responseModelParams: [],
             showEditable: false,
             modelTypes: "",
-
+            showFixed: false,
             // for new session form
             availableModels: [],
             sessionName: '',
@@ -301,6 +307,9 @@ export default {
         Errors
     },
     methods: {
+        getFixed(){
+            this.showFixed = true
+        },
         scrollToTop() {
         window.scrollTo(0,0);
     },
@@ -338,6 +347,7 @@ export default {
                     this.responseModelParams = response.data
                     console.log(response.data)
                     this.showEditable = true
+                    this.showFixed = true
                 }).catch(error => {
                     if (error.response) {
                         for (const property in error.response.data) {
