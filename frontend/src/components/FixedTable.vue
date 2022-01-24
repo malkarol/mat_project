@@ -36,7 +36,7 @@
                     :step="getStep(parameter.name)" /> </td>
                         </span> -->
 
-                    <select   :disabled="parameter.Selected" v-else>
+                    <select    v-model="parameter.value" :disabled="parameter.Selected" v-else>
                         <option v-for="item in parameter.values" :key="item" :selected="parameter.Selected == true && item == parameter.defaultVal">{{item}}</option>
                         </select>
                     </td>

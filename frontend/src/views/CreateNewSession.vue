@@ -138,6 +138,7 @@
             </form>
             <!-- <button class="btn btn-danger btn-lg px-5" @click="tosth()">tosth</button> -->
             <Loading />
+            <button @click="printGowno()"> Hello</button>
         </div>
     </div>
 </div>
@@ -307,6 +308,9 @@ export default {
         Errors
     },
     methods: {
+        printGowno(){
+            console.log(this.fixedParams)
+        },
         getFixed(){
             this.showFixed = true
         },
