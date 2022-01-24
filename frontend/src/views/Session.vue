@@ -11,7 +11,6 @@
                     <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Information</button>
                     <button class="nav-link" id="nav-upload-tab" data-bs-toggle="tab" data-bs-target="#nav-upload" type="button" role="tab" aria-controls="nav-upload" aria-selected="false">Learning panel</button>
                     <button v-if="showResultsTab || debug" class="nav-link" id="nav-getGlobal-tab" data-bs-toggle="tab" data-bs-target="#nav-getGlobal" type="button" role="tab" aria-controls="nav-getGlobal" aria-selected="false">Results</button>
-                    <button class="nav-link" id="nav-manageSession-tab" data-bs-toggle="tab" data-bs-target="#nav-manageSession" type="button" role="tab" aria-controls="nav-manageSession" aria-selected="false">Manage session</button>
                 </div>
             </nav>
 
@@ -103,26 +102,33 @@
                 <div class="tab-pane fade" id="nav-upload" role="tabpanel" aria-labelledby="nav-upload-tab">
                     <div class="row">
                         <div class="col-6 px-4">
-                            <div v-if="showStep1 || debug" class="row">
+                            <div v-if="(showStep1 && isActive && !sessionEnded) || debug" class="row">
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                     <h4 for="uploadWeights"> <strong>Step 1. Download learning script</strong></h4>
                                     <p>Download learning script for this model to train it on your private data</p>
-                                    <button class="btn btn-primary btn-lg btn-success  mt-3  " @click="generateLocalModel()">Download local learning script</button>
+                                    <button :disabled="!isActive" class="btn btn-primary btn-lg btn-success  mt-3  " @click="generateLocalModel()">Download local learning script</button>
                                 </div>
                             </div>
-                            <div v-if="showStep2 || debug" class="row">
+                            <div v-if="!isActive  && !sessionEnded" class="row">
+                                <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                                    <h4 for="uploadWeights"> <strong>Wait for session to start</strong></h4>
+                                    <p>Learning session has not started yet. Please wait until the session start date: {{this.session.start_date}} or required number of participants join the session to begin learning</p>
+                                    <p><strong>Required number of participants to start learning session: {{this.session.min_num_of_participants}}</strong></p>
+                                </div>
+                            </div>
+                            <div v-if="(showStep2 && isActive && !showStep4 && !sessionEnded) || debug" class="row">
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                     <h4 for="uploadWeights"> <strong>Step 2. Wait for other participants to upload their model weights</strong></h4>
                                     <p>Some participants still need to train their local model and upload the weights.</p>
                                 </div>
                             </div>
-                            <div v-if="showStep3 && this.session.founder != this.$store.state.user.username || debug" class="row">
+                            <div v-if="(showStep3 && isActive  && !sessionEnded && this.session.founder != this.$store.state.user.username) || debug" class="row">
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                     <h4 for="uploadWeights"> <strong>Step 3. Wait for the session founder to perform aggregation</strong></h4>
                                     <p>...</p>
                                 </div>
                             </div>
-                            <div v-if="showStep3 && this.session.founder == this.$store.state.user.username || debug" class="row">
+                            <div v-if="(showStep3 && isActive && !sessionEnded && this.session.founder == this.$store.state.user.username) || debug" class="row">
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                     <h4 for="uploadWeights"> <strong>Step 3. Aggregate your model</strong></h4>
                                     <p>All participants have uploaded their weights. It's time for you to start the aggregation process
@@ -133,14 +139,20 @@
                                     </div>
                                     <div class="d-flex justify-content-center">
                                         <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregateModelsScript()">Aggregate models locally</button>
-                                        <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregation()">Aggregate models on server</button>
+                                        <button v-if="this.session.pricing_plan == 1 || debug" class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregation()">Aggregate models on server</button>
                                     </div>
                                 </div>
                             </div>
-                            <div v-if="showStep4 || debug" class="row">
+                            <div v-if="(showStep4 && isActive && !sessionEnded)|| debug" class="row">
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                     <h4 for="uploadWeights"> <strong>Step 4. Aggregation process is finished. See the results</strong></h4>
                                     <p>Aggregation process has finished successfully. Go to results tab to see the learning results and download aggregated model weights</p>
+                                </div>
+                            </div>
+                            <div v-if="sessionEnded || debug" class="row">
+                                <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                                    <h4> <strong>This session has finished</strong></h4>
+                                    <p>This session has already ended. Go to results tab to see the final statistics about this learning session</p>
                                 </div>
                             </div>
                             <div class="row mt-3">
@@ -232,7 +244,7 @@
                     </div>
                     <div class="row mt-3">
                         <div class="col mb-3 shadow p-3 mb-5 d-flex justify-content-center rounded" style="background-color: #f1f1f1;">
-                            <button class="btn btn-primary btn-lg btn-success mt-3 mb-3 mx-1" @click="deleteSession()">Delete session</button>
+                            
                         </div>
                     </div>
                 </div>
@@ -241,8 +253,9 @@
             <div class="d-flex justify-content-between">
                 <button class="btn btn-primary btn-lg btn-block" @click="backToSessions()">Back to sessions</button>
                 <button v-if="session.founder != this.$store.state.user.username && !this.$store.state.isLoading" class="btn btn-danger btn-lg btn-block" @click="leaveSession()">Leave session</button>
+                <button v-if="session.founder == this.$store.state.user.username" class="btn btn-lg btn-danger" @click="deleteSession()">Delete session</button>
             </div>
-            <Loading/>
+            <Loading />
         </div>
     </div>
 </div>
@@ -270,11 +283,13 @@ export default {
     data() {
         return {
             // participantList: participantJson,
+            isActive: false,
+            sessionEnded: false,
             showStep1: true,
             showStep2: false,
             showStep3: false,
             showStep4: false,
-            debug: true,
+            debug: false,
             showResultsTab: false,
             data_for_chart: {},
             startDate: '2022-01-01',
@@ -334,7 +349,16 @@ export default {
         await axios.get('/api/v1/session/' + this.$route.params.id)
             .then(response => {
                 this.session = response.data
-                this.$store.state.isLoading = false
+                console.log(this.session)
+                if (new Date(this.session.start_date) <= new Date(Date.now()) &&
+                    this.session.actual_num_of_participants >= this.session.min_num_of_participants
+                )
+                    this.isActive = true
+
+                if (this.session.end_date != null && new Date(this.session.end_date) <= new Date(Date.now())) {
+                    this.isActive = false
+                    this.sessionEnded = true
+                }
             }).catch(error => {
                 if (error.response) {
                     for (const property in error.response.data) {
@@ -362,6 +386,7 @@ export default {
         for (const user in this.participants)
             this.usernames.push(user['username'])
         this.getParticipantsProgress()
+        this.$store.state.isLoading = false
 
     },
     methods: {
@@ -760,7 +785,8 @@ export default {
         },
 
         generateLocalModel() {
-
+            if (!this.isActive)
+                return
             axios({
                 url: '/api/v1/generate-local-model/' + this.session.session_id,
                 method: 'GET',

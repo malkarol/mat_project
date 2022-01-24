@@ -202,6 +202,7 @@ export default {
             .get('/api/v1/participants/filter/' + this.$store.state.user.id)
             .then(response => {
                 this.joinedSessions = response.data
+                this.$store.commit("setIsLoading", false);
             }).catch(error => {
                 if (error.response) {
                     for (const property in error.response.data) {
@@ -211,7 +212,7 @@ export default {
                     this.errors.push('Something went wrong. Please try again.')
                 }
             })
-            this.$store.commit("setIsLoading", false);
+            
 
     },
     methods: {
