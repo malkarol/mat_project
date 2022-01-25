@@ -812,7 +812,8 @@ def get_round_results(request, pk):
     if request.method == 'GET':
         try:
             session = Session.objects.get(pk = pk)
-            sessionResult = SessionResult.objects.filter(session__session_id = pk).filter(federated_round = session.federated_round)[0]
+            round = session.federated_round - 1 if session.federated_round > 1 else session.federated_round 
+            sessionResult = SessionResult.objects.filter(session__session_id = pk).filter(federated_round = round)[0]
             serializer = SessionResultSerializer(sessionResult)
             return Response(serializer.data)
         except Session.DoesNotExist or SessionResult.DoesNotExist:

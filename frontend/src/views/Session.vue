@@ -211,17 +211,17 @@
                             </div>
 
                         </div>
-                        <div v-if="renderChart && currentResult.finished" class="row mt-3">
+                        <div v-if="renderChart" class="row mt-3">
                             <div class="w-100 d-flex col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                 <div>
-                                    <h4 class='mb-3'> <strong>Accuracy and loss diagrams for round {{this.session.federated_round}}:</strong></h4>
+                                    <h4 class='mb-3'> <strong>Accuracy and loss diagrams for round {{this.session.federated_round - 1}}:</strong></h4>
                                     <div class="d-flex justify-content-center">
                                         <ChartResult :key="componentKey" v-bind:chartData="chartDataAccuracy" :chartOptions="chartOptionsAccuracy" />
                                         <ChartResult :key="componentKeyLoss" v-bind:chartData="chartDataLoss" :chartOptions="chartOptionsLoss" />
                                     </div>
                                 </div>
                                 <div class="text-center flex-fill d-flex flex-column">
-                                    <h4 class="mb-3"><strong>Aggregated model results on test data for round {{this.session.federated_round}}:</strong></h4>
+                                    <h4 class="mb-3"><strong>Aggregated model results on test data for round {{this.session.federated_round - 1}}:</strong></h4>
                                     <div class="">
                                         <h4 class="mb-3 text-primary"> <strong>Accuracy: </strong></h4>
                                         <h4 class="mb-3"> <strong>{{this.globalModelAccuracy}} %</strong></h4>
