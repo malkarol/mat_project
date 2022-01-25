@@ -13,7 +13,7 @@ from sklearn.metrics import accuracy_score
 import io
 import json
 import tensorflow as tf
-from session_handler.models import SessionResult
+from session_handler.models import SessionResult,Session
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import MaxPooling2D
@@ -224,11 +224,20 @@ class PretrainedAggregator(Aggregator):
 
     def calculate_global_model_accuracy(self, global_model, testpath):
         loss, accuracy = global_model.evaluate(self.load_dataset(testpath))
-        ses_result = SessionResult.objects.get(session_id = self.parameters['session_id'])
+
+        session = Session.objects.get(pk=self.parameters['session_id'])
+        
+        ses_result = SessionResult.objects.filter(session__session_id = self.parameters['session_id']).filter(federated_round = session.federated_round)[0]
         ses_result.finished = True
         ses_result.global_model_accuracy = accuracy
         ses_result.global_model_loss = loss
         ses_result.save()
+
+        session.federated_round += 1
+        session.save()
+        newSessionResult = SessionResult.objects.create(session=session, federated_round = session.federated_round, finished=False)
+        newSessionResult.save()
+
         try:
             shutil.rmtree(f'./user_files/session_Id_{self.parameters["session_id"]}')
         except OSError as e:

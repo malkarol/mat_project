@@ -29,6 +29,7 @@ class Session(models.Model):
     parameters_values = ArrayField(models.CharField(max_length=30), null=True)
     model_name = models.CharField(max_length=200, null=True)
     private_key = models.CharField(max_length=1000, null = True)
+    federated_round = models.IntegerField(default = 1, null = False)
     # setting PricingPlanEnum value
 
     class PricingPlanEnum(models.IntegerChoices):
@@ -79,4 +80,5 @@ class SessionResult(models.Model):
     finished = models.BooleanField(default=False)
     global_model_accuracy = models.FloatField(null=True)
     global_model_loss = models.FloatField(null=True)
+    federated_round = models.IntegerField(default=1, null=False)
     # global_model = models.ForeignKey(MLModel, on_delete=models.CASCADE)

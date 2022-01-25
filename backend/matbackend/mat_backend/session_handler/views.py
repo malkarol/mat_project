@@ -167,19 +167,6 @@ def download_zip_testdata(request,pk):
     return response
 
 @api_view(['POST'])
-def upload_global_model_results(request):
-    try:
-        session = Session.objects.get(pk = request.data['session_id'])
-    except Session.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    accuracy = request.data['accuracy']
-    loss = request.data['loss']
-    result = SessionResult.objects.create(session=session, finished=True, global_model_accuracy=accuracy, global_model_loss=loss)
-    result.save()
-    return Response(status=status.HTTP_200_OK)
-
-
-@api_view(['POST'])
 def join_session(request):
     '''
     Creates new participant associated with session
@@ -214,49 +201,6 @@ def join_session(request):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(sessSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# @api_view('POST')
-# def add_filled_session(request):
-#     if request.method == 'POST':
-#         serializer = SessionSerializer(data=request.data['session'])
-#         if serializer.is_valid():
-#             serializer.save()
-#             usernames = request.data['usernames']
-#             users = []
-#             for username in usernames:
-#                 user = User.objects.get(username=username)
-#                 users.append(user)
-#             serializerUser = UserSerializer(data=users,many=True)
-#             participants = []
-#             session_id = serializer.data['session_id']
-        #     for user in serializerUser.data:
-        #         participant = {}
-        #         participant['user'] = user['id']
-        #         participant['session'] = session_id
-        #         participant['is_owner'] = False
-        #         participants.append(participant)
-
-        #     owner ={}
-        #     owner['user'] = request.user.id
-        #     owner['session'] = session_id
-        #     owner['is_owner'] = True
-        #     participants.append(owner)
-
-        #     serializerParticipant = ParticipantSerializer(data=participants, many=True)
-        #     if serializerParticipant.is_valid():
-        #         serializerParticipant.save()
-        #         return Response(serializerParticipant.data, status=status.HTTP_201_CREATED)
-        # return Response(serializerParticipant.errors, status=status.HTTP_400_BAD_REQUEST)
-
-# def check_if_user_exists(request):
-#     usernames = request.data['usernames']
-#     users = []
-#     for username in usernames:
-#         try:
-#             user = User.objects.get(username=username)
-#         except User.DoesNotExist:
-#             return Response(status=status.HTTP_404_NOT_FOUND)
-#         users.append(user)
-#     serializerUser =UserSerializer(data=users,many=True)
 
 import json
 @api_view(['POST'])
@@ -361,7 +305,6 @@ def get_results_for_participants(request,pk):
         return Response(participants, status=status.HTTP_201_CREATED)
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
-
 @api_view(['POST'])
 def upload_global_weights(request):
     if request.method == 'POST':
@@ -372,20 +315,18 @@ def upload_global_weights(request):
 
         file_object = request.FILES['model_weights']
         target_path = f'/sessions/session_Id_'+request.data['session_id']+'/' + 'global_weights.h5'
-        ses_result = SessionResult.objects.get(session__session_id = request.data['session_id'])
+        
+        ses_result = SessionResult.objects.filter(session__session_id = request.data['session_id']).filter(federated_round = session.federated_round)[0]
         ses_result.finished = True
         ses_result.global_model_accuracy = request.data['accuracy']
         ses_result.global_model_loss = request.data['loss']
         ses_result.save()
-        # sess_res_Serializer = SessionResultSerializer(ses_result)
 
-        # resultsTmp = sess_res_Serializer.data
-        # resultsTmp['finished'] = True
-        # resultsTmp['accuracy'] = request.data['accuracy']
-        # resultsTmp['loss'] = request.data['loss']
-        #print(request.data['accuracy'])
-        #print(request.data['loss'])
-        #sessSerializer = SessionResultSerializer(session, data=resultsTmp)
+        session.federated_round += 1
+        session.save()
+        newSessionResult = SessionResult.objects.create(session=session, federated_round = session.federated_round, finished=False)
+        newSessionResult.save()
+
         if session.founder==request.user.username:
                 path = storage.save(target_path, ContentFile(file_object.read()))
                 return Response(status=status.HTTP_200_OK)
@@ -611,6 +552,7 @@ def local_model_script(request,pk):
         parameters['session_id'] = session.session_id
         parameters['load_data'] = 'load_data'
         parameters['learning'] = 'learning'
+        parameters['federated_round'] = session.federated_round
 
         lines = ScriptsExecutor().create_local_model(parameters)
         print(parameters)
@@ -853,8 +795,20 @@ def generate_private_key(session):
 def global_model_results(request, pk):
     if request.method == 'GET':
         try:
-            session = SessionResult.objects.get(session_id = pk)
-            serializer = SessionResultSerializer(session)
+            session = Session.objects.get(pk = pk)
+            sessionResults = SessionResult.objects.filter(session__session_id = pk)
+            serializer = SessionResultSerializer(sessionResults, many=True)
             return Response(serializer.data) 
-        except SessionResult.DoesNotExist:
+        except Session.DoesNotExist or SessionResult.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def get_round_results(request, pk):
+    if request.method == 'GET':
+        try:
+            session = Session.objects.get(pk = pk)
+            sessionResult = SessionResult.objects.filter(session__session_id = pk).filter(federated_round = session.federated_round)[0]
+            serializer = SessionResultSerializer(sessionResult)
+            return Response(serializer.data)
+        except Session.DoesNotExist or SessionResult.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)

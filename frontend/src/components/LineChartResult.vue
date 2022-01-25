@@ -2,14 +2,14 @@
 
 
 <script>
-import { Bar } from "vue3-chart-v2";
+import { Line } from "vue3-chart-v2";
 
 export default {
-  name: 'ChartResult',
-  extends: Bar,
+  name: 'LineChartResult',
+  extends: Line,
   props: {
     chartData: {
-      type: Object  ,
+      type: Object,
       required: true
     },
     chartOptions: {

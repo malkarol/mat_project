@@ -165,9 +165,9 @@
                             </p> -->
                             </div>
                         </div>
-                        <div class="col-4 px-4">
+                        <div class="col-5 px-4">
                             <div class="col shadow p-3 rounded" style="background-color: #f1f1f1;">
-                                <h4> <strong> Participants' progress </strong> </h4>
+                                <h4> <strong> Participants' progress for <span class="text-danger">federated round {{this.session.federated_round}}:</span> </strong> </h4>
                                 <hr />
                                 <table class="table table-bordered table-hover">
                                     <thead>
@@ -214,14 +214,14 @@
                         <div v-if="renderChart" class="row mt-3">
                             <div class="w-100 d-flex col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                 <div>
-                                    <h4 class='mb-3'> <strong>Accuracy and loss diagrams:</strong></h4>
+                                    <h4 class='mb-3'> <strong>Accuracy and loss diagrams for round {{this.session.federated_round}}:</strong></h4>
                                     <div class="d-flex justify-content-center">
-                                        <ChartResult :key="componentKey" v-bind:chartData="chartDataAccuracy" :chartOptions="chartOptions" />
-                                        <ChartResult :key="componentKeyLoss" v-bind:chartData="chartDataLoss" :chartOptions="chartOptions" />
+                                        <ChartResult :key="componentKey" v-bind:chartData="chartDataAccuracy" :chartOptions="chartOptionsAccuracy" />
+                                        <ChartResult :key="componentKeyLoss" v-bind:chartData="chartDataLoss" :chartOptions="chartOptionsLoss" />
                                     </div>
                                 </div>
                                 <div class="text-center flex-fill d-flex flex-column">
-                                    <h4 class="mb-3"> Aggregated model results on test data:</h4>
+                                    <h4 class="mb-3"><strong>Aggregated model results on test data for round {{this.session.federated_round}}:</strong></h4>
                                     <div class="">
                                         <h4 class="mb-3 text-primary"> <strong>Accuracy: </strong></h4>
                                         <h4 class="mb-3"> <strong>{{this.globalModelAccuracy}} %</strong></h4>
@@ -229,6 +229,17 @@
                                     <div class="">
                                         <h4 class="mb-3 text-danger"> <strong>Loss: </strong></h4>
                                         <h4 class="mb-3"> <strong>{{this.globalModelLoss}}</strong></h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="renderChart" class="row mt-3">
+                            <div class="w-100 d-flex col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                                <div>
+                                    <h4 class='mb-3'><strong>Global model accuracy and loss curves</strong></h4>
+                                    <div class="d-flex justify-content-center">
+                                        <LineChartResult :key="componentGlobalAccuracies" v-bind:chartData="globalAccuracies" :chartOptions="chartOptionsAccuracy" />
+                                        <LineChartResult :key="componentGlobalLosses" v-bind:chartData="globalLosses" :chartOptions="chartOptionsLoss" />
                                     </div>
                                 </div>
                             </div>
@@ -271,11 +282,13 @@ import axios from 'axios'
 //import Chart from '@/components/Chart.vue'
 import ChartResult from '@/components/ChartResult.vue'
 import Loading from '@/components/Loading.vue'
+import LineChartResult from '@/components/LineChartResult.vue'
 
 export default {
     components: {
         ChartResult,
-        Loading
+        Loading,
+        LineChartResult
     },
     beforeCreate() {
         //this.$options.components.ChartResult = require('@/components/ChartResult.vue').default;
@@ -307,10 +320,28 @@ export default {
             usernames: [],
             componentKey: 0,
             componentKeyLoss: 0,
+            componentGlobalAccuracies: 0,
+            componentGlobalLosses: 0,
             localLearningScriptDownloaded: false,
             localModelWeightUploaded: false,
             resultsFileUploaded: false,
             participantsProgress: [],
+            globalAccuracies: {
+                labels: ["1", "2", "3", "4", "5", "6", "7"], //response.data.names,
+                datasets: [{
+                    label: 'Learning rounds vs accuracy',
+                    backgroundColor: 'rgb(77, 137, 255)',
+                    data: [23, 36, 40, 45, 49, 51, 53] //response.data.accuracy
+                }]
+            },
+            globalLosses: {
+                labels: ["1", "2", "3", "4", "5", "6", "7"], //response.data.names,
+                datasets: [{
+                    label: 'Learning rounds vs loss',
+                    backgroundColor: '#f87979',
+                    data: [0.87, 0.83, 0.79, 0.65, 0.6, 0.55, 0.50] //response.data.accuracy
+                }]
+            },
             chartDataAccuracy: {
                 labels: ["Hello"], //response.data.names,
                 datasets: [{
@@ -323,11 +354,11 @@ export default {
                 labels: ["Hello"], //response.data.names,
                 datasets: [{
                     label: 'Data One',
-                    backgroundColor: '#f87979',
+                    backgroundColor: 'rgb(77, 137, 255)',
                     data: [1] //response.data.accuracy
                 }]
             },
-            chartOptions: {
+            chartOptionsAccuracy: {
                 responsive: true,
                 size: {
 
@@ -338,7 +369,25 @@ export default {
                     yAxes: [{
                         ticks: {
                             min: 0,
-                            beginAtZero: true
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }]
+                }
+            },
+            chartOptionsLoss: {
+                responsive: true,
+                size: {
+
+                    height: 25
+
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            min: 0,
+                            beginAtZero: true,
+                            max: 1
                         }
                     }]
                 }
@@ -407,8 +456,8 @@ export default {
             }
             return paramDic[x]
         },
-        getGlobalModelResults() {
-            axios.get('/api/v1/global-model-results/' + this.$route.params.id)
+        getRoundResults() {
+            axios.get('/api/v1/get-round-results/' + this.$route.params.id)
                 .then(response => {
                     console.log(response)
                     this.globalModelAccuracy = response.data.global_model_accuracy.toFixed(4) * 100
@@ -471,6 +520,8 @@ export default {
         forceRerender() {
             this.componentKey += 1
             this.componentKeyLoss += 1
+            this.componentGlobalAccuracies += 1
+            this.componentGlobalLosses += 1
         },
         fillData() {
             axios.get('/api/v1/results-for-chart/' + this.$route.params.id)
@@ -493,9 +544,42 @@ export default {
                             data: response.data.losses,
                         }]
                     }
-                    this.renderChart = true;
-                    this.forceRerender()
-                    this.getGlobalModelResults()
+
+                    axios.get('/api/v1/global-model-results/' + this.$route.params.id)
+                        .then(response2 => {
+                            console.log(response2)
+                            let accuracies = Array.from(response2.data, a => a.global_model_accuracy.toFixed(4) * 100)
+                            let losses = Array.from(response2.data, a => a.global_model_loss)
+                            let labels = Array.from({length: accuracies.length}, (_, i) => i + 1)
+
+                            this.globalAccuracies = {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Rounds vs Accuracy %',
+                                    backgroundColor: 'rgb(77, 137, 255)',
+                                    data: accuracies
+                                }]
+                            }
+                            this.globalLosses = {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Rounds vs Loss',
+                                    backgroundColor: '#f87979',
+                                    data: losses,
+                                }]
+                            }
+                            this.renderChart = true;
+                            this.forceRerender()
+                            this.getRoundResults()
+                        }).catch(error => {
+                            if (error.response) {
+                                for (const property in error.response.data) {
+                                    this.errors.push(`${property}: ${error.response.data[property]}`)
+                                }
+                            } else if (error.message) {
+                                this.errors.push('Something went wrong. Please try again.')
+                            }
+                        })
                 }).catch(error => {
                     if (error.response) {
                         for (const property in error.response.data) {

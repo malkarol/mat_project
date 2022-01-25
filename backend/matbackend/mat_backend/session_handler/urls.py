@@ -27,7 +27,6 @@ urlpatterns=[
     path('get-local-weights/<int:pk>', views.get_local_weights),
     # generate global model script for session
     path('generate-global-model/<int:pk>', views.global_model_script),
-    path('upload-global-model-results/', views.upload_global_model_results),
      # generate aggregate script for session
     path('generate-aggregate-script/<int:pk>', views.aggregate_script),
 
@@ -51,7 +50,8 @@ urlpatterns=[
     # instructions
     path('instructions/lm/', views.get_instructions_local_model),
     path('results-for-chart/<int:pk>',views.get_results_for_participants),
-    path('global-model-results/<int:pk>', views.global_model_results)
+    path('global-model-results/<int:pk>', views.global_model_results),
+    path('get-round-results/<int:pk>', views.get_round_results)
     # add session and participants with filed usernames
     # path('sessions/add-filled/', views.add_filled_session),
     # path('user/<int:pk>',views.user_details)
