@@ -59,7 +59,7 @@ class ParametersScript(AbstractHandler):
             input_list =[parameters['width_size'],parameters['height_size']]
             lines =['']
             for key, value in tmp_params.items():
-                if '('not in value and  not isinstance(value, list) and value.isdigit() == False and value.replace(".", "", 1).isdigit()== False:
+                if not isinstance(value, (int)) and '('not in value and  not isinstance(value, list) and value.isdigit() == False and value.replace(".", "", 1).isdigit()== False:
                     new_line = f'{key} = "{value}"'
                 else:
                     new_line = f'{key} = {value}'
