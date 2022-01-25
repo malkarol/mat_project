@@ -211,7 +211,7 @@
                             </div>
 
                         </div>
-                        <div v-if="renderChart" class="row mt-3">
+                        <div v-if="renderChart && currentResult.finished" class="row mt-3">
                             <div class="w-100 d-flex col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                 <div>
                                     <h4 class='mb-3'> <strong>Accuracy and loss diagrams for round {{this.session.federated_round}}:</strong></h4>
@@ -303,7 +303,8 @@ export default {
             showStep2: false,
             showStep3: false,
             showStep4: false,
-            debug: true,
+            currentResult: {},
+            debug: false,
             showResultsTab: false,
             data_for_chart: {},
             startDate: '2022-01-01',
@@ -436,7 +437,6 @@ export default {
         for (const user in this.participants)
             this.usernames.push(user['username'])
         this.getParticipantsProgress()
-        this.$store.state.isLoading = false
 
     },
     methods: {
@@ -483,30 +483,35 @@ export default {
                     this.participantsProgress = response.data
                     if (this.participantsProgress.every(x => x.is_model_uploaded)) {
                         this.showStep2 = false
-                        axios.get('/api/v1/global-model-results/' + this.$route.params.id)
-                            .then(response2 => {
-                                if (response2.data.finished) {
-                                    this.showStep3 = false
-                                    this.showStep4 = true
-                                    this.showResultsTab = true
-                                } else {
-                                    this.showStep3 = true
-                                    this.showResultsTab = false
-                                }
-                            }).catch(error => {
-                                if (error.response) {
-                                    for (const property in error.response.data) {
-                                        this.errors.push(`${property}: ${error.response.data[property]}`)
-                                    }
-                                } else if (error.message) {
-                                    this.errors.push('Something went wrong. Please try again.')
-                                }
-                            })
+
                     } else {
                         this.showStep2 = true
                     }
 
-                    console.log(this.participantsProgress)
+                    axios.get('/api/v1/global-model-results/' + this.$route.params.id)
+                        .then(response2 => {
+                            let result = response2.data.find(elem => elem.federated_round == this.session.federated_round)
+                            this.currentResult = result
+                            if (result.finished == false) {
+                                this.showStep3 = false
+                                this.showStep4 = false
+                            } else {
+                                this.showStep3 = true
+                            }
+
+                            this.showResultsTab = response2.data.some(x => x.finished)
+                            this.$store.state.isLoading = false
+
+                        }).catch(error => {
+                            if (error.response) {
+                                for (const property in error.response.data) {
+                                    this.errors.push(`${property}: ${error.response.data[property]}`)
+                                }
+                            } else if (error.message) {
+                                this.errors.push('Something went wrong. Please try again.')
+                            }
+                        })
+
                 }).catch(error => {
                     if (error.response) {
                         for (const property in error.response.data) {
@@ -548,9 +553,11 @@ export default {
                     axios.get('/api/v1/global-model-results/' + this.$route.params.id)
                         .then(response2 => {
                             console.log(response2)
-                            let accuracies = Array.from(response2.data, a => a.global_model_accuracy.toFixed(4) * 100)
-                            let losses = Array.from(response2.data, a => a.global_model_loss)
-                            let labels = Array.from({length: accuracies.length}, (_, i) => i + 1)
+                            let accuracies = Array.from(response2.data.filter(x => x.global_model_accuracy != null), a => a.global_model_accuracy.toFixed(4) * 100)
+                            let losses = Array.from(response2.data.filter(x => x.global_model_accuracy != null), a => a.global_model_loss)
+                            let labels = Array.from({
+                                length: accuracies.length
+                            }, (_, i) => i + 1)
 
                             this.globalAccuracies = {
                                 labels: labels,

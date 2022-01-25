@@ -327,9 +327,14 @@ def upload_global_weights(request):
         newSessionResult = SessionResult.objects.create(session=session, federated_round = session.federated_round, finished=False)
         newSessionResult.save()
 
+        participants = Participant.objects.filter(session_id = session.session_id)
+        for participant in participants:
+            participant.is_model_uploaded = False
+            participant.save()
+
         if session.founder==request.user.username:
-                path = storage.save(target_path, ContentFile(file_object.read()))
-                return Response(status=status.HTTP_200_OK)
+            path = storage.save(target_path, ContentFile(file_object.read()))
+            return Response(status=status.HTTP_200_OK)
         # if sessSerializer.is_valid():
         #     sessSerializer.save()
             

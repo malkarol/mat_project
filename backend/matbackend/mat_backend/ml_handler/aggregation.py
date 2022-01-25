@@ -13,7 +13,7 @@ from sklearn.metrics import accuracy_score
 import io
 import json
 import tensorflow as tf
-from session_handler.models import SessionResult,Session
+from session_handler.models import SessionResult,Session, Participant
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import MaxPooling2D
@@ -237,6 +237,11 @@ class PretrainedAggregator(Aggregator):
         session.save()
         newSessionResult = SessionResult.objects.create(session=session, federated_round = session.federated_round, finished=False)
         newSessionResult.save()
+
+        participants = Participant.objects.filter(session_id = session.session_id)
+        for participant in participants:
+            participant.is_model_uploaded = False
+            participant.save()
 
         try:
             shutil.rmtree(f'./user_files/session_Id_{self.parameters["session_id"]}')
