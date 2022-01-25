@@ -212,7 +212,6 @@
 
                         </div>
                         <div v-if="renderChart" class="row mt-3">
-                            <h4>Results</h4>
                             <div class="w-100 d-flex col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                 <div>
                                     <h4 class='mb-3'> <strong>Accuracy and loss diagrams:</strong></h4>
@@ -245,7 +244,7 @@
                     </div>
                     <div class="row mt-3">
                         <div class="col mb-3 shadow p-3 mb-5 d-flex justify-content-center rounded" style="background-color: #f1f1f1;">
-                            
+
                         </div>
                     </div>
                 </div>

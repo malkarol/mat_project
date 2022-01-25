@@ -113,6 +113,7 @@
                     </div>
                 </div>
                 <div class="row mb-3">
+                    <h5 class="col-sm-2 col-sm-2-pt-0"> <strong>Test dataset</strong></h5>
                     <label for="uploadDataset" class="form-label text-muted">(Only .zip files)</label>
                     <input class="form-control form-control" id="uploadDataset" accept=".zip" type="file" required>
                     <!-- <div class="text-center" v-if="creatingSession">
@@ -138,7 +139,7 @@
             </form>
             <!-- <button class="btn btn-danger btn-lg px-5" @click="tosth()">tosth</button> -->
             <Loading />
-            <button @click="printGowno()"> Hello</button>
+            <!-- <button @click="printGowno()"> Hello</button> -->
         </div>
     </div>
 </div>
@@ -308,9 +309,6 @@ export default {
         Errors
     },
     methods: {
-        printGowno(){
-            console.log(this.fixedParams)
-        },
         getFixed(){
             this.showFixed = true
         },
