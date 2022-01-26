@@ -309,7 +309,7 @@ export default {
             showStep3: false,
             showStep4: false,
             currentResult: {},
-            debug: true,
+            debug: false,
             showResultsTab: false,
             data_for_chart: {},
             startDate: '2022-01-01',
@@ -501,9 +501,9 @@ export default {
                             if (result.finished == true) {
                                 this.showStep3 = false
                                 this.showStep4 = false
-                            } else {
-                                this.showStep3 = true
                             }
+                            if (!result.finished && this.participantsProgress.every(x => x.is_model_uploaded))
+                                this.showStep3 = true
 
                             this.showResultsTab = response2.data.some(x => x.finished)
                             this.$store.state.isLoading = false
