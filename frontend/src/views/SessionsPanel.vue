@@ -68,31 +68,38 @@
                                             <p v-else class="mb-1 text-primary">Eligible to join</p>
                                         </div>
                                     </div>
-                                    <div class="container py-2">
-                                        <div class="row justify-content-start pt-3">
-                                            <div class="col-3">
+                                    <div class="row py-2">
+                                        <form>
+
+                                            <div class="col-8 mb-2">
                                                 <div class="row">
-                                                    <label><strong>Founder</strong></label>
+                                            <label  class="col-sm-2 col-form"> <strong>Founder</strong></label>
+                                            <div class="col-sm-10">
+                                                <span> {{session.founder}}</span>
+                                            </div>
                                                 </div>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-8 mb-2">
                                                 <div class="row">
-                                                    <span class="">{{session.founder}}</span>
+                                            <label  class="col-sm-2 col-form"> <strong>Descritpion</strong></label>
+                                            <div class="col-sm-10">
+                                                <span> {{getDescription(session.description)}}</span>
+                                            </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="row justify-content-start py-3">
-                                            <div class="col-3">
+                                            <div class="col-8">
                                                 <div class="row">
-                                                    <label><strong>Classification problem</strong></label>
+                                            <label  class="col-sm-2 col-form"> <strong>Tags</strong></label>
+                                            <div v-if="session.tags.length >0" class="col-sm-10">
+                                                 <span  v-for="(tag) in session.tags" :key="tag" class="badge bg-dark mx-1"> {{tag}} </span>
+                                            </div>
+                                            <div v-else class="col-sm-2 col-form" >
+                                                <span> No tags </span>
+                                            </div>
                                                 </div>
                                             </div>
-                                            <div class="col-6">
-                                                <div class="row">
-                                                    <span class="">Image</span>
-                                                </div>
-                                            </div>
-                                        </div>
+
+                                        </form>
                                         <div v-if="session.pricing_plan==1 && !isJoined(session.session_id)" class="row justify-content-start py-3">
                                             <div class="col-3">
                                                 <div class="row">
@@ -212,10 +219,21 @@ export default {
                     this.errors.push('Something went wrong. Please try again.')
                 }
             })
-            
+
 
     },
     methods: {
+        getDescription(description)
+        {
+            if (description.length > 150)
+            {
+                return description.substring(0, 150)+"..."
+            }
+            else
+            {
+                 return description
+            }
+        },
         hello() {
             axios.get('api/v1/mailget/').then(response => {
 
