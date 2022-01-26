@@ -107,6 +107,10 @@
                                     <h4 for="uploadWeights"> <strong>Step 1. Download learning script</strong></h4>
                                     <p>Download learning script for this model to train it on your private data</p>
                                     <button :disabled="!isActive" class="btn btn-primary btn-lg btn-success  mt-3  " @click="generateLocalModel()">Download local learning script</button>
+                                    <div class="text-center mb-3" v-if="downloadingScript">
+                                        <div class="lds-dual-ring"></div>
+                                        <div>Downloading script and test dataset...</div>
+                                    </div>
                                 </div>
                             </div>
                             <div v-if="!isActive  && !sessionEnded" class="row">
@@ -299,6 +303,7 @@ export default {
             downloadingLocalAggregation: false,
             isActive: false,
             sessionEnded: false,
+            downloadingScript: false,
             showStep1: true,
             showStep2: false,
             showStep3: false,
@@ -874,13 +879,16 @@ export default {
 
                 fileLink.click();
 
-                console.log(response)
+                
+            }).then(response2 =>{
+                this.downloadingScript = false
             })
         },
 
         generateLocalModel() {
             if (!this.isActive)
                 return
+            this.downloadingScript = true
             axios({
                 url: '/api/v1/generate-local-model/' + this.session.session_id,
                 method: 'GET',
