@@ -107,9 +107,14 @@
                                     <h4 for="uploadWeights"> <strong>Step 1. Download learning script</strong></h4>
                                     <p>Download learning script for this model to train it on your private data</p>
                                     <button :disabled="!isActive" class="btn btn-primary btn-lg btn-success  mt-3  " @click="generateLocalModel()">Download local learning script</button>
+                                    <button :disabled="!isActive" class="btn btn-primary btn-lg btn-success  mt-3  mx-2" @click="downloadTestDataset()">Download test dataset</button>
                                     <div class="text-center mb-3" v-if="downloadingScript">
                                         <div class="lds-dual-ring"></div>
-                                        <div>Downloading script and test dataset...</div>
+                                        <div>Downloading script...</div>
+                                    </div>
+                                    <div class="text-center mb-3" v-if="downloadingDataset">
+                                        <div class="lds-dual-ring"></div>
+                                        <div>Downloading test dataset...</div>
                                     </div>
                                 </div>
                             </div>
@@ -300,6 +305,7 @@ export default {
     data() {
         return {
             // participantList: participantJson,
+            downloadingDataset: false,
             downloadingLocalAggregation: false,
             isActive: false,
             sessionEnded: false,
@@ -761,8 +767,8 @@ export default {
 
                 fileLink.click();
 
-                console.log(response)
-                this.downloadTestDataset()
+            }).then(response2 => {
+                this.downloadingScript = false
                 this.downloadingLocalAggregation = false
             })
 
@@ -864,6 +870,7 @@ export default {
             })
         },
         downloadTestDataset() {
+            this.downloadingDataset = true
             axios({
                 url: 'api/v1/download-zip-testdata/' + this.session.session_id,
                 //url: 'api/v1/testmodel/',
@@ -881,9 +888,8 @@ export default {
                 document.body.appendChild(fileLink);
 
                 fileLink.click();
-
-            }).then(response2 => {
-                this.downloadingScript = false
+            }).then(resp => {
+                this.downloadingDataset = false
             })
         },
 
@@ -920,8 +926,8 @@ export default {
                     document.body.appendChild(fileLink);
 
                     fileLink.click();
-
-                    if (this.session.learning_round > 1) {
+                    console.log(this.session.federated_round)
+                    if (this.session.federated_round > 1) {
                         axios({
                             url: '/api/v1/get-global-weights/' + this.session.session_id,
                             method: 'GET',
@@ -937,12 +943,10 @@ export default {
                             fileLink.click();
 
                             console.log(response)
-                            this.localLearningScriptDownloaded = true
                         }).then(response2 => {
                             this.downloadingScript = false
+                            this.localLearningScriptDownloaded = true
                         })
-                    } else {
-                        this.downloadTestDataset()
                     }
                 })
             }).catch(error => {
