@@ -34,7 +34,7 @@
                     <div class="col-lg-4 mb-5 mb-lg-0">
                         <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-collection"></i></div>
                         <h2 class="h4 fw-bolder">Federated learning</h2>
-                        <p>Paragraph of text beneath the heading to explain the heading. We'll add onto it with another sentence and probably just keep going until we run out of words.</p>
+                        <p>Federated Learning is very new. As a part of Machine Learning it was introduce by Google to teach <strong>"cohorts"</strong> of edge devices. Now we present to you software that can allow you to grasp the idea of Federated Learning.</p>
                         <a class="text-decoration-none" href="https://venturebeat.com/2021/08/13/what-is-federated-learning/">
                             More about Federated Learning
                             <i class="bi bi-arrow-right"></i>
@@ -43,13 +43,13 @@
                     <div class="col-lg-4 mb-5 mb-lg-0">
                         <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-building"></i></div>
                         <h2 class="h4 fw-bolder">Free to use</h2>
-                        <p>Paragraph of text beneath the heading to explain the heading. We'll add onto it with another sentence and probably just keep going until we run out of words.</p>
+                        <p>If you are not sure how to use <strong> MAT </strong> or you are just taking first steps with <strong> Machine Learning </strong> and <strong> Federated Learning </strong> you can start for free and ugrade your plan later.</p>
 
                     </div>
                     <div class="col-lg-4">
                         <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-toggles2"></i></div>
                         <h2 class="h4 fw-bolder">No data sharing</h2>
-                        <p>Paragraph of text beneath the heading to explain the heading. We'll add onto it with another sentence and probably just keep going until we run out of words.</p>
+                        <p>You do not have to worry about your data safety, <strong> MAT </strong> does not take your data for Federated Learning. You only upload trained weigths to the server, which minimizes chances of privacy breach.</p>
 
                     </div>
                 </div>
@@ -59,8 +59,8 @@
         <section class="bg-light py-5 border-bottom">
             <div class="container px-5">
                 <div class="text-center mb-5">
-                    <h2 class="fw-bolder">Pay as you grow</h2>
-                    <p class="lead mb-0">With our no hassle pricing plans</p>
+                    <h2 class="fw-bolder">Pay to learn faster grow</h2>
+                    <p class="lead mb-0">With our fantastic pricing plans</p>
                 </div>
                 <div class="row gx-5 justify-content-center">
                     <!-- Pricing card free-->
@@ -70,7 +70,7 @@
                                 <div class="small text-uppercase fw-bold text-muted">Free</div>
                                 <div class="mb-3">
                                     <span class="display-4 fw-bold">$0</span>
-                                    <span class="text-muted">/ mo.</span>
+
                                 </div>
                                 <ul class="list-unstyled mb-4">
                                     <li class="mb-2">
@@ -112,7 +112,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <span class="display-4 fw-bold">$3</span>
-                                    <span class="text-muted">/ mo.</span>
+
                                 </div>
                                 <ul class="list-unstyled mb-4">
                                     <li class="mb-2">
