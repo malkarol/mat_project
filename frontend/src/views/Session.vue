@@ -218,14 +218,14 @@
                         <div v-if="renderChart" class="row mt-3">
                             <div class="w-100 d-flex col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                 <div>
-                                    <h4 class='mb-3'> <strong>Accuracy and loss diagrams for round {{this.session.federated_round != 1 ? this.session.federated_round - 1 : 1}}:</strong></h4>
+                                    <h4 class='mb-3'> <strong>Accuracy and loss diagrams for round {{this.currentResult.finished ? this.session.federated_round : this.session.federated_round - 1}}:</strong></h4>
                                     <div class="d-flex justify-content-center">
                                         <ChartResult :key="componentKey" v-bind:chartData="chartDataAccuracy" :chartOptions="chartOptionsAccuracy" />
                                         <ChartResult :key="componentKeyLoss" v-bind:chartData="chartDataLoss" :chartOptions="chartOptionsLoss" />
                                     </div>
                                 </div>
                                 <div class="text-center flex-fill d-flex flex-column">
-                                    <h4 class="mb-3"><strong>Aggregated model results on test data for round {{this.session.federated_round != 1 ? this.session.federated_round - 1 : 1}}:</strong></h4>
+                                    <h4 class="mb-3"><strong>Aggregated model results on test data for round {{this.currentResult.finished ? this.session.federated_round : this.session.federated_round - 1}}:</strong></h4>
                                     <div class="">
                                         <h4 class="mb-3 text-primary"> <strong>Accuracy: </strong></h4>
                                         <h4 class="mb-3"> <strong>{{this.globalModelAccuracy}} %</strong></h4>
@@ -309,7 +309,7 @@ export default {
             showStep3: false,
             showStep4: false,
             currentResult: {},
-            debug: false,
+            debug: true,
             showResultsTab: false,
             data_for_chart: {},
             startDate: '2022-01-01',
@@ -501,6 +501,8 @@ export default {
                             if (result.finished == true) {
                                 this.showStep3 = false
                                 this.showStep4 = false
+                            } else {
+                                this.showStep3 = true
                             }
 
                             this.showResultsTab = response2.data.some(x => x.finished)
@@ -880,8 +882,7 @@ export default {
 
                 fileLink.click();
 
-                
-            }).then(response2 =>{
+            }).then(response2 => {
                 this.downloadingScript = false
             })
         },
@@ -920,9 +921,29 @@ export default {
 
                     fileLink.click();
 
-                    console.log(response)
-                    this.downloadTestDataset()
-                    this.localLearningScriptDownloaded = true
+                    if (this.session.learning_round > 1) {
+                        axios({
+                            url: '/api/v1/get-global-weights/' + this.session.session_id,
+                            method: 'GET',
+                            responseType: 'blob',
+                        }).then((response) => {
+                            var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                            var fileLink = document.createElement('a');
+
+                            fileLink.href = fileURL;
+                            fileLink.setAttribute('download', 'global_weights.h5'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                            document.body.appendChild(fileLink);
+
+                            fileLink.click();
+
+                            console.log(response)
+                            this.localLearningScriptDownloaded = true
+                        }).then(response2 => {
+                            this.downloadingScript = false
+                        })
+                    } else {
+                        this.downloadTestDataset()
+                    }
                 })
             }).catch(error => {
                 if (error.response) {
