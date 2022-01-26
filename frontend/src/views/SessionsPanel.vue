@@ -81,7 +81,7 @@
                                             </div>
                                             <div class="col-8 mb-2">
                                                 <div class="row">
-                                            <label  class="col-sm-2 col-form"> <strong>Descritpion</strong></label>
+                                            <label  class="col-sm-2 col-form"> <strong>Description</strong></label>
                                             <div class="col-sm-10">
                                                 <span> {{getDescription(session.description)}}</span>
                                             </div>
