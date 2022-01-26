@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.response import Response
 from session_handler.models import Session, SessionResult, Participant, StorageFile
 from django.core.files.base import ContentFile
+from django.http import FileResponse
 
 storage = GoogleCloudStorage()
 
@@ -27,3 +28,17 @@ def upload_many(request):
         target_path = f'/common/' + file_object.name
         path = storage.save(target_path, ContentFile(file_object.read()))
         return Response(status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def download_mate(request):
+    path = f'/sessions/common/mate.zip'
+    storage_file = storage.open(path, 'rb')
+    response = FileResponse(storage_file)
+    return response
+
+@api_view(['GET'])
+def download_mates(request):
+    path = f'/sessions/common/mates.zip'
+    storage_file = storage.open(path, 'rb')
+    response = FileResponse(storage_file)
+    return response

@@ -83,7 +83,7 @@
                         </li>
                          <li>
                             Show <strong>Joined sessions</strong> checkbox filter
-                            <br> <span class="text-muted"> Notice that when you create session you also join session</span>
+                            <br> <span class="text-muted"> Notice that when you create session you also automatically join session.</span>
                         </li>
                     </ul>
                     <br> For <strong> Premium </strong> plan you can additionally filter by:
@@ -118,12 +118,15 @@
                         <p>
                             In order to do local learning,
                         </p>
+
+                        <button class='btn btn-primary btn btn-success mb-3' @click="downloadMate()"> Download MATE app</button>
                     </li>
                     <li>
                         <h5> Aggregation </h5>
                         <p>
                             In order to do local learning,
                         </p>
+                        <button class='btn btn-primary btn btn-success mb-3' @click="downloadMates()"> Download MATES app</button>
                     </li>
                     <li>
                         <h5> Results </h5>
@@ -139,3 +142,60 @@
     </div>
 </div>
 </template>
+<script>
+import axios from "axios"
+
+export default {
+  data() {
+    return {
+
+    }
+  },
+  methods:{
+      downloadMate()
+      {
+           axios({
+                url: 'api/v1/download-mate/' ,
+                method: 'GET',
+                responseType: 'blob',
+            }).then((response) => {
+                console.log(response)
+                var fileURL = window.URL.createObjectURL(new Blob([response.data], {
+                    type: 'application/zip'
+                }));
+                var fileLink = document.createElement('a');
+
+                fileLink.href = fileURL;
+                fileLink.setAttribute('download','mate.zip');
+                document.body.appendChild(fileLink);
+
+                fileLink.click();
+
+            })
+
+      },
+      downloadMates()
+      {
+          axios({
+                url: 'api/v1/download-mates/' ,
+                method: 'GET',
+                responseType: 'blob',
+            }).then((response) => {
+                console.log(response)
+                var fileURL = window.URL.createObjectURL(new Blob([response.data], {
+                    type: 'application/zip'
+                }));
+                var fileLink = document.createElement('a');
+
+                fileLink.href = fileURL;
+                fileLink.setAttribute('download','mates.zip');
+                document.body.appendChild(fileLink);
+
+                fileLink.click();
+
+            })
+      }
+  }
+}
+</script>
+

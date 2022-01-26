@@ -19,6 +19,8 @@ from session_handler.models import Session, SessionResult, Participant, StorageF
 from session_handler.serializers import SessionResultSerializer, SessionSerializer, ParticipantSerializer, StorageSerializer
 from django.core.files.base import ContentFile
 
+from rest_framework.decorators import authentication_classes, permission_classes
+
 from storages.backends.gcloud import GoogleCloudStorage
 
 from django.core.mail import send_mail
@@ -160,8 +162,27 @@ def get_session_model_progress(request, spk):
 
 @api_view(['GET'])
 def download_zip_testdata(request,pk):
-    
+
     path = f'/sessions/session_Id_{pk}/TEST_SET.zip'
+    storage_file = storage.open(path, 'rb')
+    response = FileResponse(storage_file)
+    return response
+
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def download_mate(request):
+    path = f'/common/mate.zip'
+    storage_file = storage.open(path, 'rb')
+    response = FileResponse(storage_file)
+    return response
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def download_mates(request):
+    path = f'/common/mates.zip'
     storage_file = storage.open(path, 'rb')
     response = FileResponse(storage_file)
     return response
@@ -315,7 +336,7 @@ def upload_global_weights(request):
 
         file_object = request.FILES['model_weights']
         target_path = f'/sessions/session_Id_'+request.data['session_id']+'/' + 'global_weights.h5'
-        
+
         ses_result = SessionResult.objects.filter(session__session_id = request.data['session_id']).filter(federated_round = session.federated_round)[0]
         ses_result.finished = True
         ses_result.global_model_accuracy = request.data['accuracy']
@@ -337,7 +358,7 @@ def upload_global_weights(request):
             return Response(status=status.HTTP_200_OK)
         # if sessSerializer.is_valid():
         #     sessSerializer.save()
-            
+
     return Response(status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
@@ -803,7 +824,7 @@ def global_model_results(request, pk):
             session = Session.objects.get(pk = pk)
             sessionResults = SessionResult.objects.filter(session__session_id = pk)
             serializer = SessionResultSerializer(sessionResults, many=True)
-            return Response(serializer.data) 
+            return Response(serializer.data)
         except Session.DoesNotExist or SessionResult.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -812,7 +833,7 @@ def get_round_results(request, pk):
     if request.method == 'GET':
         try:
             session = Session.objects.get(pk = pk)
-            round = session.federated_round - 1 if session.federated_round > 1 else session.federated_round 
+            round = session.federated_round - 1 if session.federated_round > 1 else session.federated_round
             sessionResult = SessionResult.objects.filter(session__session_id = pk).filter(federated_round = round)[0]
             serializer = SessionResultSerializer(sessionResult)
             return Response(serializer.data)

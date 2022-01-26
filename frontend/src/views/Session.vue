@@ -47,6 +47,8 @@
                                         </ul>
 
                                     </div>
+
+
                                 </div>
 
                             </form>
@@ -106,7 +108,8 @@
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                     <h4 for="uploadWeights"> <strong>Step 1. Download learning script</strong></h4>
                                     <p>Download learning script for this model to train it on your private data</p>
-                                    <button :disabled="!isActive" class="btn btn-primary btn-lg btn-success  mt-3  " @click="generateLocalModel()">Download local learning script</button>
+                                    <button :disabled="!isActive" class="btn  btn-lg btn-success  mt-3  " @click="generateLocalModel()">Download local learning script</button>
+
                                     <div class="text-center mb-3" v-if="downloadingScript">
                                         <div class="lds-dual-ring"></div>
                                         <div>Downloading script and test dataset...</div>
@@ -142,7 +145,8 @@
                                         <div>Aggregating...</div>
                                     </div>
                                     <div class="d-flex justify-content-center">
-                                        <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregateModelsScript()">Aggregate models locally</button>
+                                        <button class="btn btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregateModelsScript()">Aggregate models locally</button>
+
                                         <button v-if="this.session.pricing_plan == 1 || debug" class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregation()">Aggregate models on server</button>
                                     </div>
                                     <h5 class="" v-if="downloadingLocalAggregation"><strong>Downloading weights and test dataset...</strong></h5>
@@ -170,8 +174,9 @@
                             </div>
                         </div>
                         <div class="col-5 px-4">
-                            <div class="col shadow p-3 rounded" style="background-color: #f1f1f1;">
-                                <h4> <strong> Participants' progress for <span class="text-danger">federated round {{this.session.federated_round}}:</span> </strong> </h4>
+                            <div class="col shadow p-3 rounded mb-5" style="background-color: #f1f1f1;">
+                                <h4> <strong> Participants' progress for <br>
+                                    <span class="text-danger">federated round {{this.session.federated_round}}:</span> </strong> </h4>
                                 <hr />
                                 <table class="table table-bordered table-hover">
                                     <thead>
@@ -190,6 +195,18 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                            </div>
+                            <div class="col shadow p-3 rounded mb-5" style="background-color: #f1f1f1;">
+                                 <h4> <strong> Desktop applications </strong> </h4>
+                                <hr />
+                            <div>
+                                <span> MATE - for local model learning </span>
+                                 <button :disabled="!isActive" class='btn btn-lg btn-warning mt-3 mx-3 mb-3' @click="downloadMate()"> Download MATE </button>
+                            </div>
+                             <div v-if="(showStep3 && isActive && !sessionEnded && this.session.founder == this.$store.state.user.username) || debug" >
+                                <span> MATES - for local weights aggregation </span>
+                                 <button :disabled="!isActive" class='btn btn-lg btn-warning mt-3 mx-3' @click="downloadMates()"> Download MATES </button>
+                            </div>
                             </div>
                         </div>
                     </div>
@@ -879,7 +896,7 @@ export default {
 
                 fileLink.click();
 
-                
+
             }).then(response2 =>{
                 this.downloadingScript = false
             })
@@ -1114,11 +1131,56 @@ export default {
                     for (const property in error.response.data) {
                         this.errors.push(`${property}: ${error.response.data[property]}`)
                     }
-                } else if (error.message) {
+                } else if(error.message) {
                     this.errors.push('Something went wrong. Please try again.')
                 }
             })
-        }
+        },
+        async downloadMate()
+      {
+           await axios({
+                url: 'api/v1/download-mate/' ,
+                method: 'GET',
+                responseType: 'blob',
+            }).then((response) => {
+                console.log(response)
+                var fileURL = window.URL.createObjectURL(new Blob([response.data], {
+                    type: 'application/zip'
+                }));
+                var fileLink = document.createElement('a');
+
+                fileLink.href = fileURL;
+                fileLink.setAttribute('download','mate.zip');
+                document.body.appendChild(fileLink);
+
+                fileLink.click();
+
+            })
+
+      },
+      async downloadMates()
+      {
+          this.downloadingLocalAggregation = true
+          await axios({
+                url: 'api/v1/download-mates/' ,
+                method: 'GET',
+                responseType: 'blob',
+            }).then((response) => {
+                console.log(response)
+                var fileURL = window.URL.createObjectURL(new Blob([response.data], {
+                    type: 'application/zip'
+                }));
+                var fileLink = document.createElement('a');
+
+                fileLink.href = fileURL;
+                fileLink.setAttribute('download','mates.zip');
+                document.body.appendChild(fileLink);
+
+                fileLink.click();
+
+            })
+            this.downloadingLocalAggregation = false
+      }
     }
 }
 // <div class="form-group ">

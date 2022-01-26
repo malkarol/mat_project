@@ -51,7 +51,11 @@ urlpatterns=[
     path('instructions/lm/', views.get_instructions_local_model),
     path('results-for-chart/<int:pk>',views.get_results_for_participants),
     path('global-model-results/<int:pk>', views.global_model_results),
-    path('get-round-results/<int:pk>', views.get_round_results)
+    path('get-round-results/<int:pk>', views.get_round_results),
+    path('download-mate/',views.download_mate),
+    path('download-mates/',views.download_mates),
+
+
     # add session and participants with filed usernames
     # path('sessions/add-filled/', views.add_filled_session),
     # path('user/<int:pk>',views.user_details)
