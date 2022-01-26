@@ -108,11 +108,15 @@
                                 <div class="col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                     <h4 for="uploadWeights"> <strong>Step 1. Download learning script</strong></h4>
                                     <p>Download learning script for this model to train it on your private data</p>
-                                    <button :disabled="!isActive" class="btn  btn-lg btn-success  mt-3  " @click="generateLocalModel()">Download local learning script</button>
-
+                                    <button :disabled="!isActive" class="btn btn-primary btn-lg btn-success  mt-3  " @click="generateLocalModel()">Download local learning script</button>
+                                    <button :disabled="!isActive" class="btn btn-primary btn-lg btn-success  mt-3  mx-2" @click="downloadTestDataset()">Download test dataset</button>
                                     <div class="text-center mb-3" v-if="downloadingScript">
                                         <div class="lds-dual-ring"></div>
-                                        <div>Downloading script and test dataset...</div>
+                                        <div>Downloading script...</div>
+                                    </div>
+                                    <div class="text-center mb-3" v-if="downloadingDataset">
+                                        <div class="lds-dual-ring"></div>
+                                        <div>Downloading test dataset...</div>
                                     </div>
                                 </div>
                             </div>
@@ -235,14 +239,14 @@
                         <div v-if="renderChart" class="row mt-3">
                             <div class="w-100 d-flex col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                 <div>
-                                    <h4 class='mb-3'> <strong>Accuracy and loss diagrams for round {{this.session.federated_round - 1}}:</strong></h4>
+                                    <h4 class='mb-3'> <strong>Accuracy and loss diagrams for round {{this.currentResult.finished ? this.session.federated_round : this.session.federated_round - 1}}:</strong></h4>
                                     <div class="d-flex justify-content-center">
                                         <ChartResult :key="componentKey" v-bind:chartData="chartDataAccuracy" :chartOptions="chartOptionsAccuracy" />
                                         <ChartResult :key="componentKeyLoss" v-bind:chartData="chartDataLoss" :chartOptions="chartOptionsLoss" />
                                     </div>
                                 </div>
                                 <div class="text-center flex-fill d-flex flex-column">
-                                    <h4 class="mb-3"><strong>Aggregated model results on test data for round {{this.session.federated_round - 1}}:</strong></h4>
+                                    <h4 class="mb-3"><strong>Aggregated model results on test data for round {{this.currentResult.finished ? this.session.federated_round : this.session.federated_round - 1}}:</strong></h4>
                                     <div class="">
                                         <h4 class="mb-3 text-primary"> <strong>Accuracy: </strong></h4>
                                         <h4 class="mb-3"> <strong>{{this.globalModelAccuracy}} %</strong></h4>
@@ -317,6 +321,7 @@ export default {
     data() {
         return {
             // participantList: participantJson,
+            downloadingDataset: false,
             downloadingLocalAggregation: false,
             isActive: false,
             sessionEnded: false,
@@ -514,12 +519,13 @@ export default {
                         .then(response2 => {
                             let result = response2.data.find(elem => elem.federated_round == this.session.federated_round)
                             this.currentResult = result
-                            if (result.finished == false) {
+                            console.log(result)
+                            if (result.finished == true) {
                                 this.showStep3 = false
                                 this.showStep4 = false
-                            } else {
-                                this.showStep3 = true
                             }
+                            if (!result.finished && this.participantsProgress.every(x => x.is_model_uploaded))
+                                this.showStep3 = true
 
                             this.showResultsTab = response2.data.some(x => x.finished)
                             this.$store.state.isLoading = false
@@ -725,6 +731,8 @@ export default {
             axios.get('/api/v1/aggregate-on-server/' + this.$route.params.id)
                 .then(response => {
                     this.aggregating = false
+                    this.showStep3 = false
+                    this.showStep4 = true
                 }).catch(error => {
                     if (error.response) {
                         for (const property in error.response.data) {
@@ -775,8 +783,8 @@ export default {
 
                 fileLink.click();
 
-                console.log(response)
-                this.downloadTestDataset()
+            }).then(response2 => {
+                this.downloadingScript = false
                 this.downloadingLocalAggregation = false
             })
 
@@ -878,6 +886,7 @@ export default {
             })
         },
         downloadTestDataset() {
+            this.downloadingDataset = true
             axios({
                 url: 'api/v1/download-zip-testdata/' + this.session.session_id,
                 //url: 'api/v1/testmodel/',
@@ -895,10 +904,8 @@ export default {
                 document.body.appendChild(fileLink);
 
                 fileLink.click();
-
-
-            }).then(response2 =>{
-                this.downloadingScript = false
+            }).then(resp => {
+                this.downloadingDataset = false
             })
         },
 
@@ -935,10 +942,28 @@ export default {
                     document.body.appendChild(fileLink);
 
                     fileLink.click();
+                    console.log(this.session.federated_round)
+                    if (this.session.federated_round > 1) {
+                        axios({
+                            url: '/api/v1/get-global-weights/' + this.session.session_id,
+                            method: 'GET',
+                            responseType: 'blob',
+                        }).then((response) => {
+                            var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                            var fileLink = document.createElement('a');
 
-                    console.log(response)
-                    this.downloadTestDataset()
-                    this.localLearningScriptDownloaded = true
+                            fileLink.href = fileURL;
+                            fileLink.setAttribute('download', 'global_weights.h5'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                            document.body.appendChild(fileLink);
+
+                            fileLink.click();
+
+                            console.log(response)
+                        }).then(response2 => {
+                            this.downloadingScript = false
+                            this.localLearningScriptDownloaded = true
+                        })
+                    }
                 })
             }).catch(error => {
                 if (error.response) {

@@ -647,8 +647,10 @@ def get_zip(request, pk):
 @api_view(['GET'])
 def get_local_weights(request,pk):
     if request.method == 'GET':
-        files = StorageFile.objects.filter(related_session = pk).filter(path__contains = '/local_weights/').filter(name__contains = '.h5')
-        print(len(files))
+        session = Session.objects.get(pk = pk)
+        files = StorageFile.objects.filter(related_session = pk).filter(path__contains = '/local_weights/').filter(name__contains = '.h5').order_by("-file_id")[:session.actual_num_of_participants]
+        for file in files:
+            print(file.file_id)
         session = Session.objects.get(pk = pk)
         b = BytesIO()
 
@@ -722,7 +724,7 @@ def global_model_script(request,pk):
 
 @api_view(['GET'])
 def get_global_weights(request,pk):
-    path = f'/sessions/session_Id_'+str(pk)+'/' + 'initial_global_weights.h5'
+    path = f'/sessions/session_Id_'+str(pk)+'/' + 'global_weights.h5'
     storage_file = storage.open(path, 'rb')
     response = FileResponse(storage_file)
     return response
