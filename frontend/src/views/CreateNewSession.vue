@@ -218,13 +218,13 @@ export default {
                     Selected: false
 
                 },
-                {
-                    name: 'momentum',
-                    value: 0.9,
-                    defaultVal: 0.9,
-                    Selected: false
+                // {
+                //     name: 'momentum',
+                //     value: 0.9,
+                //     defaultVal: 0.9,
+                //     Selected: false
 
-                },
+                // },
                 {
                     name: 'batch_size',
                     value: 32,
