@@ -65,7 +65,7 @@ class ParametersScript(AbstractHandler):
                     new_line = f'{key} = {value}'
                 lines.append(new_line)
             input_size = f'input_shape = [{input_list[0]}, {input_list[1]}]'
-            optimizer = f'optimizer = tf.keras.optimizers.{parameters["optimizer"]}(learning_rate=learning_rate,momentum=momentum)'
+            optimizer = f'optimizer = tf.keras.optimizers.{parameters["optimizer"]}(learning_rate=learning_rate)'
             lines.append(input_size)
             lines.append(f'session_id = {parameters["session_id"]}')
             lines.append(optimizer)
