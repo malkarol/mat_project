@@ -71,7 +71,7 @@ def aggregate_on_server(request, pk):
             zip_iterator = zip(serializer.data['parameters_keys'],serializer.data['parameters_values'])
             parameters= dict(zip_iterator)
             parameters['model_name'] = ff.get_class_name(serializer.data['model_name'])
-            list_of_participants = Participant.objects.filter(session__session_id = pk)
+            list_of_participants = Participant.objects.filter(session__session_id = pk).filter(is_model_uploaded = True)
             serializerPar = ParticipantSerializer(list_of_participants , many=True)
             clients_counts = []
             users_ids = [x['user'] for x in serializerPar.data]

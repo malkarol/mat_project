@@ -48,7 +48,6 @@
 
                                     </div>
 
-
                                 </div>
 
                             </form>
@@ -180,7 +179,7 @@
                         <div class="col-5 px-4">
                             <div class="col shadow p-3 rounded mb-5" style="background-color: #f1f1f1;">
                                 <h4> <strong> Participants' progress for <br>
-                                    <span class="text-danger">federated round {{this.session.federated_round}}:</span> </strong> </h4>
+                                        <span class="text-danger">federated round {{this.session.federated_round}}:</span> </strong> </h4>
                                 <hr />
                                 <table class="table table-bordered table-hover">
                                     <thead>
@@ -201,16 +200,16 @@
                                 </table>
                             </div>
                             <div class="col shadow p-3 rounded mb-5" style="background-color: #f1f1f1;">
-                                 <h4> <strong> Desktop applications </strong> </h4>
+                                <h4> <strong> Desktop applications </strong> </h4>
                                 <hr />
-                            <div>
-                                <span> MATE - for local model learning </span>
-                                 <button :disabled="!isActive" class='btn btn-lg btn-warning mt-3 mx-3 mb-3' @click="downloadMate()"> Download MATE </button>
-                            </div>
-                             <div v-if="(showStep3 && isActive && !sessionEnded && this.session.founder == this.$store.state.user.username) || debug" >
-                                <span> MATES - for local weights aggregation </span>
-                                 <button :disabled="!isActive" class='btn btn-lg btn-warning mt-3 mx-3' @click="downloadMates()"> Download MATES </button>
-                            </div>
+                                <div>
+                                    <span> MATE - for local model learning </span>
+                                    <button :disabled="!isActive" class='btn btn-lg btn-warning mt-3 mx-3 mb-3' @click="downloadMate()"> Download MATE </button>
+                                </div>
+                                <div v-if="(showStep3 && isActive && !sessionEnded && this.session.founder == this.$store.state.user.username) || debug">
+                                    <span> MATES - for local weights aggregation </span>
+                                    <button :disabled="!isActive" class='btn btn-lg btn-warning mt-3 mx-3' @click="downloadMates()"> Download MATES </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -229,7 +228,7 @@
                                     <h4><strong>Federated Averaging:</strong></h4>
                                     <div class=" d-flex justify-content-center">
                                         <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getFile()">Global model script for predictions</button>
-                                        <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getGlobalModel()">Global model script for idividual learning</button>
+                                        <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getGlobalWeights()">Get global model weights</button>
                                         <input type="button" class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="fillData()" value="Show results" />
                                     </div>
                                 </div>
@@ -508,7 +507,7 @@ export default {
             axios.get('/api/v1/participantstrainingprocess/' + this.$route.params.id)
                 .then(response => {
                     this.participantsProgress = response.data
-                    if (this.participantsProgress.every(x => x.is_model_uploaded)) {
+                    if (this.participantsProgress.filter(x => x.is_model_uploaded).length >= this.session.min_num_of_participants) {
                         this.showStep2 = false
 
                     } else {
@@ -524,7 +523,7 @@ export default {
                                 this.showStep3 = false
                                 this.showStep4 = false
                             }
-                            if (!result.finished && this.participantsProgress.every(x => x.is_model_uploaded))
+                            if (!result.finished && this.participantsProgress.filter(x => x.is_model_uploaded).length >= this.session.min_num_of_participants)
                                 this.showStep3 = true
 
                             this.showResultsTab = response2.data.some(x => x.finished)
@@ -560,7 +559,7 @@ export default {
             axios.get('/api/v1/results-for-chart/' + this.$route.params.id)
                 .then(response => {
                     let accuracy = Array.from(response.data.accuracy, a => a.toFixed(4) * 100)
-
+                    console.log(response)
                     this.chartDataAccuracy = {
                         labels: response.data.names,
                         datasets: [{
@@ -628,6 +627,23 @@ export default {
         },
         getRandomInt() {
             return Math.floor(Math.random() * (10 - 5 + 1)) + 10
+        },
+        getGlobalWeights() {
+            axios({
+                url: '/api/v1/get-global-weights/' + this.session.session_id,
+                method: 'GET',
+                responseType: 'blob',
+            }).then((response) => {
+                var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                var fileLink = document.createElement('a');
+
+                fileLink.href = fileURL;
+                fileLink.setAttribute('download', 'global_weights.h5'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                document.body.appendChild(fileLink);
+
+                fileLink.click();
+
+            })
         },
         getUserType(usertype) {
             switch (usertype) {
@@ -959,11 +975,11 @@ export default {
                             fileLink.click();
 
                             console.log(response)
-                        }).then(response2 => {
-                            this.downloadingScript = false
-                            this.localLearningScriptDownloaded = true
                         })
                     }
+                }).then(response2 => {
+                    this.downloadingScript = false
+                    this.localLearningScriptDownloaded = true
                 })
             }).catch(error => {
                 if (error.response) {
@@ -1156,15 +1172,14 @@ export default {
                     for (const property in error.response.data) {
                         this.errors.push(`${property}: ${error.response.data[property]}`)
                     }
-                } else if(error.message) {
+                } else if (error.message) {
                     this.errors.push('Something went wrong. Please try again.')
                 }
             })
         },
-        async downloadMate()
-      {
-           await axios({
-                url: 'api/v1/download-mate/' ,
+        async downloadMate() {
+            await axios({
+                url: 'api/v1/download-mate/',
                 method: 'GET',
                 responseType: 'blob',
             }).then((response) => {
@@ -1175,19 +1190,18 @@ export default {
                 var fileLink = document.createElement('a');
 
                 fileLink.href = fileURL;
-                fileLink.setAttribute('download','mate.zip');
+                fileLink.setAttribute('download', 'mate.zip');
                 document.body.appendChild(fileLink);
 
                 fileLink.click();
 
             })
 
-      },
-      async downloadMates()
-      {
-          this.downloadingLocalAggregation = true
-          await axios({
-                url: 'api/v1/download-mates/' ,
+        },
+        async downloadMates() {
+            this.downloadingLocalAggregation = true
+            await axios({
+                url: 'api/v1/download-mates/',
                 method: 'GET',
                 responseType: 'blob',
             }).then((response) => {
@@ -1198,14 +1212,14 @@ export default {
                 var fileLink = document.createElement('a');
 
                 fileLink.href = fileURL;
-                fileLink.setAttribute('download','mates.zip');
+                fileLink.setAttribute('download', 'mates.zip');
                 document.body.appendChild(fileLink);
 
                 fileLink.click();
 
             })
             this.downloadingLocalAggregation = false
-      }
+        }
     }
 }
 // <div class="form-group ">

@@ -246,7 +246,7 @@ def add_many_participants(request):
             session_id = serializer.data['session_id']
             target_path = f'/sessions/session_Id_{session_id}/accuracy_and_loss/'
             storage.save(target_path,ContentFile(bytes('', 'utf-8')))
-            target_path = f'/sessions/session_Id_{session_id}/local_weights/'
+            target_path = f'/sessions/session_Id_{session_id}/local_weights/federated_round_1/'
             storage.save(target_path,ContentFile(bytes('', 'utf-8')))
 
             file_object = request.data['files']
@@ -302,7 +302,11 @@ def get_available_models(request):
 @api_view(['GET'])
 def get_results_for_participants(request,pk):
     if request.method == 'GET':
-        participant_list = Participant.objects.filter(session__session_id=pk)
+        session = Session.objects.get(pk = pk)
+        round = session.federated_round-1 if session.federated_round > 1 else 1
+        files = StorageFile.objects.filter(related_session = session).filter(path__contains = f'/federated_round_{round}/')
+        files_ids = [file.file_id for file in files]
+        participant_list = Participant.objects.filter(session__session_id=pk).filter(weights_uploaded_id__in = files_ids)
         serializer = ParticipantSerializer(participant_list, many=True)
         participants = {}
         losses = []
@@ -606,7 +610,7 @@ def upload_local_model(request):
         file_object = request.FILES['model_weights']
         print(type(file_object))
         session = Session.objects.get(pk=request.data['session_id'])
-        target_path = f'/sessions/session_Id_{session.session_id}/local_weights/' + file_object.name
+        target_path = f'/sessions/session_Id_{session.session_id}/local_weights/federated_round_{session.federated_round}/' + file_object.name
         path = storage.save(target_path, ContentFile(file_object.read()))
         file = StorageFile.objects.create(name=file_object.name, path=path, related_session=session)
         # file = StorageFile.objects.create(name=file_object.name, path=path, related_session=session)
@@ -648,7 +652,7 @@ def get_zip(request, pk):
 def get_local_weights(request,pk):
     if request.method == 'GET':
         session = Session.objects.get(pk = pk)
-        files = StorageFile.objects.filter(related_session = pk).filter(path__contains = '/local_weights/').filter(name__contains = '.h5').order_by("-file_id")[:session.actual_num_of_participants]
+        files = StorageFile.objects.filter(related_session = pk).filter(path__contains = f'/federated_round_{session.federated_round}/').filter(name__contains = '.h5')
         for file in files:
             print(file.file_id)
         session = Session.objects.get(pk = pk)

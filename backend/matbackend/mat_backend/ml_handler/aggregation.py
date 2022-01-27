@@ -80,7 +80,8 @@ class Aggregator():
         # for MNIST example dataset: client_names = ['michal','karol','jan']
         #                            client_counts = [4200,4200,4200]
     def getClientsWeightsFromJson(self,client,count):
-        file_path = f'/sessions/session_Id_{self.session}/local_weights/{client}_{count}.h5'
+        session = Session.objects.get(pk=self.session)
+        file_path = f'/sessions/session_Id_{self.session}/local_weights/federated_round_{session.federated_round}/{client}_{count}.h5'
         storage_file = storage.open(file_path , 'rb')
         return  storage_file.read()
 
