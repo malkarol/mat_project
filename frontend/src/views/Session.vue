@@ -236,7 +236,8 @@
 
                         </div>
                         <div v-if="renderChart" class="row mt-3">
-                            <div class="w-100 d-flex col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                            <div v-if="!(!this.currentResult.finished && this.participantsProgress.filter(x => x.is_model_uploaded).length > 0)" 
+                            class="w-100 d-flex col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                 <div>
                                     <h4 class='mb-3'> <strong>Accuracy and loss diagrams for round {{this.currentResult.finished ? this.session.federated_round : this.session.federated_round - 1}}:</strong></h4>
                                     <div class="d-flex justify-content-center">
@@ -254,6 +255,12 @@
                                         <h4 class="mb-3 text-danger"> <strong>Loss: </strong></h4>
                                         <h4 class="mb-3"> <strong>{{this.globalModelLoss}}</strong></h4>
                                     </div>
+                                </div>
+                            </div>
+                            <div v-else class="w-100 d-flex col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                                <div>
+                                    <h4 class='mb-3'> <strong>Federated round {{this.session.federated_round}} is in progress.
+                                    To see the results from round number {{this.session.federated_round - 1}} wait until the new aggregation process is finished.</strong></h4>
                                 </div>
                             </div>
                         </div>
