@@ -246,8 +246,15 @@ def add_many_participants(request):
             session_id = serializer.data['session_id']
             target_path = f'/sessions/session_Id_{session_id}/accuracy_and_loss/'
             storage.save(target_path,ContentFile(bytes('', 'utf-8')))
+
             target_path = f'/sessions/session_Id_{session_id}/local_weights/federated_round_1/'
             storage.save(target_path,ContentFile(bytes('', 'utf-8')))
+
+            dic = {'accuracies': [], 'losses': [], 'usernames': []}
+            jsonn = json.dumps(dic)
+            target_path = f'/sessions/session_Id_{session_id}/local_weights/federated_round_1/round_stats.json'
+            storage.save(target_path,ContentFile(bytes(jsonn, 'utf-8')))
+                
 
             file_object = request.data['files']
             target_path =  f'/sessions/session_Id_{session_id}/TEST_SET.zip'
@@ -300,34 +307,39 @@ def get_available_models(request):
 
 
 @api_view(['GET'])
-def get_results_for_participants(request,pk):
+def get_results_for_participants(request,pk,rk):
     if request.method == 'GET':
         session = Session.objects.get(pk = pk)
         round = session.federated_round-1 if session.federated_round > 1 else 1
-        files = StorageFile.objects.filter(related_session = session).filter(path__contains = f'/federated_round_{round}/')
-        files_ids = [file.file_id for file in files]
-        participant_list = Participant.objects.filter(session__session_id=pk).filter(weights_uploaded_id__in = files_ids)
-        serializer = ParticipantSerializer(participant_list, many=True)
-        participants = {}
-        losses = []
-        names = []
-        accuracies = []
-        for user in serializer.data:
-            losses.append(user['loss'])
-            accuracies.append(user['accuracy'])
 
-        users_ids = [x['user'] for x in serializer.data]
-        users_list = User.objects.filter(id__in=users_ids)
-        serializerUser = UserSerializer(users_list, many=True)
-        print()
-        for user_2 in users_list:
-            names.append(user_2.username)
+        target_stats = f'/sessions/session_Id_{session.session_id}/local_weights/federated_round_{rk}/round_stats.json'
+        fh = storage.open(target_stats, 'r')
+        dic = json.load(fh)
+        print(dic)
+        # files = StorageFile.objects.filter(related_session = session).filter(path__contains = f'/federated_round_{round}/')
+        # files_ids = [file.file_id for file in files]
+        # participant_list = Participant.objects.filter(session__session_id=pk).filter(weights_uploaded_id__in = files_ids)
+        # serializer = ParticipantSerializer(participant_list, many=True)
+        # participants = {}
+        # losses = []
+        # names = []
+        # accuracies = []
+        # for user in serializer.data:
+            # losses.append(user['loss'])
+            # accuracies.append(user['accuracy'])
+ 
+        # users_ids = [x['user'] for x in serializer.data]
+        # users_list = User.objects.filter(id__in=users_ids)
+        # serializerUser = UserSerializer(users_list, many=True)
+        # print()
+        # for user_2 in users_list:
+            # names.append(user_2.username)
+ 
+        # participants['names'] = names
+        # participants['losses'] = losses
+        # participants['accuracy'] = accuracies
 
-        participants['names'] = names
-        participants['losses'] = losses
-        participants['accuracy'] = accuracies
-
-        return Response(participants, status=status.HTTP_201_CREATED)
+        return Response(dic, status=status.HTTP_201_CREATED)
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
@@ -351,6 +363,11 @@ def upload_global_weights(request):
         session.save()
         newSessionResult = SessionResult.objects.create(session=session, federated_round = session.federated_round, finished=False)
         newSessionResult.save()
+
+        dic = {'accuracies': [], 'losses': [], 'usernames': []}
+        jsonn = json.dumps(dic)
+        target_path = f'/sessions/session_Id_{session.session_id}/local_weights/federated_round_{session.federated_round}/round_stats.json'
+        storage.save(target_path,ContentFile(bytes(jsonn, 'utf-8')))
 
         participants = Participant.objects.filter(session_id = session.session_id)
         for participant in participants:
@@ -598,11 +615,6 @@ def upload_local_model(request):
     except Session.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == 'POST':
-
-        # participant_list = Participant.objects.filter(session__session_id=request.data['session'])
-        # serializerPart = ParticipantSerializer(participant_list, many=True)
-        # users_ids = [x['user'] for x in serializerPart.data]
-        # if request.user.id in users_ids:
         try:
             participant = Participant.objects.filter(session__session_id=request.data['session_id']).get(user__id = request.user.id)
         except Participant.DoesNotExist:
@@ -613,7 +625,6 @@ def upload_local_model(request):
         target_path = f'/sessions/session_Id_{session.session_id}/local_weights/federated_round_{session.federated_round}/' + file_object.name
         path = storage.save(target_path, ContentFile(file_object.read()))
         file = StorageFile.objects.create(name=file_object.name, path=path, related_session=session)
-        # file = StorageFile.objects.create(name=file_object.name, path=path, related_session=session)
         print(file.file_id)
         participant = Participant.objects.filter(session__session_id=request.data['session_id']).get(user__id = request.user.id)
         serializerParticipant = ParticipantSerializer(participant)
@@ -622,8 +633,20 @@ def upload_local_model(request):
         participant.weights_uploaded = file
         participant.accuracy = request.data['accuracy']
         participant.loss = request.data['loss']
-        participant.local_data_count = request.data['local_data_count']#int(file.name.split('_')[-1].split('.')[0])
+        participant.local_data_count = request.data['local_data_count']
         participant.save()
+
+        target_stats = f'/sessions/session_Id_{session.session_id}/local_weights/federated_round_{session.federated_round}/round_stats.json'
+        fh = storage.open(target_stats, 'r')
+        dic = json.load(fh)
+        
+        dic['accuracies'].append(request.data['accuracy'])
+        dic['losses'].append(request.data['loss'])
+        dic['usernames'].append(participant.user.username)
+
+        storage.save(target_stats,ContentFile(bytes(json.dumps(dic), 'utf-8')))
+        
+
         # print(serializerParticipant.data)
 
 
@@ -835,12 +858,12 @@ def global_model_results(request, pk):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
-def get_round_results(request, pk):
+def get_round_results(request, pk, rk):
     if request.method == 'GET':
         try:
             session = Session.objects.get(pk = pk)
-            round = session.federated_round - 1 if session.federated_round > 1 else session.federated_round
-            sessionResult = SessionResult.objects.filter(session__session_id = pk).filter(federated_round = round)[0]
+            
+            sessionResult = SessionResult.objects.filter(session__session_id = pk).filter(federated_round = rk)[0]
             serializer = SessionResultSerializer(sessionResult)
             return Response(serializer.data)
         except Session.DoesNotExist or SessionResult.DoesNotExist:

@@ -182,9 +182,9 @@ export default {
         .then((response) => {
           console.log(response);
           this.$store.commit("setUser", {
-            id: response.data.id,
-            username: response.data.username,
-            pricing_plan: response.data.pricing_plan,
+            'id': response.data.id,
+            'username': response.data.username,
+            'pricing_plan': response.data.pricing_plan,
           });
 
           localStorage.setItem("username", response.data.username);

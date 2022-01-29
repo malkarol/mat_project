@@ -229,38 +229,34 @@
                                     <div class=" d-flex justify-content-center">
                                         <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getFile()">Global model script for predictions</button>
                                         <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getGlobalWeights()">Get global model weights</button>
-                                        <input type="button" class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="fillData()" value="Show results" />
+                                        <input type="button" class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="fillData()" value="Show results from round:" />
+                                        <select class="d-inline p-2 mb-2 mx-2 rounded border" v-model="selectedRound" >
+                                            <option v-for="number in this.session.federated_round" :value="number">{{number}}</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
 
                         </div>
                         <div v-if="renderChart" class="row mt-3">
-                            <div v-if="(!this.currentResult.finished && this.participantsProgress.filter(x => x.is_model_uploaded).length == 0)" class="w-100 d-flex col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
+                            <div class="w-100 d-flex col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
                                 <div>
-                                    <h4 class='mb-3'> <strong>Accuracy and loss diagrams for round {{this.currentResult.finished ? this.session.federated_round : this.session.federated_round - 1}}:</strong></h4>
+                                    <h4 class='mb-3'> <strong>Accuracy and loss diagrams for round {{visibleRound}}:</strong></h4>
                                     <div class="d-flex justify-content-center">
                                         <ChartResult :key="componentKey" v-bind:chartData="chartDataAccuracy" :chartOptions="chartOptionsAccuracy" />
                                         <ChartResult :key="componentKeyLoss" v-bind:chartData="chartDataLoss" :chartOptions="chartOptionsLoss" />
                                     </div>
                                 </div>
                                 <div class="text-center flex-fill d-flex flex-column">
-                                    <h4 class="mb-3"><strong>Aggregated model results on test data for round {{this.currentResult.finished ? this.session.federated_round : this.session.federated_round - 1}}:</strong></h4>
+                                    <h4 class="mb-3"><strong>Aggregated model results on test data for round {{visibleRound}}:</strong></h4>
                                     <div class="">
                                         <h4 class="mb-3 text-primary"> <strong>Accuracy: </strong></h4>
-                                        <h4 class="mb-3"> <strong>{{this.globalModelAccuracy}} %</strong></h4>
+                                        <h4 class="mb-3"> <strong>{{this.globalModelAccuracy == 0  || this.globalModelAccuracy == null ? "To be announced" : this.globalModelAccuracy}} %</strong></h4>
                                     </div>
                                     <div class="">
                                         <h4 class="mb-3 text-danger"> <strong>Loss: </strong></h4>
-                                        <h4 class="mb-3"> <strong>{{this.globalModelLoss}}</strong></h4>
+                                        <h4 class="mb-3"> <strong>{{this.globalModelLoss == 0 || this.globalModelLoss == null ? "To be announced" : this.globalModelLoss}}</strong></h4>
                                     </div>
-                                </div>
-                            </div>
-                            <div v-if="!(!this.currentResult.finished && this.participantsProgress.filter(x => x.is_model_uploaded).length == 0)"
-                            class="w-100 d-flex col mb-3 shadow p-3 mb-5  rounded" style="background-color: #f1f1f1;">
-                                <div>
-                                    <h4 class='mb-3'> <strong>Federated round {{this.session.federated_round}} is in progress.
-                                    To see the results from round number {{this.session.federated_round - 1}} wait until the new aggregation process is finished.</strong></h4>
                                 </div>
                             </div>
                         </div>
@@ -327,9 +323,11 @@ export default {
     data() {
         return {
             // participantList: participantJson,
+            selectedRound: 1,
             downloadingDataset: false,
             downloadingLocalAggregation: false,
             isActive: false,
+            visibleRound: 1,
             sessionEnded: false,
             downloadingScript: false,
             showStep1: true,
@@ -456,7 +454,10 @@ export default {
         await axios.get('/api/v1/participants/session/' + this.$route.params.id).then(response => {
             this.participants = response.data
             console.log(this.participants)
-
+            let userPermitted = this.participants.filter(x => x.username == this.$store.state.user.username)
+            if (userPermitted.length == 0){
+                this.backToSessions()
+            }
         }).catch(error => {
             if (error.response) {
                 for (const property in error.response.data) {
@@ -490,11 +491,17 @@ export default {
             return paramDic[x]
         },
         getRoundResults() {
-            axios.get('/api/v1/get-round-results/' + this.$route.params.id)
+            axios.get('/api/v1/get-round-results/' + this.$route.params.id + '/' + this.selectedRound)
                 .then(response => {
                     console.log(response)
-                    this.globalModelAccuracy = response.data.global_model_accuracy.toFixed(4) * 100
-                    this.globalModelLoss = response.data.global_model_loss.toFixed(2)
+                    if (response.data.global_model_accuracy == null || response.data.global_model_loss == null){
+                        this.globalModelAccuracy = 0
+                        this.globalModelLoss = 0
+                    }else{
+                        this.globalModelAccuracy = response.data.global_model_accuracy.toFixed(4) * 100
+                        this.globalModelLoss = response.data.global_model_loss.toFixed(2)
+                    }
+
                 }).catch(error => {
                     if (error.response) {
                         for (const property in error.response.data) {
@@ -523,6 +530,7 @@ export default {
 
                     axios.get('/api/v1/global-model-results/' + this.$route.params.id)
                         .then(response2 => {
+                            console.log(response2.data)
                             let result = response2.data.find(elem => elem.federated_round == this.session.federated_round)
                             this.currentResult = result
                             console.log(result)
@@ -563,12 +571,15 @@ export default {
             this.componentGlobalLosses += 1
         },
         fillData() {
-            axios.get('/api/v1/results-for-chart/' + this.$route.params.id)
+            axios.get('/api/v1/results-for-chart/' + this.$route.params.id + '/' + this.selectedRound)
                 .then(response => {
-                    let accuracy = Array.from(response.data.accuracy, a => a.toFixed(4) * 100)
-                    console.log(response)
+                    console.log(response.data)
+                    let temp = response.data.accuracies.map(Number)
+                    this.visibleRound = this.selectedRound
+                    let accuracy = Array.from(temp, a => a.toFixed(4) * 100)
+
                     this.chartDataAccuracy = {
-                        labels: response.data.names,
+                        labels: response.data.usernames,
                         datasets: [{
                             label: 'Accuracy %',
                             backgroundColor: 'rgb(77, 137, 255)',
@@ -576,7 +587,7 @@ export default {
                         }]
                     }
                     this.chartDataLoss = {
-                        labels: response.data.names,
+                        labels: response.data.usernames,
                         datasets: [{
                             label: 'Loss',
                             backgroundColor: '#f87979',

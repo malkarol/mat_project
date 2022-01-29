@@ -27,6 +27,7 @@ from tensorflow.keras.models import Model
 import ssl
 from io import BytesIO
 import zipfile, shutil
+from django.core.files.base import ContentFile
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications.vgg16 import *
 from tensorflow.keras.applications.vgg19 import *
@@ -238,6 +239,11 @@ class PretrainedAggregator(Aggregator):
         session.save()
         newSessionResult = SessionResult.objects.create(session=session, federated_round = session.federated_round, finished=False)
         newSessionResult.save()
+
+        dic = {'accuracies': [], 'losses': [], 'usernames': []}
+        jsonn = json.dumps(dic)
+        target_path = f'/sessions/session_Id_{session.session_id}/local_weights/federated_round_{session.federated_round}/round_stats.json'
+        storage.save(target_path,ContentFile(bytes(jsonn, 'utf-8')))
 
         participants = Participant.objects.filter(session_id = session.session_id)
         for participant in participants:

@@ -49,9 +49,9 @@ urlpatterns=[
     path('participantstrainingprocess/<int:spk>', views.get_session_model_progress),
     # instructions
     path('instructions/lm/', views.get_instructions_local_model),
-    path('results-for-chart/<int:pk>',views.get_results_for_participants),
-    path('global-model-results/<int:pk>', views.global_model_results),
-    path('get-round-results/<int:pk>', views.get_round_results),
+    path('results-for-chart/<int:pk>/<int:rk>/',views.get_results_for_participants),
+    path('global-model-results/<int:pk>/', views.global_model_results),
+    path('get-round-results/<int:pk>/<int:rk>/', views.get_round_results),
     path('download-ell/',views.download_mate),
     path('download-all/',views.download_mates),
 
