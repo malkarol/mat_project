@@ -19,7 +19,7 @@
                 <div>
                     <h4>Prerequisites</h4>
                 </div>
-                <p>In order to use <strong>MAT</strong> webpage you don't have to have anything installed.
+                <p>In order to use <strong>M</strong>odel <strong>A</strong>ggregation <strong>T</strong>ool webpage you don't have to have anything installed.
                 <br>However, in order to use Python scripts on your PC it is adviced that you have <strong>Python 3.7+</strong> and <strong>Tensorflow 2</strong> installed.
                 <br>If you don't have them please go to the following web pages, download them and use tutorials for installation.
                     </p>
@@ -29,7 +29,9 @@
 
                     </ul>
 
-
+                <p class="text-danger"> Currently, only Windows architecture is supported for execution  of ELL and ALL desktop appliations.
+                    We are working on enabling macOS and Linux distros access to desktop applications.
+                </p>
                 <hr/>
 
                 <div>
@@ -86,7 +88,7 @@
                             <br> <span class="text-muted"> Notice that when you create session you also automatically join session.</span>
                         </li>
                     </ul>
-                    <br> For <strong> Premium </strong> plan you can additionally filter by:
+                     For <strong> Premium </strong> plan you can additionally filter by:
                     <ul>
                         <li>
                             <strong>Public sessions</strong> checkbox filter
@@ -95,9 +97,8 @@
                             <strong>Private sessions</strong> checkbox filter
                         </li>
                     </ul>
-                    <br>
-                    <br>
-                    <br> If you just created your new session for the first time click checkbox name <strong>"Created sessions"</strong>.
+
+                     If you just created your new session for the first time click checkbox name <strong>"Created sessions"</strong>.
                     <br> Then the only session you will see will be the one that you previously created.
                     <br>Click on newly created session card, then click <strong>"Go to session"</strong> button.
 
@@ -109,25 +110,29 @@
                 </div>
                 <p>
                     After going into session you will see session panel that is only presented to participants of the given session.
+                    As you can see you have 3 different tabs.
                     <br>
                     <br>
                 </p>
                 <ul>
                     <li>
-                        <h5> Local learning </h5>
+                        <h5> General information </h5>
                         <p>
                             In order to do local learning,
                         </p>
 
-                        <button class='btn btn-primary btn btn-success mb-3' @click="downloadMate()"> Download MATE app</button>
                     </li>
                     <li>
-                        <h5> Aggregation </h5>
+                        <h5> Local learning </h5>
                         <p>
-                            In order to do local learning,
+                            In order to do local learning, you must download <strong>ELL</strong>(<strong>E</strong>xecute  <strong>L</strong>ocal  <strong>L</strong>earning) desktop application.
+                            After that you will be able to run downloaded Python script with selected train and test data.
                         </p>
-                        <button class='btn btn-primary btn btn-success mb-3' @click="downloadMates()"> Download MATES app</button>
+
+                        <button class='btn btn-primary btn btn-success mb-3' @click="downloadMate()"> Download ELL app</button>
+                        <button class='btn btn-primary btn btn-success mb-3 mx-3' @click="downloadMates()"> Download ALL app</button>
                     </li>
+
                     <li>
                         <h5> Results </h5>
                         <p>
@@ -155,7 +160,7 @@ export default {
       downloadMate()
       {
            axios({
-                url: 'api/v1/download-mate/' ,
+                url: 'api/v1/download-ell/' ,
                 method: 'GET',
                 responseType: 'blob',
             }).then((response) => {
@@ -177,7 +182,7 @@ export default {
       downloadMates()
       {
           axios({
-                url: 'api/v1/download-mates/' ,
+                url: 'api/v1/download-all/' ,
                 method: 'GET',
                 responseType: 'blob',
             }).then((response) => {

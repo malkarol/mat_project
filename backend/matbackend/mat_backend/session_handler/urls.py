@@ -52,8 +52,8 @@ urlpatterns=[
     path('results-for-chart/<int:pk>',views.get_results_for_participants),
     path('global-model-results/<int:pk>', views.global_model_results),
     path('get-round-results/<int:pk>', views.get_round_results),
-    path('download-mate/',views.download_mate),
-    path('download-mates/',views.download_mates),
+    path('download-ell/',views.download_mate),
+    path('download-all/',views.download_mates),
 
 
     # add session and participants with filed usernames

@@ -202,13 +202,13 @@
                             <div class="col shadow p-3 rounded mb-5" style="background-color: #f1f1f1;">
                                 <h4> <strong> Desktop applications </strong> </h4>
                                 <hr />
-                                <div>
-                                    <span> MATE - for local model learning </span>
-                                    <button :disabled="!isActive" class='btn btn-lg btn-warning mt-3 mx-3 mb-3' @click="downloadMate()"> Download MATE </button>
+                                <div class=" mt-3 mx-3">
+                                    <button :disabled="!isActive" class='btn btn-lg btn-warning ' @click="downloadEll()"> Download ELL </button>
+                                    <span>  - for local model learning </span>
                                 </div>
-                                <div v-if="(showStep3 && isActive && !sessionEnded && this.session.founder == this.$store.state.user.username) || debug">
-                                    <span> MATES - for local weights aggregation </span>
-                                    <button :disabled="!isActive" class='btn btn-lg btn-warning mt-3 mx-3' @click="downloadMates()"> Download MATES </button>
+                                <div class="mt-3 mx-3 mb-3" v-if="(showStep3 && isActive && !sessionEnded && this.session.founder == this.$store.state.user.username) || debug">
+                                    <button :disabled="!isActive" class='btn btn-lg btn-warning' @click="downloadAll()"> Download ALL </button>
+                                    <span>  - for local weights aggregation </span>
                                 </div>
                             </div>
                         </div>
@@ -337,7 +337,7 @@ export default {
             showStep3: false,
             showStep4: false,
             currentResult: {},
-            debug: false,
+            debug: true,
             showResultsTab: false,
             data_for_chart: {},
             startDate: '2022-01-01',
@@ -1184,9 +1184,9 @@ export default {
                 }
             })
         },
-        async downloadMate() {
+        async downloadEll() {
             await axios({
-                url: 'api/v1/download-mate/',
+                url: 'api/v1/download-ell/',
                 method: 'GET',
                 responseType: 'blob',
             }).then((response) => {
@@ -1197,7 +1197,7 @@ export default {
                 var fileLink = document.createElement('a');
 
                 fileLink.href = fileURL;
-                fileLink.setAttribute('download', 'mate.zip');
+                fileLink.setAttribute('download', 'ELL.zip');
                 document.body.appendChild(fileLink);
 
                 fileLink.click();
@@ -1205,10 +1205,10 @@ export default {
             })
 
         },
-        async downloadMates() {
+        async downloadAll() {
             this.downloadingLocalAggregation = true
             await axios({
-                url: 'api/v1/download-mates/',
+                url: 'api/v1/download-all/',
                 method: 'GET',
                 responseType: 'blob',
             }).then((response) => {
@@ -1219,7 +1219,7 @@ export default {
                 var fileLink = document.createElement('a');
 
                 fileLink.href = fileURL;
-                fileLink.setAttribute('download', 'mates.zip');
+                fileLink.setAttribute('download', 'ALL.zip');
                 document.body.appendChild(fileLink);
 
                 fileLink.click();
