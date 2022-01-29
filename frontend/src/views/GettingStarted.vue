@@ -110,33 +110,44 @@
                 </div>
                 <p>
                     After going into session you will see session panel that is only presented to participants of the given session.
-                    As you can see you have 3 different tabs.
+                    As you can see you have 3 different tabs:
                     <br>
                     <br>
                 </p>
                 <ul>
                     <li>
-                        <h5> General information </h5>
+                        <h5> Information </h5>
                         <p>
-                            In order to do local learning,
+                            In this tab, any session participant can read informations provided by session founder during the creation process
+                            For instance, what learning rate was set, what model did owner choose etc.
+                            In other words, this tab gives its participants usernames, any participant can see other usernames.
                         </p>
 
                     </li>
                     <li>
-                        <h5> Local learning </h5>
+                        <h5> Learning panel</h5>
                         <p>
                             In order to do local learning, you must download <strong>ELL</strong>(<strong>E</strong>xecute  <strong>L</strong>ocal  <strong>L</strong>earning) desktop application.
-                            After that you will be able to run downloaded Python script with selected train and test data.
+                            After that, you will be able to run downloaded Python script with selected train and test data.
+                            </p>
+
+                             <button class='btn btn-primary btn btn-success mb-3 mx-3' @click="downloadMate()"> Download ELL app</button>
+                              <br>
+                            <p>
+                            Only the session owner can aggregate results locally or on-server - depending on the pricing plan he or she has. If the owner has free plan the only action that is allowed is local aggreagtion.
+                            In order to do so, one has to download <strong>ELL</strong>(<strong>A</strong>ggregate  <strong>L</strong>ocal  <strong>L</strong>earning) desktop application.
+                            After that, you can run downloaded Python aggregation script with locally trained weights that other users uploaded.
                         </p>
 
-                        <button class='btn btn-primary btn btn-success mb-3' @click="downloadMate()"> Download ELL app</button>
+
                         <button class='btn btn-primary btn btn-success mb-3 mx-3' @click="downloadMates()"> Download ALL app</button>
                     </li>
 
                     <li>
                         <h5> Results </h5>
                         <p>
-                            In order to do local learning,
+                            Here, you download aggregated weights at the end of each learning. In order for round to end, session owner needs to aggregate local weights.
+                            After that, you can observe the accuracy results each user got locally for this round as well as the accuracy for aggregated weights.
                         </p>
                     </li>
                 </ul>
