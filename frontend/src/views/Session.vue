@@ -335,7 +335,7 @@ export default {
             showStep3: false,
             showStep4: false,
             currentResult: {},
-            debug: true,
+            debug: false,
             showResultsTab: false,
             data_for_chart: {},
             startDate: '2022-01-01',

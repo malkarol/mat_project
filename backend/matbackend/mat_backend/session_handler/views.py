@@ -798,7 +798,7 @@ def aggregate_script(request, pk):
             parameters['learning'] = 'learning'
             parameters['session_id'] = session.session_id
 
-            list_of_participants = Participant.objects.filter(session__session_id = pk)
+            list_of_participants = Participant.objects.filter(session__session_id = pk).filter(is_model_uploaded = True)
             username_list = []
             clients_counts = []
             for participant in list_of_participants:
