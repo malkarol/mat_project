@@ -152,7 +152,7 @@
 
                                         <button v-if="this.session.pricing_plan == 1 || debug" class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getAggregation()">Aggregate models on server</button>
                                     </div>
-                                    <h5 class="" v-if="downloadingLocalAggregation"><strong>Downloading weights and test dataset...</strong></h5>
+                                    <h5 class="" v-if="downloadingLocalAggregation"><strong>Downloading files...</strong></h5>
                                 </div>
                             </div>
                             <div v-if="(showStep4 && isActive && !sessionEnded)|| debug" class="row">
@@ -204,11 +204,11 @@
                                 <hr />
                                 <div class=" mt-3 mx-3">
                                     <button :disabled="!isActive" class='btn btn-lg btn-warning ' @click="downloadEll()"> Download ELL </button>
-                                    <span>  - for local model learning </span>
+                                    <span> - for local model learning </span>
                                 </div>
                                 <div class="mt-3 mx-3 mb-3" v-if="(showStep3 && isActive && !sessionEnded && this.session.founder == this.$store.state.user.username) || debug">
                                     <button :disabled="!isActive" class='btn btn-lg btn-warning' @click="downloadAll()"> Download ALL </button>
-                                    <span>  - for local weights aggregation </span>
+                                    <span> - for local weights aggregation </span>
                                 </div>
                             </div>
                         </div>
@@ -230,7 +230,7 @@
                                         <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getFile()">Global model script for predictions</button>
                                         <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getGlobalWeights()">Get global model weights</button>
                                         <input type="button" class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="fillData()" value="Show results from round:" />
-                                        <select class="d-inline p-2 mb-2 mx-2 rounded border" v-model="selectedRound" >
+                                        <select class="d-inline p-2 mb-2 mx-2 rounded border" v-model="selectedRound">
                                             <option v-for="number in this.session.federated_round" :value="number">{{number}}</option>
                                         </select>
                                     </div>
@@ -455,7 +455,7 @@ export default {
             this.participants = response.data
             console.log(this.participants)
             let userPermitted = this.participants.filter(x => x.username == this.$store.state.user.username)
-            if (userPermitted.length == 0){
+            if (userPermitted.length == 0) {
                 this.backToSessions()
             }
         }).catch(error => {
@@ -494,10 +494,10 @@ export default {
             axios.get('/api/v1/get-round-results/' + this.$route.params.id + '/' + this.selectedRound)
                 .then(response => {
                     console.log(response)
-                    if (response.data.global_model_accuracy == null || response.data.global_model_loss == null){
+                    if (response.data.global_model_accuracy == null || response.data.global_model_loss == null) {
                         this.globalModelAccuracy = 0
                         this.globalModelLoss = 0
-                    }else{
+                    } else {
                         this.globalModelAccuracy = response.data.global_model_accuracy.toFixed(4) * 100
                         this.globalModelLoss = response.data.global_model_loss.toFixed(2)
                     }
@@ -871,22 +871,6 @@ export default {
                 fileLink.click();
 
                 console.log(response)
-                axios({
-                    url: '/api/v1/instructions/lm/',
-                    method: 'GET',
-                    responseType: 'blob',
-                }).then((response) => {
-                    var fileURL = window.URL.createObjectURL(new Blob([response.data]));
-                    var fileLink = document.createElement('a');
-
-                    fileLink.href = fileURL;
-                    fileLink.setAttribute('download', 'instructions.txt'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
-                    document.body.appendChild(fileLink);
-
-                    fileLink.click();
-
-                    console.log(response)
-                })
             }).catch(error => {
                 if (error.response) {
                     for (const property in error.response.data) {
@@ -948,23 +932,7 @@ export default {
                 return
             this.downloadingScript = true
             axios({
-                url: '/api/v1/generate-local-model/' + this.session.session_id,
-                method: 'GET',
-                responseType: 'blob',
-            }).then((response) => {
-                var fileURL = window.URL.createObjectURL(new Blob([response.data]));
-                var fileLink = document.createElement('a');
-
-                fileLink.href = fileURL;
-                fileLink.setAttribute('download', 'local_model.py'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
-                document.body.appendChild(fileLink);
-
-                fileLink.click();
-
-                console.log(response)
-                this.showStep2 = true
-                axios({
-                    url: '/api/v1/instructions/lm/',
+                    url: '/api/v1/generate-local-model/' + this.session.session_id,
                     method: 'GET',
                     responseType: 'blob',
                 }).then((response) => {
@@ -972,11 +940,13 @@ export default {
                     var fileLink = document.createElement('a');
 
                     fileLink.href = fileURL;
-                    fileLink.setAttribute('download', 'instructions.txt'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
+                    fileLink.setAttribute('download', 'local_model.py'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
                     document.body.appendChild(fileLink);
 
                     fileLink.click();
-                    console.log(this.session.federated_round)
+
+                    console.log(response)
+                    this.showStep2 = true
                     if (this.session.federated_round > 1) {
                         axios({
                             url: '/api/v1/get-global-weights/' + this.session.session_id,
@@ -995,19 +965,21 @@ export default {
                             console.log(response)
                         })
                     }
-                }).then(response2 => {
+
+                })
+                .then(response2 => {
                     this.downloadingScript = false
                     this.localLearningScriptDownloaded = true
                 })
-            }).catch(error => {
-                if (error.response) {
-                    for (const property in error.response.data) {
-                        this.errors.push(`${property}: ${error.response.data[property]}`)
+                .catch(error => {
+                    if (error.response) {
+                        for (const property in error.response.data) {
+                            this.errors.push(`${property}: ${error.response.data[property]}`)
+                        }
+                    } else if (error.message) {
+                        this.errors.push('Something went wrong. Please try again.')
                     }
-                } else if (error.message) {
-                    this.errors.push('Something went wrong. Please try again.')
-                }
-            })
+                })
 
         },
         getLocalModelInstructions() {
@@ -1055,22 +1027,7 @@ export default {
                 fileLink.click();
 
                 console.log(response)
-                axios({
-                    url: '/api/v1/instructions/lm/',
-                    method: 'GET',
-                    responseType: 'blob',
-                }).then((response) => {
-                    var fileURL = window.URL.createObjectURL(new Blob([response.data]));
-                    var fileLink = document.createElement('a');
-
-                    fileLink.href = fileURL;
-                    fileLink.setAttribute('download', 'instructions.txt'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
-                    document.body.appendChild(fileLink);
-
-                    fileLink.click();
-                    this.getManyWeights()
-                    console.log(response)
-                })
+                this.getManyWeights()
             }).catch(error => {
                 if (error.response) {
                     for (const property in error.response.data) {
@@ -1097,22 +1054,6 @@ export default {
                 fileLink.click();
 
                 console.log(response)
-                axios({
-                    url: '/api/v1/instructions/lm/',
-                    method: 'GET',
-                    responseType: 'blob',
-                }).then((response) => {
-                    var fileURL = window.URL.createObjectURL(new Blob([response.data]));
-                    var fileLink = document.createElement('a');
-
-                    fileLink.href = fileURL;
-                    fileLink.setAttribute('download', 'instructions.txt'); // 'file.pdf' do zmiany na rozszerzenie pliku ktory sie rzeczywiscie pobralo
-                    document.body.appendChild(fileLink);
-
-                    fileLink.click();
-
-                    console.log(response)
-                })
             }).catch(error => {
                 if (error.response) {
                     for (const property in error.response.data) {
