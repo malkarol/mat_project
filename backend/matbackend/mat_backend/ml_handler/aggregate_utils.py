@@ -21,6 +21,7 @@ from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras import backend as K
 
+# source: https://towardsdatascience.com/federated-learning-a-step-by-step-implementation-in-tensorflow-aac568283399
 
 def scale_model_weights(weight, scalar):
     '''function for scaling a models weights'''
