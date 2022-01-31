@@ -165,7 +165,7 @@ export default {
             }
             this.$store.state.isLoading = true
             axios
-                .post('api/v1/profileEmail/', formData)
+                .put('api/v1/profileEmail/', formData)
                 .then(response => {
                     console.log(response)
                     emailChangeInput.classList.remove('d-none')
@@ -215,7 +215,7 @@ export default {
             this.isFetching = true
             this.$store.state.isLoading = true
             axios
-                .post('api/v1/profileManagement/', formData)
+                .put('api/v1/profileManagement/', formData)
                 .then(response => {
                     this.$store.commit('setUser', {
                         'id': this.$store.state.user.id,
@@ -246,7 +246,7 @@ export default {
             }
             this.$store.state.isLoading = true
             axios
-                .post('api/v1/profilePassword/', formData)
+                .put('api/v1/profilePassword/', formData)
                 .then(response => {
                     var element = document.getElementById("passChangeInput");
                     element.classList.remove("d-none")

@@ -41,8 +41,7 @@ from tensorflow.keras.applications.xception import *
 from tensorflow.keras.applications.densenet import *
 from tensorflow.keras.applications.efficientnet import *
 ssl._create_default_https_context = ssl._create_unverified_context
-from storages.backends.gcloud import GoogleCloudStorage
-storage = GoogleCloudStorage()
+
 
 def SimpleCNN(num_of_classes,input_shape):
     model = Sequential()
@@ -127,6 +126,11 @@ class Aggregator():
                           optimizer=optimizer,
                           metrics=["accuracy"])
             global_model.set_weights(average_weights)
+
+            test_path = f'/sessions/session_Id_{self.parameters["session_id"]}/TEST_SET.zip'
+
+            calculate_global_model_accuracy(self, global_model, test_path)
+
             global_model.save_weights("tmp_aver_weight.h5")
             return "tmp_aver_weight.h5"
 
@@ -195,7 +199,7 @@ class PretrainedAggregator(Aggregator):
 
             test_path = f'/sessions/session_Id_{self.parameters["session_id"]}/TEST_SET.zip'
 
-            self.calculate_global_model_accuracy(global_model, test_path)
+            calculate_global_model_accuracy(self, global_model, test_path)
 
             global_model.save_weights("tmp_aver_weight.h5")
 
@@ -203,57 +207,7 @@ class PretrainedAggregator(Aggregator):
             print("done")
             return "tmp_aver_weight.h5"
 
-    def unzip_dataset(self, testpath):
-        storage_file = storage.open(testpath, 'rb')
-        b = BytesIO(storage_file.read())
-        with zipfile.ZipFile(b, 'r') as zip_ref:
-            zip_ref.extractall(f'./user_files/session_Id_{self.parameters["session_id"]}/TESTSET/')
-        return f'./user_files/session_Id_{self.parameters["session_id"]}/TESTSET/'
 
-    def load_dataset(self, testpath):
-        test_path = self.unzip_dataset(testpath)
-        #Default image size for VGG16
-
-        # ImageDataGenerator can help perform augumentation on existing images. This way, we get more diverse train set.
-        test_datagen = ImageDataGenerator(rescale = 1./255)
-        #Through flow_from_directory - we create an array of images that can be used for training.
-        test_set = test_datagen.flow_from_directory(test_path,
-                                                target_size = tuple(self.input_shape),
-                                                batch_size = int(self.parameters['batch_size']),
-                                                class_mode = 'categorical')
-
-        return test_set
-
-    def calculate_global_model_accuracy(self, global_model, testpath):
-        loss, accuracy = global_model.evaluate(self.load_dataset(testpath))
-
-        session = Session.objects.get(pk=self.parameters['session_id'])
-        
-        ses_result = SessionResult.objects.filter(session__session_id = self.parameters['session_id']).filter(federated_round = session.federated_round)[0]
-        ses_result.finished = True
-        ses_result.global_model_accuracy = accuracy
-        ses_result.global_model_loss = loss
-        ses_result.save()
-
-        session.federated_round += 1
-        session.save()
-        newSessionResult = SessionResult.objects.create(session=session, federated_round = session.federated_round, finished=False)
-        newSessionResult.save()
-
-        dic = {'accuracies': [], 'losses': [], 'usernames': []}
-        jsonn = json.dumps(dic)
-        target_path = f'/sessions/session_Id_{session.session_id}/local_weights/federated_round_{session.federated_round}/round_stats.json'
-        storage.save(target_path,ContentFile(bytes(jsonn, 'utf-8')))
-
-        participants = Participant.objects.filter(session_id = session.session_id)
-        for participant in participants:
-            participant.is_model_uploaded = False
-            participant.save()
-
-        try:
-            shutil.rmtree(f'./user_files/session_Id_{self.parameters["session_id"]}')
-        except OSError as e:
-            print("Error: %s - %s." % (e.filename, e.strerror))
 
 
     

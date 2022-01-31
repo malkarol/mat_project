@@ -64,7 +64,7 @@ def user_details(request, id):
         user.delete()
         return JsonResponse("User deleted successfully", safe=False)
 
-@api_view(['POST'])
+@api_view(['PUT'])
 def password_management(request):
     user_id = request.data['user_id']
     user = User.objects.get(pk=user_id)
@@ -73,7 +73,7 @@ def password_management(request):
     return Response(status=status.HTTP_200_OK)
 
 
-@api_view(['POST'])
+@api_view(['PUT'])
 def email_management(request):
     user_id = request.data['user_id']
     user = User.objects.get(pk=user_id)
@@ -81,7 +81,7 @@ def email_management(request):
     user.save()
     return Response(status=status.HTTP_200_OK)
 
-@api_view(['POST'])
+@api_view(['PUT'])
 def profile_management(request):
     user_id = request.data['user_id']
     user = User.objects.get(pk=user_id)
