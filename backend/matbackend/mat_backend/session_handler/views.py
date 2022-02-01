@@ -851,7 +851,7 @@ def global_model_results(request, pk):
     if request.method == 'GET':
         try:
             session = Session.objects.get(pk = pk)
-            sessionResults = SessionResult.objects.filter(session__session_id = pk)
+            sessionResults = SessionResult.objects.filter(session__session_id = pk).order_by('federated_round')
             serializer = SessionResultSerializer(sessionResults, many=True)
             return Response(serializer.data)
         except Session.DoesNotExist or SessionResult.DoesNotExist:
