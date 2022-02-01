@@ -349,10 +349,11 @@ def upload_global_weights(request):
             session = Session.objects.get(session_id = request.data['session_id'])
         except Participant.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
-        file_object = request.FILES['model_weights']
-        target_path = f'/sessions/session_Id_'+request.data['session_id']+'/' + 'global_weights.h5'
-
+        print(request.data)
+        
+        # if session.founder==request.user.username:
+        #     return Response(status=status.HTTP_403_FORBIDDEN)
+        
         ses_result = SessionResult.objects.filter(session__session_id = request.data['session_id']).filter(federated_round = session.federated_round)[0]
         ses_result.finished = True
         ses_result.global_model_accuracy = request.data['accuracy']
@@ -361,24 +362,25 @@ def upload_global_weights(request):
 
         session.federated_round += 1
         session.save()
+
         newSessionResult = SessionResult.objects.create(session=session, federated_round = session.federated_round, finished=False)
         newSessionResult.save()
 
         dic = {'accuracies': [], 'losses': [], 'usernames': []}
         jsonn = json.dumps(dic)
-        target_path = f'/sessions/session_Id_{session.session_id}/local_weights/federated_round_{session.federated_round}/round_stats.json'
-        storage.save(target_path,ContentFile(bytes(jsonn, 'utf-8')))
+        json_path= f'/sessions/session_Id_{session.session_id}/local_weights/federated_round_{session.federated_round}/round_stats.json'
+        storage.save(json_path,ContentFile(bytes(jsonn, 'utf-8')))
 
         participants = Participant.objects.filter(session_id = session.session_id)
         for participant in participants:
             participant.is_model_uploaded = False
             participant.save()
-
-        if session.founder==request.user.username:
-            path = storage.save(target_path, ContentFile(file_object.read()))
-            return Response(status=status.HTTP_200_OK)
-        # if sessSerializer.is_valid():
-        #     sessSerializer.save()
+        print("Session founder", session.founder, request.user.username)
+        
+        file_object = request.FILES['model_weights']
+        target_path = f'/sessions/session_Id_'+request.data['session_id']+'/' + 'global_weights.h5'
+        path = storage.save(target_path, ContentFile(file_object.read()))
+        return Response(status=status.HTTP_200_OK)
 
     return Response(status=status.HTTP_404_NOT_FOUND)
 
