@@ -113,7 +113,7 @@ props:['parameters'],
             case 'momentum':
                 return 0.9
             default:
-                return 128
+                return 299
 
         }
     },
@@ -125,7 +125,7 @@ props:['parameters'],
             case 'validation_split':
                 return 0.1
             case 'batch_size':
-                return 32
+                return 16
             case 'number_of_epochs':
                 return 5
             case 'input_size':

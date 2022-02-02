@@ -231,7 +231,7 @@
                                         <button class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="getGlobalWeights()">Get global model weights</button>
                                         <input type="button" class="btn btn-primary btn-lg btn-success d-inline p-2 mb-2 mx-2" @click="fillData()" value="Show results from round:" />
                                         <select class="d-inline p-2 mb-2 mx-2 rounded border" v-model="selectedRound">
-                                            <option v-for="number in this.session.federated_round" :value="number">{{number}}</option>
+                                            <option v-bind:key="number" v-for="number in this.session.federated_round" :value="number">{{number}}</option>
                                         </select>
                                     </div>
                                 </div>
