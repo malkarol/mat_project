@@ -2,7 +2,6 @@ from django.db import models
 from django.db.models.fields import FloatField
 from django.utils import tree
 from account.models import User
-from ml_handler.models import MLModel
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import int_list_validator
 

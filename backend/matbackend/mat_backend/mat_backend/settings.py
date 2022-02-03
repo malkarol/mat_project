@@ -57,7 +57,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'djoser',
-    'webapp.apps.WebappConfig',
     'account.apps.AccountConfig',
     'ml_handler.apps.MlHandlerConfig',
     'session_handler.apps.SessionHandlerConfig'

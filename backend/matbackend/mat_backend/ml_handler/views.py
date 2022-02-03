@@ -4,8 +4,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import os
-from  ml_handler.models import MLModel
-from ml_handler.serializers import MLModelSerializer
+
 from account.models import User
 from account.serializers import UserSerializer
 from session_handler.models import Session, Participant

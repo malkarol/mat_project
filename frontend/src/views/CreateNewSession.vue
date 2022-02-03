@@ -148,7 +148,6 @@
 <script>
 import TagInput from '@/components/TagInput.vue'
 import FixedTable from '@/components/FixedTable.vue'
-import EditableTable from '@/components/EditableTable.vue'
 import Loading from '@/components/Loading.vue'
 import Errors from '@/components/Errors.vue'
 
@@ -304,7 +303,6 @@ export default {
         TagInput,
         Datepicker,
         FixedTable,
-        EditableTable,
         Loading,
         Errors
     },
