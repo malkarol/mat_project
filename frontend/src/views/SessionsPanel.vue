@@ -52,7 +52,6 @@
                                 <h5 class="mb-1">{{session.name}} <span class="badge " :class="badgeColor(session.pricing_plan)">{{badgeText(session.pricing_plan)}}</span></h5>
                                 <small :class="textMutedColor(index)">{{getDays(session.creation_date)}} days ago</small>
                             </div>
-                            <p class="mb-1">{{session.description}}</p>
                             <small :class="textMutedColor(index)">{{session.actual_num_of_participants}}/{{session.max_num_of_participants}} Users</small>
                         </div>
 
