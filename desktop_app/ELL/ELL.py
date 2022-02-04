@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import (
 class LearningWindow(QMainWindow):
     def __init__(self, token):
         super().__init__()
-        self.setWindowTitle('MATE')
+        self.setWindowTitle('ELL')
         self.resize(600, 600)
         self.setMaximumWidth(600)
         self.setMaximumHeight(600)
@@ -155,7 +155,7 @@ class LearningWindow(QMainWindow):
     def get_script_path(self):
         # options = QFileDialog.Options()
         # options |= QFileDialog.DontUseNativeDialog
-        fileName = QFileDialog.getOpenFileName(self,"MATE", "","Python Files (*.py)")
+        fileName = QFileDialog.getOpenFileName(self,"ELL", "","Python Files (*.py)")
         if fileName[0]:
             self.python_script = fileName[0]
             f = open(fileName[0],'r')
@@ -183,7 +183,7 @@ class LearningWindow(QMainWindow):
     def get_weights_path(self):
         # options = QFileDialog.Options()
         # options |= QFileDialog.DontUseNativeDialog
-        fileName = QFileDialog.getOpenFileName(self,"MATE", "","HDF5 Files (*.h5)")
+        fileName = QFileDialog.getOpenFileName(self,"ELL", "","HDF5 Files (*.h5)")
         if fileName[0]:
             self.isWeightUploaded= True
             is_enabled = self.isTrainUploaded and self.isTestUploaded and self.isScriptUploaded and self.isWeightUploaded
@@ -213,7 +213,7 @@ class LoginForm(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle('MATE')
+        self.setWindowTitle('ELL')
         self.resize(500, 120)
         self.setMaximumWidth(500)
         self.setMaximumHeight(120)
