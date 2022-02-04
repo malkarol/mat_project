@@ -43,17 +43,6 @@ from tensorflow.keras.applications.efficientnet import *
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
-def SimpleCNN(num_of_classes,input_shape):
-    model = Sequential()
-    model.add(Input(shape=input_shape))
-    model.add(Conv2D(32, kernel_size=(3, 3), activation="relu"))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Conv2D(64, kernel_size=(3, 3), activation="relu"))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Flatten())
-    model.add(Dropout(0.5))
-    model.add(Dense(num_of_classes, activation="softmax"))
-    return model
 class Aggregator():
     def __init__(self,input_shape, num_classes, parameters, session_id):
         self.input_shape = input_shape

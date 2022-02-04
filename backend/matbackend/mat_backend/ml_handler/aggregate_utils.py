@@ -89,15 +89,13 @@ def unzip_dataset(self, testpath):
 
 def load_dataset(self, testpath):
     test_path = unzip_dataset(self, testpath)
-    #Default image size for VGG16
-    # ImageDataGenerator can help perform augumentation on existing images. This way, we get more diverse train set.
     test_datagen = ImageDataGenerator(rescale = 1./255)
-    #Through flow_from_directory - we create an array of images that can be used for training.
     test_set = test_datagen.flow_from_directory(test_path,
                                             target_size = tuple(self.input_shape),
                                             batch_size = int(self.parameters['batch_size']),
                                             class_mode = 'categorical')
     return test_set
+    
 def calculate_global_model_accuracy(self, global_model, testpath):
     loss, accuracy = global_model.evaluate(load_dataset(self, testpath))
     session = Session.objects.get(pk=self.parameters['session_id'])

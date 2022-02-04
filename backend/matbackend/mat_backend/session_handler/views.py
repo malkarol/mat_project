@@ -351,8 +351,8 @@ def upload_global_weights(request):
             return Response(status=status.HTTP_404_NOT_FOUND)
         print(request.data)
         
-        # if session.founder==request.user.username:
-        #     return Response(status=status.HTTP_403_FORBIDDEN)
+        if session.founder!=request.user.username:
+            return Response(status=status.HTTP_403_FORBIDDEN)
         
         ses_result = SessionResult.objects.filter(session__session_id = request.data['session_id']).filter(federated_round = session.federated_round)[0]
         ses_result.finished = True
